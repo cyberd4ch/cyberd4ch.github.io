@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Github, Link2 } from 'lucide-react'
+import { FaGithub, FaLink } from 'react-icons/fa6'
 import { projects, ProjectCategory } from '@/lib/projects'
 
 type Filter = 'all' | ProjectCategory
@@ -79,7 +79,7 @@ export default function ProjectsPage() {
                     className="hover:opacity-60 transition-opacity"
                     aria-label="GitHub"
                   >
-                    <Github size={17} />
+                    <FaGithub size={17} />
                   </a>
                 )}
                 {project.live && (
@@ -90,7 +90,7 @@ export default function ProjectsPage() {
                     className="hover:opacity-60 transition-opacity"
                     aria-label="Live link"
                   >
-                    <Link2 size={17} />
+                    <FaLink size={17} />
                   </a>
                 )}
               </div>

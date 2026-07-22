@@ -1,5 +1,6 @@
-import { Github, Linkedin, Mail, Link2, ExternalLink } from 'lucide-react'
+
 import Link from 'next/link'
+import { FaGithub, FaLinkedin, FaMailchimp, FaLink, FaExternalLinkAlt } from 'react-icons/fa'
 
 export default function HomePage() {
   return (
@@ -76,9 +77,9 @@ export default function HomePage() {
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm underline-link"
           >
-            <Github size={14} />
+            <FaGithub size={14} />
             <span>cportscan — port scanner built in C</span>
-            <ExternalLink size={11} className="text-[var(--muted)]" />
+            <FaExternalLinkAlt size={11} className="text-[var(--muted)]" />
           </a>
           <a
             href="https://cyberdach.bearblog.dev/blog/"
@@ -86,9 +87,9 @@ export default function HomePage() {
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm underline-link"
           >
-            <Link2 size={14} />
+            <FaLink size={14} />
             <span>blog — IT, networking, security & digital forensics</span>
-            <ExternalLink size={11} className="text-[var(--muted)]" />
+            <FaExternalLinkAlt size={11} className="text-[var(--muted)]" />
           </a>
         </div>
       </section>
@@ -106,14 +107,14 @@ export default function HomePage() {
             className="p-2 hover:bg-[var(--card)] rounded transition-colors"
             aria-label="GitHub"
           >
-            <Github size={18} />
+            <FaGithub size={18} />
           </a>
           <a
             href="mailto:hello@cyberdach.dev"
             className="p-2 hover:bg-[var(--card)] rounded transition-colors"
             aria-label="Email"
           >
-            <Mail size={18} />
+            <FaMailchimp size={18} />
           </a>
           <a
             href="https://cyberdach.bearblog.dev"
@@ -122,7 +123,7 @@ export default function HomePage() {
             className="p-2 hover:bg-[var(--card)] rounded transition-colors"
             aria-label="Blog"
           >
-            <Link2 size={18} />
+            <FaLink size={18} />
           </a>
         </div>
       </section>
