@@ -1,0 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f7f6f3;
+  --fg: #0f0e0d;
+  --muted: #7a7470;
+  --border: #ddd9d4;
+  --card: #edeae5;
+  --accent: #0f0e0d;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+}
+
+.dark {
+  --bg: #0f0e0d;
+  --fg: #f7f6f3;
+  --muted: #8b8580;
+  --border: #333333;
+  --card: #1a1918;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Subtle scanline texture on cards */
+.scanlines {
+  position: relative;
+  overflow: hidden;
+}
+.scanlines::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 3px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* nav active */
+.nav-active {
+  background: var(--fg);
+  color: var(--bg);
+  padding: 2px 10px;
+  border-radius: 3px;
+}
+
+/* tag pill */
+.tag {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+/* link underline */
+.underline-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--border);
+  transition: text-decoration-color 0.15s;
+}
+.underline-link:hover {
+  text-decoration-color: var(--fg);
+}
+
+/* cursor blink */
+.cursor::after {
+  content: '▌';
+  animation: blink 1s step-end infinite;
+  margin-left: 1px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* stagger animations */
+.stagger-1 { animation: fadeUp 0.45s ease 0.05s both; }
+.stagger-2 { animation: fadeUp 0.45s ease 0.12s both; }
+.stagger-3 { animation: fadeUp 0.45s ease 0.2s both; }
+.stagger-4 { animation: fadeUp 0.45s ease 0.28s both; }
+.stagger-5 { animation: fadeUp 0.45s ease 0.36s both; }
+.stagger-6 { animation: fadeUp 0.45s ease 0.44s both; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* filter tabs */
+.filter-tab {
+  padding: 3px 12px;
+  border-radius: 3px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.filter-tab:hover {
+  background: var(--card);
+}
+.filter-tab.active {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* project card hover */
+.project-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+/* blog row hover */
+.blog-row {
+  transition: opacity 0.15s;
+}
+.blog-row:hover {
+  opacity: 0.7;
+}
+
+/* terminal glow on focus */
+input:focus, textarea:focus {
+  outline: 1px solid var(--fg);
+  outline-offset: 2px;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
