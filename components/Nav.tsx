@@ -27,7 +27,29 @@ export default function Nav() {
 
   return (
     <nav className="flex items-center justify-between">
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-6">
+        <Link href="/" aria-label="cyber.dach home" className="flex items-center gap-2">
+          <svg
+            viewBox="0 0 256 256"
+            width={26}
+            height={26}
+            aria-hidden="true"
+            className="text-[var(--fg)]"
+          >
+            <g
+              transform="translate(6,-2)"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={20}
+              strokeLinejoin="miter"
+              strokeLinecap="square"
+            >
+              <path d="M162 123 L108 92 L54 123 L54 185 L108 216 L162 185" />
+              <path d="M190 44 V185" />
+            </g>
+          </svg>
+          <span className="text-sm font-semibold tracking-tight">cyber.dach</span>
+        </Link>
         {links.map(({ href, label }) => {
           const active = path === href || (href !== '/' && path.startsWith(href))
           return (
