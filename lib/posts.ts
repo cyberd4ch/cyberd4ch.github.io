@@ -14,6 +14,17 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    id: 'three-tiers-on-kind',
+    slug: 'three-tiers-on-kind',
+    title: 'same tiers, new vocabulary: kind, crashloops, and the one secret spelling',
+    date: 'Nov 7, 2026',
+    dateISO: '2026-11-07',
+    category: 'technical',
+    url: '/blog/three-tiers-on-kind/',
+    excerpt:
+      're-homing the lab 01 stack onto kind: a KeyError crashloop, the secret that is a bag of keys, boot-time retries, and a same-tag rebuild that never rolls.',
+  },
+  {
     id: 'three-tiers-after-desktop',
     slug: 'three-tiers-after-desktop',
     title: 'after docker desktop: three tiers, colima, and the ghosts it left behind',
