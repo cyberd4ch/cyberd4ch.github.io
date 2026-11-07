@@ -88,3 +88,15 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      # github-pages publishes within seconds of this job; the dispatch makes
+      # the profile README sync run while the new blog.json is already live.
+      # Needs PROFILE_SYNC_PAT (GitHub token) admitted to cyberd4ch/cyberd4ch.
+      - name: Wake the profile README sync
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_SYNC_PAT }}
+        run: |
+          gh api -X POST repos/cyberd4ch/cyberd4ch/dispatches \
+            -f event_type=blog-updated
+          echo "blog-updated → cyberd4ch/cyberd4ch (sync-readme)"
