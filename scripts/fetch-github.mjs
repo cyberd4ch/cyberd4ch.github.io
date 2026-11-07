@@ -96,18 +96,44 @@ function describe(event) {
   }
 }
 
+/** Pinned repositories, in the order they appear on the profile. Needs a token. */
+async function fetchPinned() {
+  if (!token) return []
+  const query = `query($login: String!) {
+    user(login: $login) {
+      pinnedItems(first: 6, types: REPOSITORY) {
+        nodes { ... on Repository { name } }
+      }
+    }
+  }`
+  const res = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables: { login: USER } }),
+  })
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for graphql pinnedItems`)
+  const json = await res.json()
+  const nodes = json.data?.user?.pinnedItems?.nodes || []
+  return nodes.map(node => node?.name).filter(Boolean)
+}
+
 async function main() {
   if (!token) {
     console.warn('[github] no GITHUB_TOKEN set — using anonymous rate limits (60/hr)')
   }
 
-  const [user, rawRepos, rawEvents] = await Promise.all([
+  const [user, rawRepos, rawEvents, pinned] = await Promise.all([
     api(`https://api.github.com/users/${USER}`),
     api(`https://api.github.com/users/${USER}/repos?per_page=100&sort=pushed`),
     api(`https://api.github.com/users/${USER}/events/public?per_page=50`),
+    // Pinning is optional polish; a failure must not lose repos/activity.
+    fetchPinned().catch(err => {
+      console.warn(`[github] pinned lookup skipped: ${err.message}`)
+      return []
+    }),
   ])
 
-  const repos = rawRepos
+  const publicRepos = rawRepos
     .filter(r => !r.fork && !r.archived && !EXCLUDE.has(r.name))
     .map(r => ({
       name: r.name,
@@ -120,8 +146,17 @@ async function main() {
       forks: r.forks_count,
       pushedAt: r.pushed_at,
       createdAt: r.created_at,
+      pinned: false,
     }))
     .sort((a, b) => b.pushedAt.localeCompare(a.pushedAt))
+
+  // Pinned repos lead the list in profile order; the rest stay newest-push first.
+  const byName = new Map(publicRepos.map(repo => [repo.name, repo]))
+  const pinnedRepos = pinned.map(name => byName.get(name)).filter(Boolean)
+  const repos = [
+    ...pinnedRepos.map(repo => ({ ...repo, pinned: true })),
+    ...publicRepos.filter(repo => !repo.pinned && !pinnedRepos.some(p => p.name === repo.name)),
+  ]
 
   const seen = new Set()
   const activity = rawEvents
@@ -147,6 +182,7 @@ async function main() {
       publicRepos: user.public_repos,
       followers: user.followers,
     },
+    pinned,
     repos,
     activity,
   }

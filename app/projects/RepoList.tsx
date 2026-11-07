@@ -44,14 +44,21 @@ export default function RepoList({ repos, languages }: Props) {
           >
             <div className="p-5">
               <div className="flex items-start justify-between gap-3 mb-1">
-                <a
-                  href={repo.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-base underline-link"
-                >
-                  {repo.name}
-                </a>
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <a
+                    href={repo.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-base underline-link truncate"
+                  >
+                    {repo.name}
+                  </a>
+                  {repo.pinned && (
+                    <span className="text-[9px] uppercase tracking-widest text-[var(--muted)] border border-[var(--border)] rounded-sm px-1.5 py-0.5 shrink-0">
+                      pinned
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-3 text-[10px] text-[var(--muted)] shrink-0 pt-1">
                   <span className="flex items-center gap-1">
                     <FaStar size={9} /> {repo.stars}

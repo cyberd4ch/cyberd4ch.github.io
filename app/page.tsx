@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { FaGithub, FaMailchimp, FaLink, FaStar, FaCodeBranch } from 'react-icons/fa'
-import { repos, activity, timeAgo, shortDate, languageColor, github } from '@/lib/github'
+import { repos, activity, timeAgo, languageColor, github, syncLabel, isStale } from '@/lib/github'
 import { posts } from '@/lib/posts'
 
-const recentRepos = repos.slice(0, 3)
+// Home shows what actually moved recently — pinning only orders the projects page.
+const recentRepos = [...repos].sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)).slice(0, 3)
 const latestActivity = activity.slice(0, 6)
 const latestPosts = posts.slice(0, 4)
 
@@ -127,8 +128,17 @@ export default function HomePage() {
           <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] font-medium">
             activity
           </h2>
-          <span className="text-[10px] text-[var(--muted)]">synced {shortDate(github.generatedAt)}</span>
+          <span className="text-[10px] text-[var(--muted)]">
+            {isStale && <span aria-hidden>⚠ </span>}
+            {syncLabel}
+          </span>
         </div>
+        {isStale && (
+          <p className="text-[11px] text-[var(--fg)] border border-[var(--border)] rounded-sm px-3 py-2 mb-3">
+            the scheduled GitHub sync may have stopped — this feed is from the last successful
+            build.
+          </p>
+        )}
         {latestActivity.length === 0 ? (
           <p className="text-[13px] text-[var(--muted)]">no public activity in the last 90 days.</p>
         ) : (

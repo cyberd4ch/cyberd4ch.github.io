@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T01:00:41.280Z",
+  "generatedAt": "2026-11-07T01:16:50.450Z",
   "user": {
     "login": "cyberd4ch",
     "name": "DKA447~000",
@@ -9,30 +9,25 @@
     "publicRepos": 22,
     "followers": 80
   },
+  "pinned": [
+    "free-torrent-cli",
+    "txn-agent",
+    "dns-watch",
+    "cportscan"
+  ],
   "repos": [
     {
-      "name": "homebrew-dnswatch",
-      "description": "Homebrew tap for dns-watch — free DNS drift watcher for bounty scopes",
-      "url": "https://github.com/cyberd4ch/homebrew-dnswatch",
+      "name": "free-torrent-cli",
+      "description": "A simple torrent client build with Node.js for terminal",
+      "url": "https://github.com/cyberd4ch/free-torrent-cli",
       "homepage": "",
-      "language": "Ruby",
+      "language": "JavaScript",
       "topics": [],
-      "stars": 0,
+      "stars": 2,
       "forks": 0,
-      "pushedAt": "2026-11-03T21:27:46Z",
-      "createdAt": "2026-11-03T20:59:07Z"
-    },
-    {
-      "name": "dns-watch",
-      "description": "dnswatch — a small, dependency-free DNS drift watcher (cron + plain-text log). Free forever.",
-      "url": "https://github.com/cyberd4ch/dns-watch",
-      "homepage": "",
-      "language": "Shell",
-      "topics": [],
-      "stars": 0,
-      "forks": 0,
-      "pushedAt": "2026-11-03T21:27:12Z",
-      "createdAt": "2026-11-03T20:17:36Z"
+      "pushedAt": "2026-10-22T05:11:05Z",
+      "createdAt": "2025-05-19T14:31:02Z",
+      "pinned": true
     },
     {
       "name": "txn-agent",
@@ -57,19 +52,21 @@
       "stars": 2,
       "forks": 0,
       "pushedAt": "2026-10-29T14:46:31Z",
-      "createdAt": "2026-10-05T02:33:54Z"
+      "createdAt": "2026-10-05T02:33:54Z",
+      "pinned": true
     },
     {
-      "name": "free-torrent-cli",
-      "description": "A simple torrent client build with Node.js for terminal",
-      "url": "https://github.com/cyberd4ch/free-torrent-cli",
+      "name": "dns-watch",
+      "description": "dnswatch — a small, dependency-free DNS drift watcher (cron + plain-text log). Free forever.",
+      "url": "https://github.com/cyberd4ch/dns-watch",
       "homepage": "",
-      "language": "JavaScript",
+      "language": "Shell",
       "topics": [],
-      "stars": 2,
+      "stars": 0,
       "forks": 0,
-      "pushedAt": "2026-10-22T05:11:05Z",
-      "createdAt": "2025-05-19T14:31:02Z"
+      "pushedAt": "2026-11-03T21:27:12Z",
+      "createdAt": "2026-11-03T20:17:36Z",
+      "pinned": true
     },
     {
       "name": "cportscan",
@@ -81,7 +78,21 @@
       "stars": 0,
       "forks": 0,
       "pushedAt": "2026-04-07T15:19:08Z",
-      "createdAt": "2025-05-08T22:00:41Z"
+      "createdAt": "2025-05-08T22:00:41Z",
+      "pinned": true
+    },
+    {
+      "name": "homebrew-dnswatch",
+      "description": "Homebrew tap for dns-watch — free DNS drift watcher for bounty scopes",
+      "url": "https://github.com/cyberd4ch/homebrew-dnswatch",
+      "homepage": "",
+      "language": "Ruby",
+      "topics": [],
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-11-03T21:27:46Z",
+      "createdAt": "2026-11-03T20:59:07Z",
+      "pinned": false
     },
     {
       "name": "stride-tmr",
@@ -93,7 +104,8 @@
       "stars": 0,
       "forks": 0,
       "pushedAt": "2025-07-12T12:37:34Z",
-      "createdAt": "2025-07-12T12:14:51Z"
+      "createdAt": "2025-07-12T12:14:51Z",
+      "pinned": false
     }
   ],
   "activity": [
