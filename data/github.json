@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T01:16:50.450Z",
+  "generatedAt": "2026-11-07T01:31:12.936Z",
   "user": {
     "login": "cyberd4ch",
     "name": "DKA447~000",
@@ -119,15 +119,6 @@
       "url": "https://github.com/hashicorp/vagrant/issues/13845#issuecomment-6699831865"
     },
     {
-      "type": "PushEvent",
-      "repo": "cyberd4ch/dns-watch",
-      "repoUrl": "https://github.com/cyberd4ch/dns-watch",
-      "at": "2026-11-03T20:25:12Z",
-      "title": "pushed to cyberd4ch/dns-watch",
-      "detail": "main",
-      "url": "https://github.com/cyberd4ch/dns-watch/commits"
-    },
-    {
       "type": "IssuesEvent",
       "repo": "ppggff/vagrant-qemu",
       "repoUrl": "https://github.com/ppggff/vagrant-qemu",
@@ -153,6 +144,15 @@
       "title": "released v1.1.0 in cyberd4ch/dns-watch",
       "detail": "dns-watch v1.1.0",
       "url": "https://github.com/cyberd4ch/dns-watch/releases/tag/v1.1.0"
+    },
+    {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/dns-watch",
+      "repoUrl": "https://github.com/cyberd4ch/dns-watch",
+      "at": "2026-11-03T20:25:12Z",
+      "title": "pushed to cyberd4ch/dns-watch",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/dns-watch/commits"
     },
     {
       "type": "PushEvent",

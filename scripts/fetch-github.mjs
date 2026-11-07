@@ -169,6 +169,8 @@ async function main() {
       seen.add(key)
       return true
     })
+    // The public feed is not strictly chronological (pushes bubble), so sort it.
+    .sort((a, b) => b.at.localeCompare(a.at))
     .slice(0, 12)
 
   const snapshot = {
