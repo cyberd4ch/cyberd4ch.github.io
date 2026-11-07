@@ -2,6 +2,9 @@
 const nextConfig = {
   // Tells Next.js to build a static HTML site in the /out directory
   output: 'export',
+
+  // Emit /path/index.html so directory URLs resolve on GitHub Pages
+  trailingSlash: true,
   
   images: {
     // Disables server-side image optimization

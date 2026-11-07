@@ -72,7 +72,7 @@ export default function HomePage() {
         </h2>
         <div className="space-y-2">
           <a
-            href="[https://github.com/cyberd4ch/cportscan](https://github.com/cyberd4ch/cportscan)"
+            href="https://github.com/cyberd4ch/cportscan"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-sm underline-link"
@@ -101,7 +101,7 @@ export default function HomePage() {
         </h2>
         <div className="flex items-center gap-4">
           <a
-            href="[https://github.com/cyberd4ch](https://github.com/cyberd4ch)"
+            href="https://github.com/cyberd4ch"
             target="_blank"
             rel="noopener noreferrer"
             className="p-2 hover:bg-[var(--card)] rounded transition-colors"

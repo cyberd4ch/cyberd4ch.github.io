@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { posts, BlogCategory } from '@/lib/posts'
 
 type Filter = 'all' | BlogCategory
@@ -38,34 +39,50 @@ export default function BlogPage() {
         {filtered.length === 0 && (
           <p className="text-sm text-[var(--muted)] py-4">no posts in this category yet.</p>
         )}
-        {filtered.map((post) => (
-          <a
-            key={post.id}
-            href={post.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="blog-row flex items-baseline justify-between py-4 gap-4 group"
-          >
-            <div className="flex-1 min-w-0">
-              <span className="text-sm underline-link group-hover:text-[var(--fg)]">
-                {post.title}
+        {filtered.map((post) => {
+          const inner = (
+            <>
+              <div className="flex-1 min-w-0">
+                <span className="text-sm underline-link group-hover:text-[var(--fg)]">
+                  {post.title}
+                </span>
+                {post.excerpt && (
+                  <p className="text-xs text-[var(--muted)] mt-0.5 leading-relaxed hidden sm:block">
+                    {post.excerpt}
+                  </p>
+                )}
+              </div>
+              <span className="text-xs text-[var(--muted)] whitespace-nowrap shrink-0">
+                {post.date}
               </span>
-              {post.excerpt && (
-                <p className="text-xs text-[var(--muted)] mt-0.5 leading-relaxed hidden sm:block">
-                  {post.excerpt}
-                </p>
-              )}
-            </div>
-            <span className="text-xs text-[var(--muted)] whitespace-nowrap shrink-0">
-              {post.date}
-            </span>
-          </a>
-        ))}
+            </>
+          )
+
+          return post.slug ? (
+            <Link
+              key={post.id}
+              href={post.url}
+              className="blog-row flex items-baseline justify-between py-4 gap-4 group"
+            >
+              {inner}
+            </Link>
+          ) : (
+            <a
+              key={post.id}
+              href={post.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="blog-row flex items-baseline justify-between py-4 gap-4 group"
+            >
+              {inner}
+            </a>
+          )
+        })}
       </div>
 
       <div className="mt-10 pt-6 border-t border-[var(--border)] stagger-4">
         <p className="text-xs text-[var(--muted)]">
-          all posts live at{' '}
+          older posts live at{' '}
           <a
             href="https://cyberdach.bearblog.dev/blog/"
             target="_blank"
