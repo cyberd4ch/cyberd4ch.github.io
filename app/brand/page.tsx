@@ -51,6 +51,17 @@ const candidates = [
   },
 ]
 
+const kit = [
+  { file: 'mark-mono.svg', label: 'mark — ink', note: 'one colour, transparent' },
+  { file: 'mark-inverse.svg', label: 'mark — paper', note: 'for dark surfaces' },
+  { file: 'mark-small.svg', label: 'mark — small cut', note: 'heavier stroke, wider c' },
+  { file: 'lockup-horizontal.svg', label: 'lockup — horizontal', note: 'mark + wordmark' },
+  { file: 'lockup-horizontal-inverse.svg', label: 'lockup — reversed', note: 'on dark' },
+  { file: 'lockup-stacked.svg', label: 'lockup — stacked', note: 'square-ish spaces' },
+  { file: 'icon-tile.svg', label: 'app icon — vector', note: '1024 tile' },
+  { file: 'icon-1024.png', label: 'app icon — 1024 px', note: 'store upload' },
+]
+
 export default function BrandPage() {
   return (
     <div className="space-y-10">
@@ -118,6 +129,35 @@ export default function BrandPage() {
           </div>
         </section>
       ))}
+
+      <section className="stagger-5 border-t border-[var(--border)] pt-6 space-y-4">
+        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] font-medium">
+          the kit
+        </h2>
+        <div className="grid grid-cols-2 gap-3 text-[12px]">
+          {kit.map(item => (
+            <a
+              key={item.file}
+              href={`/brand/kit/${item.file}`}
+              download
+              className="border border-[var(--border)] rounded-sm p-3 hover:opacity-70 transition-opacity"
+            >
+              <span className="block text-[var(--fg)]">{item.label}</span>
+              <span className="text-[var(--muted)]">{item.note}</span>
+            </a>
+          ))}
+        </div>
+        <p className="text-[12px] text-[var(--muted)]">
+          app icon also ships as 512, 256 and 128 px PNGs; favicon as 32 and 16 px.
+        </p>
+        <ul className="text-[12px] leading-relaxed list-disc pl-5 space-y-1">
+          <li>clear space around the mark: one stroke width, about 8% of its height.</li>
+          <li>minimum size: 24 px for the full mark, 16 px for the small cut.</li>
+          <li>never close the gap between bowl and stem — that is the c.</li>
+          <li>one colour only: ink on light, paper on dark. no gradients or shadows.</li>
+          <li>the wordmark is set in IBM Plex Mono, not drawn; tracking is −2 at 60 px.</li>
+        </ul>
+      </section>
 
       <section className="stagger-5 border-t border-[var(--border)] pt-6">
         <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-3 font-medium">

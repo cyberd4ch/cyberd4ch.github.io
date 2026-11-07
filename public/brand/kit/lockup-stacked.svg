@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 330" role="img" aria-label="cyber.dach">
+  <g transform="translate(124,18) scale(0.62)" fill="none" stroke="#0d1117" stroke-width="20" stroke-linejoin="miter" stroke-linecap="square">
+    <path d="M162 123 L108 92 L54 123 L54 185 L108 216 L162 185"/>
+    <path d="M190 44 V185"/>
+  </g>
+  <text x="200" y="248" fill="#0d1117" font-family="'IBM Plex Mono', Menlo, monospace" font-size="42" letter-spacing="-1.5" text-anchor="middle">cyber.dach</text>
+</svg>
