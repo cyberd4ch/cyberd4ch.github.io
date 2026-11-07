@@ -1,6 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="cyber.dach mark, small cut">
-  <g transform="translate(2,1)" fill="none" stroke="#0d1117" stroke-width="26" stroke-linejoin="miter" stroke-linecap="square">
-    <path d="M158 119 L108 91 L56 123 L56 183 L108 213 L158 185"/>
-    <path d="M198 42 V185"/>
-  </g>
+  <path transform="translate(12,-1)" d="M162 185 L108 216 L54 185 L54 123 L108 92 L162 123 V42"
+        fill="none" stroke="#0d1117" stroke-width="26" stroke-linejoin="miter" stroke-linecap="square"/>
 </svg>

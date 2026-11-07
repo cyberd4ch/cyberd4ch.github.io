@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="cyber.dach app icon">
   <rect width="1024" height="1024" rx="224" fill="#0d1117"/>
-  <g transform="translate(66,44) scale(3.48)" fill="none" stroke="#f7f6f3" stroke-width="20" stroke-linejoin="miter" stroke-linecap="square">
-    <path d="M162 123 L108 92 L54 123 L54 185 L108 216 L162 185"/>
-    <path d="M190 44 V185"/>
-  </g>
+  <path transform="translate(119,60) scale(3.48)" d="M162 185 L108 216 L54 185 L54 123 L108 92 L162 123 V44"
+        fill="none" stroke="#f7f6f3" stroke-width="20" stroke-linejoin="miter" stroke-linecap="square"/>
 </svg>

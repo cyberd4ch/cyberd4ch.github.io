@@ -36,17 +36,15 @@ export default function Nav() {
             aria-hidden="true"
             className="text-[var(--fg)]"
           >
-            <g
-              transform="translate(6,-2)"
+            <path
+              transform="translate(15,-2)"
+              d="M162 185 L108 216 L54 185 L54 123 L108 92 L162 123 V44"
               fill="none"
               stroke="currentColor"
               strokeWidth={20}
               strokeLinejoin="miter"
               strokeLinecap="square"
-            >
-              <path d="M162 123 L108 92 L54 123 L54 185 L108 216 L162 185" />
-              <path d="M190 44 V185" />
-            </g>
+            />
           </svg>
           <span className="text-sm font-semibold tracking-tight">cyber.dach</span>
         </Link>
