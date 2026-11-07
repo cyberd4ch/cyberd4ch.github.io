@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Perimeter mark">
+  <g fill="none" stroke="#0d1117" stroke-width="18" stroke-linecap="square">
+    <path d="M40 96 V40 H96"/>
+    <path d="M160 40 H216 V96"/>
+    <path d="M216 160 V216 H160"/>
+    <path d="M96 216 H40 V160"/>
+  </g>
+  <circle cx="128" cy="128" r="19" fill="#0d1117"/>
+</svg>

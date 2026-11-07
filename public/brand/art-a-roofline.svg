@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="cyber.dach — roofline concept">
+  <defs>
+    <pattern id="dotsA" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#262c30"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="800" fill="#0d1117"/>
+  <rect width="1200" height="800" fill="url(#dotsA)"/>
+  <circle cx="1040" cy="150" r="210" fill="#79c6d4" opacity="0.07"/>
+  <g transform="translate(120,215) scale(1.55)" fill="none" stroke="#79c6d4" stroke-width="20" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M36 148 L112 72 H144 L220 148"/>
+  </g>
+  <circle cx="318" cy="510" r="25" fill="#e7b36a"/>
+  <text x="560" y="352" fill="#f7f6f3" font-family="'IBM Plex Mono', Menlo, monospace" font-size="78" letter-spacing="-2">cyber.dach</text>
+  <text x="560" y="404" fill="#a9b2b4" font-family="'IBM Plex Mono', Menlo, monospace" font-size="22" letter-spacing="3">telecom · security · systems</text>
+  <rect x="560" y="444" width="96" height="4" fill="#79c6d4"/>
+  <text x="560" y="512" fill="#79c6d4" font-family="'IBM Plex Mono', Menlo, monospace" font-size="18" letter-spacing="2">01 — ROOFLINE</text>
+  <text x="560" y="548" fill="#8b9598" font-family="'IBM Plex Mono', Menlo, monospace" font-size="16">shelter over the wire</text>
+  <text x="120" y="742" fill="#4d5659" font-family="'IBM Plex Mono', Menlo, monospace" font-size="14" letter-spacing="2">cyberd4ch.github.io</text>
+  <text x="1080" y="742" fill="#4d5659" font-family="'IBM Plex Mono', Menlo, monospace" font-size="14" letter-spacing="2" text-anchor="end">2026</text>
+</svg>
