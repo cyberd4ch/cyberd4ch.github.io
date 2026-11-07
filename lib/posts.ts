@@ -14,6 +14,17 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    id: 'three-tiers-after-desktop',
+    slug: 'three-tiers-after-desktop',
+    title: 'after docker desktop: three tiers, colima, and the ghosts it left behind',
+    date: 'Nov 7, 2026',
+    dateISO: '2026-11-07',
+    category: 'technical',
+    url: '/blog/three-tiers-after-desktop/',
+    excerpt:
+      'rescuing lab 01 from a decommissioned docker desktop install — dead plugin symlinks, a credential store pointing at a corpse — and the compose lab that went green at the end.',
+  },
+  {
     id: 'announcing-dnswatch-v1-1-0',
     slug: 'announcing-dnswatch-v1-1-0',
     title: "announcing dns-watch v1.1.0: your attack surface's DNS, diffed — for free",
