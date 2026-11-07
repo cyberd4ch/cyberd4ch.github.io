@@ -7,15 +7,15 @@
   <rect width="1200" height="800" fill="#0d1117"/>
   <rect width="1200" height="800" fill="url(#dotsB)"/>
   <rect x="905" y="70" width="215" height="215" fill="#e7b36a" opacity="0.08"/>
-  <g transform="translate(140,213) scale(1.55)" fill="none" stroke="#f7f6f3" stroke-width="20" stroke-linejoin="miter" stroke-linecap="square">
-    <path d="M162 185 V123 L108 92 L54 123 L54 185 L108 216"/>
-    <path d="M162 44 V185"/>
+  <g transform="translate(120,215) scale(1.55)" fill="none" stroke="#f7f6f3" stroke-width="20" stroke-linejoin="miter" stroke-linecap="square">
+    <path d="M162 123 L108 92 L54 123 L54 185 L108 216 L162 185"/>
+    <path d="M190 44 V185"/>
   </g>
   <text x="560" y="352" fill="#f7f6f3" font-family="'IBM Plex Mono', Menlo, monospace" font-size="78" letter-spacing="-2">cyber.dach</text>
   <text x="560" y="404" fill="#a9b2b4" font-family="'IBM Plex Mono', Menlo, monospace" font-size="22" letter-spacing="3">telecom · security · systems</text>
   <rect x="560" y="444" width="96" height="4" fill="#e7b36a"/>
   <text x="560" y="512" fill="#e7b36a" font-family="'IBM Plex Mono', Menlo, monospace" font-size="18" letter-spacing="2">02 — HEX CD</text>
-  <text x="560" y="548" fill="#8b9598" font-family="'IBM Plex Mono', Menlo, monospace" font-size="16">the bottom opens into a c</text>
+  <text x="560" y="548" fill="#8b9598" font-family="'IBM Plex Mono', Menlo, monospace" font-size="16">an open c, holding a d's stem</text>
   <text x="120" y="742" fill="#4d5659" font-family="'IBM Plex Mono', Menlo, monospace" font-size="14" letter-spacing="2">cyberd4ch.github.io</text>
   <text x="1080" y="742" fill="#4d5659" font-family="'IBM Plex Mono', Menlo, monospace" font-size="14" letter-spacing="2" text-anchor="end">2026</text>
 </svg>
