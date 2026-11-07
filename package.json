@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "sync:github": "node scripts/fetch-github.mjs",
     "start": "next start",
     "lint": "next lint"
   },

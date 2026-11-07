@@ -1,0 +1,102 @@
+import snapshot from '@/data/github.json'
+
+export interface GithubRepo {
+  name: string
+  description: string
+  url: string
+  homepage: string
+  language: string
+  topics: string[]
+  stars: number
+  forks: number
+  pushedAt: string
+  createdAt: string
+}
+
+export interface GithubActivity {
+  type: string
+  repo: string
+  repoUrl: string
+  title: string
+  detail: string
+  url: string
+  at: string
+}
+
+export interface GithubSnapshot {
+  generatedAt: string
+  user: {
+    login: string
+    name: string
+    bio: string
+    avatarUrl: string
+    url: string
+    publicRepos: number
+    followers: number
+  }
+  repos: GithubRepo[]
+  activity: GithubActivity[]
+}
+
+export const github = snapshot as GithubSnapshot
+
+/** Repos ordered by most recent push — the account's working set, newest first. */
+export const repos = github.repos
+
+/** Languages actually present in the account, most common first. */
+export const languages = Array.from(
+  repos.reduce((acc, repo) => {
+    if (repo.language) acc.set(repo.language, (acc.get(repo.language) || 0) + 1)
+    return acc
+  }, new Map<string, number>()),
+)
+  .sort((a, b) => b[1] - a[1])
+  .map(([language]) => language)
+
+export const activity = github.activity
+
+const languageColors: Record<string, string> = {
+  C: '#555555',
+  'C++': '#f34b7d',
+  HTML: '#e34c26',
+  JavaScript: '#f1e05a',
+  Python: '#3572A5',
+  Ruby: '#701516',
+  Rust: '#dea584',
+  Shell: '#89e051',
+  TypeScript: '#3178c6',
+  Go: '#00ADD8',
+}
+
+export function languageColor(language: string): string {
+  return languageColors[language] || '#8b949e'
+}
+
+/** "2d ago" / "5h ago", computed at build time (the site rebuilds every 6 hours). */
+export function timeAgo(iso: string): string {
+  const seconds = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000)
+  if (seconds < 90) return 'just now'
+
+  const minutes = seconds / 60
+  if (minutes < 60) return `${Math.floor(minutes)}m ago`
+
+  const hours = minutes / 60
+  if (hours < 24) return `${Math.floor(hours)}h ago`
+
+  const days = hours / 24
+  if (days < 30) return `${Math.floor(days)}d ago`
+
+  const months = days / 30
+  if (months < 12) return `${Math.floor(months)}mo ago`
+
+  return `${Math.floor(months / 12)}y ago`
+}
+
+export function shortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+}

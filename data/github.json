@@ -1,0 +1,173 @@
+{
+  "generatedAt": "2026-11-07T01:00:41.280Z",
+  "user": {
+    "login": "cyberd4ch",
+    "name": "DKA447~000",
+    "bio": "Building & tweaking stuff, toying with networking tools, finding bugs and tinkering greasy code.",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/183819322?v=4",
+    "url": "https://github.com/cyberd4ch",
+    "publicRepos": 22,
+    "followers": 80
+  },
+  "repos": [
+    {
+      "name": "homebrew-dnswatch",
+      "description": "Homebrew tap for dns-watch — free DNS drift watcher for bounty scopes",
+      "url": "https://github.com/cyberd4ch/homebrew-dnswatch",
+      "homepage": "",
+      "language": "Ruby",
+      "topics": [],
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-11-03T21:27:46Z",
+      "createdAt": "2026-11-03T20:59:07Z"
+    },
+    {
+      "name": "dns-watch",
+      "description": "dnswatch — a small, dependency-free DNS drift watcher (cron + plain-text log). Free forever.",
+      "url": "https://github.com/cyberd4ch/dns-watch",
+      "homepage": "",
+      "language": "Shell",
+      "topics": [],
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-11-03T21:27:12Z",
+      "createdAt": "2026-11-03T20:17:36Z"
+    },
+    {
+      "name": "txn-agent",
+      "description": "Safety-first transaction layer for purchasing agents: deterministic policy gate, human approvals, idempotent checkout",
+      "url": "https://github.com/cyberd4ch/txn-agent",
+      "homepage": "https://github.com/cyberd4ch/txn-agent/tree/main/docs",
+      "language": "Python",
+      "topics": [
+        "agent-safety",
+        "agents",
+        "audit",
+        "b2b",
+        "fastapi",
+        "llm",
+        "payments",
+        "procurement",
+        "purchasing",
+        "python",
+        "stripe",
+        "transactions"
+      ],
+      "stars": 2,
+      "forks": 0,
+      "pushedAt": "2026-10-29T14:46:31Z",
+      "createdAt": "2026-10-05T02:33:54Z"
+    },
+    {
+      "name": "free-torrent-cli",
+      "description": "A simple torrent client build with Node.js for terminal",
+      "url": "https://github.com/cyberd4ch/free-torrent-cli",
+      "homepage": "",
+      "language": "JavaScript",
+      "topics": [],
+      "stars": 2,
+      "forks": 0,
+      "pushedAt": "2026-10-22T05:11:05Z",
+      "createdAt": "2025-05-19T14:31:02Z"
+    },
+    {
+      "name": "cportscan",
+      "description": "A simple port scanner built with C",
+      "url": "https://github.com/cyberd4ch/cportscan",
+      "homepage": "",
+      "language": "HTML",
+      "topics": [],
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-04-07T15:19:08Z",
+      "createdAt": "2025-05-08T22:00:41Z"
+    },
+    {
+      "name": "stride-tmr",
+      "description": "STRIDE threat modelling with pytm",
+      "url": "https://github.com/cyberd4ch/stride-tmr",
+      "homepage": "",
+      "language": "Python",
+      "topics": [],
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2025-07-12T12:37:34Z",
+      "createdAt": "2025-07-12T12:14:51Z"
+    }
+  ],
+  "activity": [
+    {
+      "type": "IssueCommentEvent",
+      "repo": "hashicorp/vagrant",
+      "repoUrl": "https://github.com/hashicorp/vagrant",
+      "at": "2026-11-07T00:47:29Z",
+      "title": "commented on #13845 in hashicorp/vagrant",
+      "detail": "Port Forwarding doesn't work on MacOS 26.7+",
+      "url": "https://github.com/hashicorp/vagrant/issues/13845#issuecomment-6699831865"
+    },
+    {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/dns-watch",
+      "repoUrl": "https://github.com/cyberd4ch/dns-watch",
+      "at": "2026-11-03T20:25:12Z",
+      "title": "pushed to cyberd4ch/dns-watch",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/dns-watch/commits"
+    },
+    {
+      "type": "IssuesEvent",
+      "repo": "ppggff/vagrant-qemu",
+      "repoUrl": "https://github.com/ppggff/vagrant-qemu",
+      "at": "2026-11-05T04:02:37Z",
+      "title": "opened issue #96 in ppggff/vagrant-qemu",
+      "detail": "vagrant-qemu: provider reports \"stopped\" while the QEMU process is alive when the pidfile directory is lost",
+      "url": "https://github.com/ppggff/vagrant-qemu/issues/96"
+    },
+    {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/homebrew-dnswatch",
+      "repoUrl": "https://github.com/cyberd4ch/homebrew-dnswatch",
+      "at": "2026-11-03T21:27:47Z",
+      "title": "pushed to cyberd4ch/homebrew-dnswatch",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/homebrew-dnswatch/commits"
+    },
+    {
+      "type": "ReleaseEvent",
+      "repo": "cyberd4ch/dns-watch",
+      "repoUrl": "https://github.com/cyberd4ch/dns-watch",
+      "at": "2026-11-03T20:58:42Z",
+      "title": "released v1.1.0 in cyberd4ch/dns-watch",
+      "detail": "dns-watch v1.1.0",
+      "url": "https://github.com/cyberd4ch/dns-watch/releases/tag/v1.1.0"
+    },
+    {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/txn-agent",
+      "repoUrl": "https://github.com/cyberd4ch/txn-agent",
+      "at": "2026-10-29T14:46:04Z",
+      "title": "pushed to cyberd4ch/txn-agent",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/txn-agent/commits"
+    },
+    {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/free-torrent-cli",
+      "repoUrl": "https://github.com/cyberd4ch/free-torrent-cli",
+      "at": "2026-10-22T04:52:00Z",
+      "title": "pushed to cyberd4ch/free-torrent-cli",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/free-torrent-cli/commits"
+    },
+    {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/cyberd4ch",
+      "repoUrl": "https://github.com/cyberd4ch/cyberd4ch",
+      "at": "2026-10-22T02:44:02Z",
+      "title": "pushed to cyberd4ch/cyberd4ch",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/cyberd4ch/commits"
+    }
+  ]
+}
