@@ -14,6 +14,17 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    id: 'announcing-dnswatch-v1-1-1',
+    slug: 'announcing-dnswatch-v1-1-1',
+    title: 'dns-watch v1.1.1: the release where nothing changed (on purpose)',
+    date: 'Nov 8, 2026',
+    dateISO: '2026-11-08',
+    category: 'technical',
+    url: '/blog/announcing-dnswatch-v1-1-1/',
+    excerpt:
+      'a packaging release: reproducible tarball, sha256-pinned homebrew tap that bumps itself, and the install path documented first.',
+  },
+  {
     id: 'three-tiers-on-kind',
     slug: 'three-tiers-on-kind',
     title: 'same tiers, new vocabulary: kind, crashloops, and the one secret spelling',
