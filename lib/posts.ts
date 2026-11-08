@@ -14,6 +14,28 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    id: 'three-tiers-become-a-module',
+    slug: 'three-tiers-become-a-module',
+    title: 'three tiers become a module: two stacks, one graph, no collisions',
+    date: 'Nov 8, 2026',
+    dateISO: '2026-11-08',
+    category: 'technical',
+    url: '/blog/three-tiers-become-a-module/',
+    excerpt:
+      'lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083 — including the readiness wait that caught a green apply serving nothing.',
+  },
+  {
+    id: 'one-binary-two-interfaces',
+    slug: 'one-binary-two-interfaces',
+    title: 'one binary, two interfaces: a web ui and a real window in 3 MB of rust',
+    date: 'Nov 8, 2026',
+    dateISO: '2026-11-08',
+    category: 'technical',
+    url: '/blog/one-binary-two-interfaces/',
+    excerpt:
+      'a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window — and the favicon bug that explained why 204 is not an icon.',
+  },
+  {
     id: 'announcing-dnswatch-v1-1-1',
     slug: 'announcing-dnswatch-v1-1-1',
     title: 'dns-watch v1.1.1: the release where nothing changed (on purpose)',
