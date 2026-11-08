@@ -14,6 +14,17 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    id: 'from-form-to-download-manager',
+    slug: 'from-form-to-download-manager',
+    title: 'from a form to a download manager: categories, drag-and-drop, and a window that lets go',
+    date: 'Nov 8, 2026',
+    dateISO: '2026-11-08',
+    category: 'technical',
+    url: '/blog/from-form-to-download-manager/',
+    excerpt:
+      'rebuilding the ftc page as a download manager — one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening.',
+  },
+  {
     id: 'three-tiers-become-a-module',
     slug: 'three-tiers-become-a-module',
     title: 'three tiers become a module: two stacks, one graph, no collisions',
