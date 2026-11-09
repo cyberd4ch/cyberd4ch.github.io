@@ -14,6 +14,17 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    id: 'footorrent-3-5-0-magnets-that-work',
+    slug: 'footorrent-3-5-0-magnets-that-work',
+    title: 'magnets that actually work: three wire bugs, a dead tracker list, and 917 KB that finally moved',
+    date: 'Nov 9, 2026',
+    dateISO: '2026-11-09',
+    category: 'technical',
+    url: '/blog/footorrent-3-5-0-magnets-that-work/',
+    excerpt:
+      'footorrent 3.5.0 — metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix.',
+  },
+  {
     id: 'from-form-to-download-manager',
     slug: 'from-form-to-download-manager',
     title: 'from a form to a download manager: categories, drag-and-drop, and a window that lets go',
