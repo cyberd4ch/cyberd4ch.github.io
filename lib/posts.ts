@@ -14,6 +14,39 @@ export interface Post {
 
 export const posts: Post[] = [
   {
+    id: 'deeplink-gadget-trace',
+    slug: 'deeplink-gadget-trace',
+    title: 'Server-side trace of the deeplink gadget: positive and negative findings',
+    date: 'Nov 10, 2026',
+    dateISO: '2026-11-10',
+    category: 'technical',
+    url: '/blog/deeplink-gadget-trace/',
+    excerpt:
+      'The deeplink gadget in Mercado Libre\'s home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce\'d script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously — but a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution.',
+  },
+  {
+    id: 'deeplink-test-account-deadend',
+    slug: 'deeplink-test-account-deadend',
+    title: 'Dead end with test accounts and researching a workaround',
+    date: 'Nov 10, 2026',
+    dateISO: '2026-11-10',
+    category: 'general',
+    url: '/blog/deeplink-test-account-deadend/',
+    excerpt:
+      'The ATO 2FA challenge test account (userId 1252539217, CHALLENGE_ATO_USER_2, site MCO) returns 302 /login/identification/not-found, suggesting it is expired or removed. Later work showed the deeplink gadget mounts anonymously for mobile UA (and is sanitised), so the account blocker now applies to the seller / second-order path. Workaround paths: seller accounts, personal account (one only, no mass creation), or waiting for program test-user rollout.',
+  },
+  {
+    id: 'bounty-program-landscape',
+    slug: 'bounty-program-landscape',
+    title: 'where the deeplink work can make money — and the reporting trap that kills it',
+    date: 'Nov 10, 2026',
+    dateISO: '2026-11-10',
+    category: 'general',
+    url: '/blog/bounty-program-landscape/',
+    excerpt:
+      'Desk research on which programs pay for nonce-laundering XSS: Basecamp/HEY on HackerOne ($100-$10,000, with a 2026 cross-account nonce-bypass chain already disclosed) is the closest fit; Intigriti only has Lightspark and Adobe paying publicly. The trap: "CSP headers" is out of scope, but "XSS despite CSP" is not.',
+  },
+  {
     id: 'footorrent-3-5-0-magnets-that-work',
     slug: 'footorrent-3-5-0-magnets-that-work',
     title: 'magnets that actually work: three wire bugs, a dead tracker list, and 917 KB that finally moved',

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import RepoList from './RepoList'
 import {
   repos,
@@ -8,6 +9,7 @@ import {
   isStale,
   syncAgeHours,
 } from '@/lib/github'
+import { curatedProjects } from '@/lib/projects'
 
 export const metadata = {
   title: 'projects — cyber.dach',
@@ -59,6 +61,41 @@ export default function ProjectsPage() {
           may have stopped. showing the last successful build.
         </p>
       )}
+
+      <section className="mb-8 stagger-2">
+        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-3 font-medium">
+          research &amp; security
+        </h2>
+        <div className="space-y-3">
+          {curatedProjects.map((project) => (
+            <Link
+              key={project.id}
+              href={project.url}
+              target={project.url.startsWith('http') ? '_blank' : undefined}
+              rel={project.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+              className="block group border border-[var(--border)] rounded-sm p-3 hover:border-[var(--fg)] transition-colors"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-semibold text-sm">{project.name}</span>
+                <span className="ml-auto text-[10px] uppercase tracking-widest text-[var(--muted)]">
+                  {project.status}
+                </span>
+              </div>
+              <p className="text-[13px] leading-relaxed">{project.description}</p>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {project.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[10px] border border-[var(--border)] px-1.5 py-0.5 rounded-sm text-[var(--muted)]"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <div className="stagger-2">
         <RepoList repos={repos} languages={languages} />

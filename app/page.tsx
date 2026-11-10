@@ -189,6 +189,12 @@ export default function HomePage() {
             )
           })}
         </div>
+        <Link
+          href="/freelance"
+          className="inline-block mt-3 text-xs underline-link text-[var(--muted)]"
+        >
+          client case studies →
+        </Link>
       </section>
 
       {/* Social */}

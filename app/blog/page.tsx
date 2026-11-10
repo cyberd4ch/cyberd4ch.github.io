@@ -81,6 +81,13 @@ export default function BlogPage() {
       </div>
 
       <div className="mt-10 pt-6 border-t border-[var(--border)] stagger-4">
+        <p className="text-xs text-[var(--muted)] mb-2">
+          client-facing{' '}
+          <Link href="/freelance" className="underline-link font-medium text-[var(--fg)]">
+            case studies
+          </Link>{' '}
+          live under services.
+        </p>
         <p className="text-xs text-[var(--muted)]">
           older posts live at{' '}
           <a
