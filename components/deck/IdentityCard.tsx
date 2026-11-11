@@ -1,59 +1,67 @@
 import Link from 'next/link'
 import { github, totalStars } from '@/lib/github'
+import { FaGithub, FaStar, FaUsers } from 'react-icons/fa'
 
 /**
- * Mobile identity card — the hero copy reimagined as the deck's first card.
- * The nav items that leave the phone navbar (projects / blog / services)
- * become its action buttons next to sponsor; "home" stays off the card
- * (the logo in the bar is home). Replaces the old view projects / read the
- * blog link pair on small screens.
+ * Mobile identity card — the hero copy reimagined as the deck's first card,
+ * restyled on the watermelon profile-card: tinted pill chips for the roles,
+ * compact icon+label/value data rows for the live GitHub stats, and the nav
+ * items that leave the phone navbar (projects / blog / services) as its
+ * action buttons next to sponsor. "home" stays off the card (the logo in
+ * the bar is home). Replaces the old view projects / read the blog link
+ * pair on small screens.
  */
 export default function IdentityCard() {
-  const stats = [
-    `${github.user.publicRepos} repos`,
-    `${totalStars} stars`,
-    `${github.user.followers} followers`,
+  const rows = [
+    { icon: <FaGithub size={12} />, label: 'public repos', value: String(github.user.publicRepos) },
+    { icon: <FaStar size={12} />, label: 'stars earned', value: String(totalStars) },
+    { icon: <FaUsers size={12} />, label: 'followers', value: String(github.user.followers) },
   ]
 
   return (
     <div>
-      <p className="hud-label mb-3">// mission brief</p>
       <h2 className="text-4xl font-semibold tracking-tight">cyber.dach</h2>
-      <p className="mt-3 text-sm">
-        telecom engineer <span className="text-[var(--muted)]">×</span> cybersecurity engineer
-      </p>
-      <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <span className="rounded-full border border-[var(--red)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--red)]">
+          telecom engineer
+        </span>
+        <span className="rounded-full border border-[var(--red)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--red)]">
+          cybersecurity engineer
+        </span>
+      </div>
+
+      <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">
         building resilient systems across networks, security, and software — and writing
         down what i learn along the way.
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        {stats.map(s => (
-          <span
-            key={s}
-            className="border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--muted)]"
-          >
-            {s}
-          </span>
+      <div className="mt-4 border-t border-[var(--border)] pt-1">
+        {rows.map(r => (
+          <div key={r.label} className="flex items-center gap-2 py-1.5 text-[13px]">
+            <span className="text-[var(--muted)]">{r.icon}</span>
+            <span className="text-[var(--muted)]">{r.label}</span>
+            <span className="ml-auto font-semibold tabular-nums">{r.value}</span>
+          </div>
         ))}
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
         <Link
           href="/projects"
-          className="bg-[var(--red)] px-3 py-2.5 text-center text-sm font-medium text-[var(--on-red)] transition-opacity hover:opacity-85"
+          className="rounded-lg bg-[var(--red)] px-3 py-2.5 text-center text-sm font-medium text-[var(--on-red)] transition-opacity hover:opacity-85"
         >
           projects
         </Link>
         <Link
           href="/blog"
-          className="border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--fg)]"
+          className="rounded-lg border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--fg)]"
         >
           blog
         </Link>
         <Link
           href="/freelance"
-          className="border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--fg)]"
+          className="rounded-lg border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--fg)]"
         >
           services
         </Link>
@@ -61,7 +69,7 @@ export default function IdentityCard() {
           href="https://github.com/sponsors/cyberd4ch"
           target="_blank"
           rel="noopener noreferrer"
-          className="border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--red)]"
+          className="rounded-lg border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--red)]"
         >
           ♥ sponsor
         </a>

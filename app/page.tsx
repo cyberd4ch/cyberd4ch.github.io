@@ -1,5 +1,18 @@
 import Link from 'next/link'
-import { FaGithub, FaMailchimp, FaStar, FaCodeBranch, FaHeart } from 'react-icons/fa'
+import {
+  FaGithub,
+  FaMailchimp,
+  FaStar,
+  FaCodeBranch,
+  FaHeart,
+  FaUserAstronaut,
+  FaBullseye,
+  FaRocket,
+  FaChartLine,
+  FaBolt,
+  FaSatelliteDish,
+  FaBroadcastTower,
+} from 'react-icons/fa'
 import { repos, activity, timeAgo, languageColor, github, syncLabel, isStale, totalStars } from '@/lib/github'
 import { posts } from '@/lib/posts'
 import Hero from '@/components/hero/Hero'
@@ -42,12 +55,21 @@ export default function HomePage() {
       <PageCol>
         {/* identity card: the hero copy as the deck's first card (phones only;
             desktop keeps the hero copy up in the hero) */}
-        <Chapter h={150} first mobileOnly index={1} total={9}>
+        <Chapter
+          h={150}
+          first
+          mobileOnly
+          index={1}
+          total={9}
+          label="identity card"
+          icon={<FaUserAstronaut size={15} />}
+          tail="the operator"
+        >
           <IdentityCard />
         </Chapter>
 
         {/* Mission brief — one card per paragraph on phones */}
-        <Chapter h={112} index={2} total={9}>
+        <Chapter h={112} index={2} total={9} label="mission brief" icon={<FaBullseye size={15} />} tail="who i am">
           <section className="reveal pt-4 max-md:pt-0">
             <h2 className="sec-label mb-4">mission brief</h2>
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
@@ -57,7 +79,7 @@ export default function HomePage() {
             </p>
           </section>
         </Chapter>
-        <Chapter h={112} index={3} total={9}>
+        <Chapter h={112} index={3} total={9} label="mission brief" icon={<FaBullseye size={15} />} tail="what i build">
           <section className="reveal mt-4 max-md:mt-0">
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
               i&apos;m also a builder — i write code across the stack and care about systems that are{' '}
@@ -66,7 +88,7 @@ export default function HomePage() {
             </p>
           </section>
         </Chapter>
-        <Chapter h={112} index={4} total={9}>
+        <Chapter h={112} index={4} total={9} label="mission brief" icon={<FaBullseye size={15} />} tail="how this site works">
           <section className="reveal mt-4 max-md:mt-0">
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
               everything on this site is pulled live from{' '}
@@ -85,7 +107,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Payload stack — derived from the languages in the account */}
-        <Chapter h={132} index={5} total={9}>
+        <Chapter h={132} index={5} total={9} label="payload stack" icon={<FaRocket size={15} />} tail="hauled from the repos">
           <section className="reveal pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">payload stack</h2>
             <div className="flex flex-wrap gap-2">
@@ -96,7 +118,7 @@ export default function HomePage() {
                 .map(t => (
                   <span
                     key={t}
-                    className="text-xs border border-[var(--border)] px-2.5 py-1 text-[var(--muted)] hover:border-[var(--blue-bright)] hover:text-[var(--blue-bright)] transition-colors cursor-default"
+                    className="text-xs border border-[var(--border)] px-2.5 py-1 text-[var(--muted)] hover:border-[var(--blue-bright)] hover:text-[var(--blue-bright)] transition-colors cursor-default max-md:rounded-full max-md:font-semibold"
                   >
                     {t}
                   </span>
@@ -106,7 +128,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Recent telemetry — most recently pushed repos */}
-        <Chapter h={148} index={6} total={9}>
+        <Chapter h={148} index={6} total={9} label="recent telemetry" icon={<FaChartLine size={15} />} tail="live from github">
           <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="recent telemetry" link="/projects" linkLabel="all projects" />
             <div className="space-y-3">
@@ -157,7 +179,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Activity log — refreshed by the scheduled build */}
-        <Chapter h={148} index={7} total={9}>
+        <Chapter h={148} index={7} total={9} label="activity log" icon={<FaBolt size={15} />} tail="last 90 days">
           <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="sec-label">activity log</h2>
@@ -198,7 +220,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Transmissions — latest writing */}
-        <Chapter h={142} index={8} total={9}>
+        <Chapter h={142} index={8} total={9} label="transmissions" icon={<FaSatelliteDish size={15} />} tail="latest writing">
           <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" />
             <div className="space-y-4">
@@ -227,7 +249,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Ground stations — where to find me */}
-        <Chapter h={120} index={9} total={9}>
+        <Chapter h={120} index={9} total={9} label="ground stations" icon={<FaBroadcastTower size={15} />} tail="say hello">
           <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10 pb-2 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">ground stations</h2>
             <div className="flex items-center gap-4">

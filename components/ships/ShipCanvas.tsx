@@ -85,7 +85,8 @@ function bandColors(dark: boolean) {
  *  - otherwise skin: warm + brighter than the backdrop, drawn large — the
  *    face's mass. Cool bright cells (blue backdrop) drop as background.
  *
- * The glasses get a second pass: the eye box is re-sampled at 2× and its
+ * The glasses (and now the nose + mouth, which sit in the same centered
+ * strip) get a second pass: the feature box is re-sampled at 2× and its
  * cells (fractional grid coords) replace the head-resolution ones — a lens
  * is ~4 cells wide in the head grid, which no amount of styling can make
  * read as an eye.
@@ -160,14 +161,15 @@ function sampleGrid(src: CanvasImageSource, sw: number, sh: number, sampleCols: 
 
   const head = classify(data, sampleCols, rows0, bg)
 
-  // ---- eye patch: re-sample the glasses box at 2× --------------------------
+  // ---- face patch: re-sample the feature box at 2× -------------------------
   // box in head-grid units (fractions of the 76×74 head grid, calibrated on
-  // the avatar: brow line through the lenses down to the nose tip), sampled
-  // fine and spliced in with fractional coordinates
+  // the avatar: brow line through the lenses, down past the nose outline
+  // (head rows ~44–54) to the mouth (~56–62)), sampled fine and spliced in
+  // with fractional coordinates
   const bx0 = Math.round(sampleCols * (24 / 76))
   const bx1 = Math.round(sampleCols * (48 / 76))
   const by0 = Math.round(rows0 * (30 / 74))
-  const by1 = Math.round(rows0 * (50 / 74))
+  const by1 = Math.round(rows0 * (62 / 74))
   const PCOLS = Math.max(4, (bx1 - bx0) * 2)
   const pW = ((bx1 - bx0) / sampleCols) * sW
   const pH = ((by1 - by0) / rows0) * sH
@@ -460,6 +462,7 @@ export default function ShipCanvas() {
 
       // ---- sprites (variant × band, drawn at device scale) -------------------
       const sprites: Record<string, HTMLCanvasElement> = {}
+      const spritesRot: Record<string, HTMLCanvasElement> = {}
       const buildSprites = () => {
         const pal = bandColors(dark)
         const ss = Math.max(1, Math.min(3, Math.round(window.devicePixelRatio || 1)))
@@ -507,6 +510,26 @@ export default function ShipCanvas() {
               g.beginPath(); g.arc(0, h * 0.02, w * 0.22, Math.PI, 0); g.fill()
             }
             sprites[`${v}${band}`] = s
+          }
+        }
+        // pre-baked rotated variants: the formation jitter (s.jr) only ever
+        // takes the 9 angles (k−4)×0.055 rad, so the formed portrait — the
+        // state that draws thousands of ships every frame — can blit a
+        // pre-rotated bitmap instead of paying save/translate/rotate/restore
+        // per ship. Scattered flight keeps the continuous rotation path.
+        for (let ji = 0; ji < 9; ji++) {
+          if (ji === 4) continue // zero angle draws the base sprite
+          const a = (ji - 4) * 0.055
+          for (const key of Object.keys(sprites)) {
+            const base = sprites[key]
+            const s = document.createElement('canvas')
+            s.width = sp
+            s.height = sp
+            const g = s.getContext('2d')!
+            g.translate(sp / 2, sp / 2)
+            g.rotate(a)
+            g.drawImage(base, -sp / 2, -sp / 2)
+            spritesRot[`${ji}|${key}`] = s
           }
         }
       }
@@ -833,6 +856,9 @@ export default function ShipCanvas() {
 
           const spr = sprites[`${s.v}${s.band}`]
           if (!spr) continue
+          // off-screen ships (scattered past the viewport on the stage) cost
+          // nothing to skip
+          if (s.px < -40 || s.px > vw + 40 || s.py < -40 || s.py > vh + 40) continue
           // scattered ships swell a little — the dispersal reads on every
           // screen size; the formed portrait keeps its exact mosaic size
           let size2 =
@@ -851,7 +877,16 @@ export default function ShipCanvas() {
           if (s.eye && blink > 0 && sEff < 0.4) sizeH *= 1 - 0.75 * blink
           const rot = s.jr * (1 - sEff) + (s.spin + Math.sin(t * 0.35 + s.ph) * 0.55) * sEff
           ctx.globalAlpha = 1 - 0.12 * sEff
-          if (Math.abs(rot) < 0.02) {
+          if (sEff === 0 && s.jr !== 0) {
+            // formed + jittered: the pre-baked rotation bucket
+            const ji = Math.round(s.jr / 0.055) + 4
+            const sprR = spritesRot[`${ji}|${s.v}${s.band}`]
+            if (sprR) {
+              ctx.drawImage(sprR, s.px - size2 / 2, s.py - sizeH / 2, size2, sizeH)
+            } else {
+              ctx.drawImage(spr, s.px - size2 / 2, s.py - sizeH / 2, size2, sizeH)
+            }
+          } else if (Math.abs(rot) < 0.02) {
             ctx.drawImage(spr, s.px - size2 / 2, s.py - sizeH / 2, size2, sizeH)
           } else {
             ctx.save()

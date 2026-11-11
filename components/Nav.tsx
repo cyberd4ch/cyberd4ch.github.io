@@ -27,10 +27,10 @@ export default function Nav() {
     setIsDark(!isDark)
   }
 
-  // One row everywhere: on phones the home bar carries only the logo and the
-  // theme toggle — the deck's identity card carries the nav items instead.
-  // Other pages keep their links (they have no card to hand them to).
-  const hideLinksOnMobile = path === '/'
+  // One row everywhere: on phones every page's bar carries only the logo and
+  // the theme toggle — the deck's cards carry the nav items on home, and the
+  // other pages get them back once there's room.
+  const hideLinksOnMobile = true
 
   return (
     <nav className="flex items-center justify-between gap-3">
