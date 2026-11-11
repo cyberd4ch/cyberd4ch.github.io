@@ -27,30 +27,47 @@ export default function Nav() {
     setIsDark(!isDark)
   }
 
+  // One row everywhere: on phones the home bar carries only the logo and the
+  // theme toggle — the deck's identity card carries the nav items instead.
+  // Other pages keep their links (they have no card to hand them to).
+  const hideLinksOnMobile = path === '/'
+
   return (
-    <nav className="flex flex-wrap items-center justify-between gap-y-2">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-6">
-        <Link href="/" aria-label="cyber.dach home" className="flex items-center gap-2">
-          <MarkGlyph size={24} className="text-[var(--fg)]" />
-          <span className="hidden min-[430px]:inline text-sm font-semibold tracking-tight">cyber.dach</span>
+    <nav className="flex items-center justify-between gap-3">
+      <div className="flex min-w-0 items-center gap-x-3 sm:gap-x-5">
+        <Link href="/" aria-label="cyber.dach home" className="flex shrink-0 items-center gap-2">
+          <MarkGlyph size={26} draw className="text-[var(--fg)]" />
+          <span className="logo-word hidden min-[430px]:inline text-sm font-semibold tracking-tight">
+            cyber.dach
+          </span>
         </Link>
-        {links.map(({ href, label }) => {
-          const active = path === href || (href !== '/' && path.startsWith(href))
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={active ? 'nav-active text-sm font-medium' : 'text-sm text-[var(--fg)] hover:opacity-70 transition-opacity'}
-            >
-              {label}
-            </Link>
-          )
-        })}
+        <div
+          className={`no-scrollbar flex min-w-0 items-center gap-x-3 overflow-x-auto sm:gap-x-5 ${
+            hideLinksOnMobile ? 'max-md:hidden' : ''
+          }`}
+        >
+          {links.map(({ href, label }) => {
+            const active = path === href || (href !== '/' && path.startsWith(href))
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`whitespace-nowrap max-md:text-[13px] ${
+                  active
+                    ? 'nav-active text-sm font-medium'
+                    : 'text-sm text-[var(--fg)] hover:opacity-70 transition-opacity'
+                }`}
+              >
+                {label}
+              </Link>
+            )
+          })}
+        </div>
       </div>
-      
-      <button 
-        onClick={toggleTheme} 
-        className="p-1.5 rounded hover:bg-[var(--card)] transition-colors text-[var(--fg)]"
+
+      <button
+        onClick={toggleTheme}
+        className="shrink-0 rounded p-1.5 text-[var(--fg)] transition-colors hover:bg-[var(--card)]"
         aria-label="Toggle theme"
       >
         {isDark ? <Sun size={16} /> : <Moon size={16} />}

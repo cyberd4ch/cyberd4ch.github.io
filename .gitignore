@@ -23,6 +23,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# local visual QA harness (playwright screenshots + scripts, not for the repo)
+/qa-shots/
+
 # local env files
 .env*.local
 

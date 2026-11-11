@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
+import { fleetBus } from '@/lib/fleetBus'
 
 /**
  * The fleet — a ship-mosaic "ASCII" portrait of the GitHub avatar.
@@ -283,17 +284,30 @@ export default function ShipCanvas() {
         vw = window.innerWidth
         vh = window.innerHeight
         narrow = vw < 760
-        const artH = narrow ? 175 : vw < 1100 ? 310 : 380
-        pitch = artH / grid.rows
-        artW = pitch * grid.cols
         const hero = heroEl()
         const heroTop = hero ? hero.getBoundingClientRect().top + window.scrollY : 0
         heroH = hero ? hero.offsetHeight : 700
-        anchorX = vw - (narrow ? 10 : 26) - artW
-        anchorY = heroTop + (narrow ? 52 : 84)
+        if (narrow) {
+          // phones: the portrait IS the hero — centered on the first screen,
+          // sized to fill the space between the telemetry rows (the ticker
+          // strip at the hero's foot is ~34px)
+          const target = Math.min(vh * 0.42, vw - 56)
+          pitch = target / grid.rows
+          artW = pitch * grid.cols
+          anchorX = Math.round((vw - artW) / 2)
+          anchorY = heroTop + Math.round((heroH - 34 - pitch * grid.rows) / 2) + 4
+        } else {
+          const artH = vw < 1100 ? 310 : 380
+          pitch = artH / grid.rows
+          artW = pitch * grid.cols
+          anchorX = vw - 26 - artW
+          anchorY = heroTop + 84
+        }
         computeZones()
         buildSprites()
         assignHomes(ships.length > 0)
+        // live ping table for the flight layer (see lib/fleetBus)
+        fleetBus.ships = ships.map(s => ({ x: s.px, y: s.py, s: 0 }))
       }
 
       // ---- sprites (variant × band, drawn at device scale) -------------------
@@ -472,9 +486,16 @@ export default function ShipCanvas() {
         const t = clock.t
 
         const scrollY = window.scrollY
-        // formation factor: 1 at the top, 0 once the hero has scrolled away
-        const scrollF = Math.max(0, Math.min(1, scrollY / (heroH * 0.85)))
+        // formation factor: 1 at the top, 0 once the hero has scrolled away.
+        // in deck mode the first card arrives over ~100svh, so the dispersal
+        // runs a little ahead of it and the card never fights the fleet
+        const deckOn = document.documentElement.dataset.deck === 'on'
+        const scrollF = Math.max(
+          0,
+          Math.min(1, scrollY / (heroH * (narrow && deckOn ? 0.62 : 0.85)))
+        )
         const introDone = t > introTotal
+        fleetBus.formed = 1 - scrollF
 
         // hover is active only over the artwork (portrait bbox + a little slack)
         const artH = pitch * grid.rows
@@ -483,10 +504,20 @@ export default function ShipCanvas() {
           ptr.on &&
           ptr.x > anchorX - 50 && ptr.x < anchorX + artW + 50 &&
           ptr.y > artY0 - 50 && ptr.y < artY0 + artH + 50
-        const R = (narrow ? 78 : 116) * (coarse ? 1.25 : 1)
+        const R = (narrow ? 100 : 116) * (coarse ? 1.25 : 1)
+
+        // flight-layer crossfire: the rocket strafes the fleet while it flies
+        // (see FlightCanvas) — impacts land as velocity impulses, and an
+        // attacking rocket continuously shoves nearby ships off its path
+        const kicks = fleetBus.drain()
+        const rocket = fleetBus.rocket
+        const rocketOn = rocket.attacking
+        const rocketX = rocket.x
+        const rocketY = rocket.y
 
         ctx.clearRect(0, 0, vw, vh)
-        for (const s of ships) {
+        for (let si = 0; si < ships.length; si++) {
+          const s = ships[si]
           // per-ship dissolve: the fleet lets go in a staggered cascade
           const raw = scrollF * 1.35 - s.stag * 0.35
           const sSc = Math.max(0, Math.min(1, raw)) ** 1.4
@@ -500,6 +531,30 @@ export default function ShipCanvas() {
           const wy = s.sy - scrollY + Math.cos(t * s.fy + s.ph * 1.3) * s.ay
           let tx = hx + (wx - hx) * sEff
           let ty = hy + (wy - hy) * sEff
+
+          // projectile impacts: upheaval radiating from each hit
+          for (const k of kicks) {
+            const dxk = s.px - k.x
+            const dyk = s.py - k.y
+            const dk = Math.hypot(dxk, dyk)
+            if (dk < k.r) {
+              const f = 1 - dk / k.r
+              const pow = k.hit * (0.35 + 0.65 * f)
+              s.vx += (dxk / (dk || 1)) * pow
+              s.vy += (dyk / (dk || 1)) * pow
+            }
+          }
+          // an attacking rocket clears its own flight path
+          if (rocketOn) {
+            const dxr = s.px - rocketX
+            const dyr = s.py - rocketY
+            const dr = Math.hypot(dxr, dyr)
+            if (dr < 120 && dr > 0.01) {
+              const f = 1 - dr / 120
+              tx += (dxr / dr) * f * 90
+              ty += (dyr / dr) * f * 90
+            }
+          }
 
           // hover repulsion: radial push + a clockwise swirl, eased by the spring
           if (inArt && sEff < 0.6) {
@@ -545,6 +600,13 @@ export default function ShipCanvas() {
             ctx.drawImage(spr, -size2 / 2, -size2 / 2, size2, size2)
             ctx.restore()
           }
+          // ping the flight layer (viewport space, hit radius = drawn size)
+          const ping = fleetBus.ships[si]
+          if (ping) {
+            ping.x = s.px
+            ping.y = s.py
+            ping.s = size2
+          }
         }
         ctx.globalAlpha = 1
       }
@@ -562,6 +624,7 @@ export default function ShipCanvas() {
         window.addEventListener('scroll', onScrollRm, { passive: true })
         return () => {
           dead = true
+          fleetBus.ships = []
           window.removeEventListener('scroll', onScrollRm)
           themeObserver.disconnect()
         }
@@ -626,6 +689,8 @@ export default function ShipCanvas() {
       return () => {
         dead = true
         cancelAnimationFrame(raf)
+        fleetBus.ships = []
+        fleetBus.drain()
         window.removeEventListener('resize', schedule)
         window.removeEventListener('pointermove', onPtrMove)
         window.removeEventListener('pointerdown', onPtrDown)

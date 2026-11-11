@@ -428,6 +428,72 @@ input:focus, textarea:focus {
   margin-left: calc(50% - 50vw);
 }
 
+/* hide scrollbars on inner-scroll surfaces (mobile nav links, deck panels) */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- mobile story deck --------------------------------------------------------
+   Phones only: the home page becomes a card deck. Each chapter reserves
+   --chapter-h viewport heights; its card sticks to the screen for the dwell
+   and is pushed off the top by the next card rising from below — every card
+   travels upward, in one side and out the other. Desktop dissolves the
+   wrappers with display:contents, so sections flow exactly as before. */
+@media (max-width: 767.98px) {
+  .chapter {
+    height: var(--chapter-h, 128svh);
+  }
+  .chapter-card {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    display: flex;
+    align-items: center;
+  }
+  .chapter-panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    width: 100%;
+    max-height: calc(100vh - 96px);
+    max-height: calc(100svh - 96px);
+    overflow-y: auto;
+    padding: 20px 18px 24px;
+  }
+}
+@media (min-width: 768px) {
+  .chapter,
+  .chapter-card,
+  .chapter-panel {
+    display: contents;
+  }
+  .chapter-mobile-only {
+    display: none !important;
+  }
+}
+
+/* ---- hand-inked logo entrance ------------------------------------------------
+   The orbit ring inks in first (the open "c" sweep), then the bowl and mast
+   complete the mark. Dash lengths are viewBox units of the 256 mark. */
+.logo-draw {
+  animation: logoInk var(--logo-dur, 0.9s) cubic-bezier(0.55, 0.06, 0.35, 1) var(--logo-delay, 0s)
+    forwards;
+}
+.logo-draw-ring { --logo-dur: 0.95s; --logo-delay: 0.2s; stroke-dasharray: 427; stroke-dashoffset: 427; }
+.logo-draw-bowl { --logo-dur: 0.62s; --logo-delay: 1.1s; stroke-dasharray: 278; stroke-dashoffset: 278; }
+.logo-draw-mast { --logo-dur: 0.4s; --logo-delay: 1.6s; stroke-dasharray: 154; stroke-dashoffset: 154; }
+@keyframes logoInk {
+  to { stroke-dashoffset: 0; }
+}
+/* the wordmark waits for the mark, then rises in */
+.logo-word {
+  animation: fadeUp 0.5s ease 1.75s both;
+}
+
 /* status beacon */
 .beacon {
   animation: beaconPulse 2.4s ease-in-out infinite;
@@ -444,6 +510,11 @@ input:focus, textarea:focus {
   .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5, .stagger-6 {
     animation: none;
   }
+  .logo-draw {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .logo-word { animation: none; }
   .reveal {
     opacity: 1 !important;
     transform: none !important;

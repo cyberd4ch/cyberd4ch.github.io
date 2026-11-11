@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { fleetBus } from '@/lib/fleetBus'
 
 /**
  * The flight layer — a retro rocket that replaces the old paint snake.
@@ -28,6 +29,12 @@ import { useEffect, useRef } from 'react'
  *   scroll up    the sequence runs backwards: parts reassemble, engine
  *                re-lights with a sputter, and the ship meanders back onto
  *                its pad, sucking up its contrail behind it
+ *
+ * On phones the ship also strafes the fleet: while it flies near the hero
+ * during a dispersal or reform it fires "space balls" ahead of its nose;
+ * every ball that connects bursts and shoves the mini ships aside (the
+ * fleet reads impacts from lib/fleetBus). The ship and its pad scale down
+ * on narrow screens so the flight line never crowds the first screen.
  *
  * Sway, flicker and exhaust emission are gated by smoothed scroll velocity,
  * so a resting page is a still page (the trail and docked state persist).
@@ -115,11 +122,24 @@ export default function FlightCanvas() {
     let emitAcc = 0
     let flashT = 0 // ignition flash countdown
 
+    // ---- projectiles: "space balls" strafing the fleet (viewport space) -----
+    // On phones the ship guns for the mini ships whenever it is flying near
+    // the hero while the fleet is dispersing or reforming: it fires forward
+    // along its nose, each ball bursts on contact and the fleet upheaves
+    // away from the impact (ShipCanvas drains the kicks).
+    type Ball = { x: number; y: number; vx: number; vy: number; r: number; life: number; age: number; blue: boolean }
+    let balls: Ball[] = []
+    let fireAcc = 0
+    type Ripple = { x: number; y: number; age: number }
+    let ripples: Ripple[] = []
+
     const buildPath = () => {
       const w = window.innerWidth
       const h = window.innerHeight
       narrow = w < 760
-      scaleS = narrow ? (w < 480 ? 0.5 : 0.58) : 1
+      // phones: a smaller ship and pad so the flight line never crowds the
+      // first screen (the portrait owns it)
+      scaleS = narrow ? (w < 480 ? 0.42 : 0.48) : 1
       swayAmp = narrow ? (w < 480 ? 3 : 6) : 10
       finTip = narrow ? 22 : 31
       finBase = narrow ? 13 : 15
@@ -513,12 +533,22 @@ export default function FlightCanvas() {
       // the path is document space; this canvas is the viewport — ride the scroll
       const sy = scrollY
 
-      // pad + dock platforms (world space)
+      // pad + dock platforms (world space), scaled down with the ship on phones
       const padF = 1 - smoothstep(0.012, 0.05, p)
-      drawPad(path[0].x, path[0].y - sy + 58 * scaleS + 6, padF, pal, 46, 52)
+      const padHalf = Math.round(46 * (narrow ? scaleS * 1.3 : 1))
+      const padBeacon = Math.round(52 * (narrow ? scaleS * 1.3 : 1))
+      drawPad(path[0].x, path[0].y - sy + 58 * scaleS + 6, padF, pal, padHalf, padBeacon)
       const dockF = smoothstep(0.955, 1.0, p)
       // landing pad meets the detached engine: engine bottom sits at +92·s
-      if (dockF > 0.01) drawPad(dock.x, dock.y - sy + 92 * scaleS + 6, dockF, pal, narrow ? 20 : 46, narrow ? 14 : 52)
+      if (dockF > 0.01)
+        drawPad(
+          dock.x,
+          dock.y - sy + 92 * scaleS + 6,
+          dockF,
+          pal,
+          Math.round((narrow ? 20 : 46) * (narrow ? scaleS * 1.3 : 1)),
+          Math.round((narrow ? 14 : 52) * (narrow ? scaleS * 1.3 : 1))
+        )
 
       // ship pose
       const u = Math.max(0, Math.min(1, p))
@@ -661,6 +691,87 @@ export default function FlightCanvas() {
 
       drawShip(shipX, shipY - sy, rot, dockF, flame, flick, pal, outline)
 
+      // ---- strafing run -------------------------------------------------------
+      // the ship attacks the mini ships whenever it is flying near the hero
+      // while the fleet is mid-transition (dispersing or reforming) — the
+      // takeoff strafes the scattering fleet and the climb back to the pad
+      // fires on the ships rushing home. publishes the pose for ShipCanvas.
+      const shipVY = shipY - sy
+      const fleetLive = fleetBus.ships.length > 0
+      const attacking =
+        narrow &&
+        fleetLive &&
+        fleetBus.formed > 0.03 &&
+        fleetBus.formed < 0.97 &&
+        activity > 0.05 &&
+        p < 0.9 &&
+        shipVY < vh * 1.2 &&
+        shipVY > -vh * 0.4
+      fleetBus.rocket.x = shipX
+      fleetBus.rocket.y = shipVY
+      fleetBus.rocket.attacking = attacking
+
+      if (attacking) {
+        const noseX = shipX + 64 * scaleS * Math.sin(rot)
+        const noseY = shipVY - 64 * scaleS * Math.cos(rot)
+        fireAcc += dt * (8 + 7 * activity)
+        while (fireAcc >= 1) {
+          fireAcc -= 1
+          if (balls.length >= (vw < 480 ? 14 : 22)) {
+            fireAcc = 0
+            break
+          }
+          const sp = 250 + Math.random() * 190
+          const spread = (Math.random() - 0.5) * 0.55
+          const cs = Math.cos(spread)
+          const sn = Math.sin(spread)
+          const dx0 = Math.sin(rot)
+          const dy0 = -Math.cos(rot)
+          balls.push({
+            x: noseX,
+            y: noseY,
+            vx: (dx0 * cs - dy0 * sn) * sp + (Math.random() - 0.5) * 36,
+            vy: (dy0 * cs + dx0 * sn) * sp + (Math.random() - 0.5) * 36,
+            r: 1.9 + Math.random() * 1.7,
+            life: 0.85 + Math.random() * 0.5,
+            age: 0,
+            blue: Math.random() < 0.35,
+          })
+        }
+      } else {
+        fireAcc = 0
+      }
+
+      // balls fly, strafe the fleet, burst on contact
+      for (let i = balls.length - 1; i >= 0; i--) {
+        const b = balls[i]
+        b.age += dt
+        b.x += b.vx * dt
+        b.y += b.vy * dt
+        const drag = Math.exp(-0.9 * dt)
+        b.vx *= drag
+        b.vy *= drag
+        let hit = false
+        if (b.age < b.life) {
+          for (const q of fleetBus.ships) {
+            const dx = q.x - b.x
+            const dy = q.y - b.y
+            const rr = q.s * 0.5 + b.r + 3
+            if (dx * dx + dy * dy < rr * rr) {
+              hit = true
+              break
+            }
+          }
+        }
+        if (hit || b.age >= b.life) {
+          if (hit) {
+            fleetBus.kick(b.x, b.y, 120, 190 + Math.random() * 130)
+            if (ripples.length < 12) ripples.push({ x: b.x, y: b.y, age: 0 })
+          }
+          balls.splice(i, 1)
+        }
+      }
+
       // ignition flash at the bell
       if (flashT > 0) {
         const k = flashT / 0.3
@@ -669,6 +780,51 @@ export default function FlightCanvas() {
         ctx.beginPath()
         ctx.arc(engX, engY - sy, (6 + 24 * (1 - k)) * scaleS, 0, Math.PI * 2)
         ctx.fill()
+        ctx.globalAlpha = 1
+      }
+
+      // impact rings where balls connected with the fleet
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        const rp = ripples[i]
+        rp.age += dt
+        if (rp.age > 0.42) {
+          ripples.splice(i, 1)
+          continue
+        }
+        const f = rp.age / 0.42
+        ctx.strokeStyle = pal.blue
+        ctx.globalAlpha = 0.5 * (1 - f)
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.arc(rp.x, rp.y, 4 + f * 30, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+      ctx.globalAlpha = 1
+
+      // the space balls: halo, core, short trail
+      if (balls.length) {
+        for (const b of balls) {
+          const f = Math.min(1, b.age / b.life)
+          const a = f < 0.12 ? f / 0.12 : 1 - Math.max(0, (f - 0.7) / 0.3) * 0.6
+          const tint = b.blue ? pal.blue : pal.flame
+          ctx.strokeStyle = tint
+          ctx.globalAlpha = 0.3 * a
+          ctx.lineWidth = Math.max(1, b.r * 0.9)
+          ctx.beginPath()
+          ctx.moveTo(b.x - b.vx * 0.045, b.y - b.vy * 0.045)
+          ctx.lineTo(b.x, b.y)
+          ctx.stroke()
+          ctx.fillStyle = tint
+          ctx.globalAlpha = 0.22 * a
+          ctx.beginPath()
+          ctx.arc(b.x, b.y, b.r * 2.7, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.fillStyle = pal.flameCore
+          ctx.globalAlpha = a
+          ctx.beginPath()
+          ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
+          ctx.fill()
+        }
         ctx.globalAlpha = 1
       }
 

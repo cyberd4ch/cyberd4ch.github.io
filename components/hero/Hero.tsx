@@ -35,10 +35,10 @@ export default function Hero() {
   ]
 
   return (
-    <section className="hero full-bleed relative flex min-h-[560px] flex-col overflow-hidden border-b border-[var(--border)] h-[86svh] max-h-[860px]">
+    <section className="hero full-bleed relative flex min-h-[560px] flex-col overflow-hidden border-b border-[var(--border)] h-[86svh] max-h-[860px] max-md:h-[calc(100svh-72px)] max-md:max-h-none max-md:min-h-[440px]">
       {/* static parked rocket — shown when the live flight layer is off */}
       <div
-        className="flight-fallback pointer-events-none absolute inset-x-0 top-[68px] h-[190px] md:top-0"
+        className="flight-fallback pointer-events-none absolute inset-x-0 top-[68px] h-[190px] max-md:top-[84px] max-md:origin-top-left max-md:scale-[0.72] md:top-0"
         aria-hidden="true"
       >
         <svg viewBox="0 0 120 190" width="120" height="190" className="absolute -left-4 top-0">
@@ -78,8 +78,10 @@ export default function Hero() {
 
       {/* ship fleet forms the portrait over the hero (see ShipCanvas) */}
 
-      {/* overlay copy — plain DOM, always readable */}
-      <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[680px] flex-1 flex-col px-6">
+      {/* overlay copy — plain DOM, always readable. on phones the title block
+          hides: the first screen is the portrait + telemetry only, and the copy
+          rides the deck's identity card instead (components/deck) */}
+      <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[680px] flex-1 flex-col px-6 max-md:justify-between">
         {/* top telemetry */}
         <div className="flex items-center justify-between pt-5 text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
           <span className="cursor">mission control</span>
@@ -87,13 +89,13 @@ export default function Hero() {
         </div>
 
         {/* title block */}
-        <div className="hero-copy flex flex-1 flex-col justify-center py-10">
+        <div className="hero-copy flex flex-1 flex-col justify-center py-10 max-md:hidden">
           <p className="hud-label mb-3">// mission brief</p>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
             cyber.dach
           </h1>
           <p className="mt-3 text-sm sm:text-base">
-            telecom engineer <span className="text-[var(--muted)]">×</span> cybersecurity expert
+            telecom engineer <span className="text-[var(--muted)]">×</span> cybersecurity engineer
           </p>
           <p className="mt-2 max-w-[44ch] text-[13px] leading-relaxed text-[var(--muted)] sm:text-sm">
             building resilient systems across networks, security, and software — and writing
