@@ -51,6 +51,22 @@ export default function DeckDriver() {
     const frame = () => {
       raf = requestAnimationFrame(frame)
       if (dead) return
+      // the presentation stage owns the mobile flow entirely (fixed chapters,
+      // gesture-stepped): stand down while it's on, and clean any inline
+      // styles this driver set before the stage took over
+      if (root.dataset.stage) {
+        if (root.dataset.deck) delete root.dataset.deck
+        if (card && !Number.isNaN(lastTy)) {
+          card.style.transform = ''
+          card.style.opacity = ''
+          card.style.visibility = ''
+          card.style.willChange = ''
+          lastTy = Number.NaN
+          lastOp = Number.NaN
+          setHeroOp(null)
+        }
+        return
+      }
       const on = mq.matches && card && top > 0
       if (on && card) {
         if (root.dataset.deck !== 'on') root.dataset.deck = 'on'

@@ -7,6 +7,7 @@ import PageCol from '@/components/PageCol'
 import Chapter from '@/components/deck/Chapter'
 import IdentityCard from '@/components/deck/IdentityCard'
 import DeckDriver from '@/components/deck/DeckDriver'
+import DeckStage from '@/components/deck/DeckStage'
 import { Squiggle } from '@/components/Deco'
 
 // Home shows what actually moved recently — pinning only orders the projects page.
@@ -31,6 +32,7 @@ export default function HomePage() {
   return (
     <div>
       <DeckDriver />
+      <DeckStage />
       <Hero />
 
       {/* the opaque paper column; the paint snake lives in the margins.
@@ -40,12 +42,12 @@ export default function HomePage() {
       <PageCol>
         {/* identity card: the hero copy as the deck's first card (phones only;
             desktop keeps the hero copy up in the hero) */}
-        <Chapter h={150} first mobileOnly>
+        <Chapter h={150} first mobileOnly index={1} total={9}>
           <IdentityCard />
         </Chapter>
 
         {/* Mission brief — one card per paragraph on phones */}
-        <Chapter h={112}>
+        <Chapter h={112} index={2} total={9}>
           <section className="reveal pt-4 max-md:pt-0">
             <h2 className="sec-label mb-4">mission brief</h2>
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
@@ -55,7 +57,7 @@ export default function HomePage() {
             </p>
           </section>
         </Chapter>
-        <Chapter h={112}>
+        <Chapter h={112} index={3} total={9}>
           <section className="reveal mt-4 max-md:mt-0">
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
               i&apos;m also a builder — i write code across the stack and care about systems that are{' '}
@@ -64,7 +66,7 @@ export default function HomePage() {
             </p>
           </section>
         </Chapter>
-        <Chapter h={112}>
+        <Chapter h={112} index={4} total={9}>
           <section className="reveal mt-4 max-md:mt-0">
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
               everything on this site is pulled live from{' '}
@@ -83,7 +85,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Payload stack — derived from the languages in the account */}
-        <Chapter h={132}>
+        <Chapter h={132} index={5} total={9}>
           <section className="reveal pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">payload stack</h2>
             <div className="flex flex-wrap gap-2">
@@ -104,7 +106,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Recent telemetry — most recently pushed repos */}
-        <Chapter h={148}>
+        <Chapter h={148} index={6} total={9}>
           <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="recent telemetry" link="/projects" linkLabel="all projects" />
             <div className="space-y-3">
@@ -155,7 +157,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Activity log — refreshed by the scheduled build */}
-        <Chapter h={148}>
+        <Chapter h={148} index={7} total={9}>
           <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="sec-label">activity log</h2>
@@ -196,7 +198,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Transmissions — latest writing */}
-        <Chapter h={142}>
+        <Chapter h={142} index={8} total={9}>
           <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" />
             <div className="space-y-4">
@@ -225,7 +227,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Ground stations — where to find me */}
-        <Chapter h={120}>
+        <Chapter h={120} index={9} total={9}>
           <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10 pb-2 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">ground stations</h2>
             <div className="flex items-center gap-4">

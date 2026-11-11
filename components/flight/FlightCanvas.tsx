@@ -261,6 +261,12 @@ export default function FlightCanvas() {
     // ---- canvas sizing --------------------------------------------------------
     const size = () => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      // pin the CSS box to innerHeight: `inset:0; height:100%` on a fixed
+      // element resolves against the LARGE viewport (iOS 100vh), so an
+      // innerHeight-sized bitmap gets stretched vertically — and would
+      // breathe as mobile toolbars collapse/expand
+      canvas.style.width = window.innerWidth + 'px'
+      canvas.style.height = window.innerHeight + 'px'
       canvas.width = Math.round(window.innerWidth * dpr)
       canvas.height = Math.round(window.innerHeight * dpr)
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -510,7 +516,10 @@ export default function FlightCanvas() {
       const vw = window.innerWidth
       const vh = window.innerHeight
       const docH = Math.max(document.documentElement.scrollHeight, vh)
-      const scrollY = window.scrollY
+      // presentation stage: the document never scrolls — the flight layer
+      // reads the stage's virtual Y instead, so the rocket keeps flying as
+      // the user steps through the portrait ⇄ card cycle
+      const scrollY = fleetBus.virtual ? fleetBus.y : window.scrollY
 
       // flight progress: purely scroll-driven, eased, fully reversible
       const scrollFrac = docH > vh ? scrollY / (docH - vh) : 0

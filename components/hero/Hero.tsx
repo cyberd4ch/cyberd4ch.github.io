@@ -134,8 +134,9 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* bottom telemetry */}
-        <div className="flex items-center justify-between pb-4 text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
+        {/* bottom telemetry — the stage (DeckStage) swaps it for the
+            propeller affordance, see globals.css [data-stage] */}
+        <div className="hero-foot flex items-center justify-between pb-4 text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
           <span className="flex items-center gap-2">
             sig
             <span className="beacon inline-block h-1.5 w-1.5 rounded-full bg-[var(--red)]" aria-hidden="true" />

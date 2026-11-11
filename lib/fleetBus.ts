@@ -18,6 +18,18 @@ export const fleetBus = {
   rocket: { x: -1e4, y: -1e4, attacking: false },
   /** impact queue: FlightCanvas pushes, ShipCanvas drains */
   kicks: [] as Kick[],
+
+  // ---- presentation stage (components/deck/DeckStage, phones only) ----------
+  // when `virtual` is on the document never scrolls: FlightCanvas reads its
+  // scroll position from `y` — tweened by DeckStage so the rocket still flies
+  // as the user steps through cards — the fleet eases toward `formedTarget`
+  // on the clock instead of being scrubbed by scroll, and `lastInput`
+  // timestamps gate the portrait's idle facial gestures.
+  virtual: false,
+  y: 0,
+  formedTarget: 1,
+  lastInput: 0,
+
   kick(x: number, y: number, r: number, hit: number) {
     if (this.kicks.length < 10) this.kicks.push({ x, y, r, hit })
   },
@@ -25,5 +37,12 @@ export const fleetBus = {
     const q = this.kicks
     if (q.length) this.kicks = []
     return q
+  },
+  /** back to native scrolling — used by the stage teardown */
+  resetStage() {
+    this.virtual = false
+    this.y = 0
+    this.formedTarget = 1
+    this.lastInput = 0
   },
 }

@@ -476,6 +476,152 @@ input:focus, textarea:focus {
   }
 }
 
+/* ---- presentation stage --------------------------------------------------------
+   The gesture-driven mobile flow (components/deck/DeckStage): the page itself
+   is locked — html/body don't scroll, touchmove is prevented — and each
+   chapter becomes a fixed full-screen layer, shown one at a time by JS while
+   swipes cycle portrait ⇄ card. The attribute is only ever set on phones by
+   JS, but the media query keeps the rules honest regardless. Desktop never
+   enters the stage and keeps native scrolling exactly as before. */
+html[data-stage] {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html[data-stage] body {
+  overflow: hidden;
+}
+@media (max-width: 767.98px) {
+  html[data-stage] .chapter {
+    position: fixed;
+    inset: 0;
+    z-index: 30; /* over the content, under the nav/utility layers */
+    height: auto;
+    display: none;
+  }
+  html[data-stage] .chapter.chapter-on {
+    display: block;
+  }
+  html[data-stage] .chapter-card {
+    position: static;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    /* the padding reserves the nav strip up top and the propeller
+       affordance strip below — the card lives strictly between them */
+    padding: 92px 18px 118px;
+  }
+  html[data-stage] .chapter-panel {
+    position: relative;
+    max-height: 100%;
+    overscroll-behavior: contain; /* inner scrolling never rubber-bands the page */
+  }
+  /* the hero's own bottom telemetry yields to the stage affordance */
+  html[data-stage] .hero-foot {
+    display: none;
+  }
+
+  /* rich-card entrance/exit (deck stage beats) */
+  html[data-stage] .chapter-panel.card-in {
+    animation: cardIn 0.72s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+  }
+  html[data-stage] .chapter-panel.card-out {
+    animation: cardOut 0.32s cubic-bezier(0.5, 0, 0.8, 0.4) both;
+  }
+  /* rich-card polish: red corner brackets frame the panel */
+  html[data-stage] .chapter-panel::before {
+    content: '';
+    position: absolute;
+    inset: 7px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--red), var(--red)) left 0 top 0 / 16px 2px,
+      linear-gradient(var(--red), var(--red)) left 0 top 0 / 2px 16px,
+      linear-gradient(var(--red), var(--red)) right 0 top 0 / 16px 2px,
+      linear-gradient(var(--red), var(--red)) right 0 top 0 / 2px 16px,
+      linear-gradient(var(--red), var(--red)) left 0 bottom 0 / 16px 2px,
+      linear-gradient(var(--red), var(--red)) left 0 bottom 0 / 2px 16px,
+      linear-gradient(var(--red), var(--red)) right 0 bottom 0 / 16px 2px,
+      linear-gradient(var(--red), var(--red)) right 0 bottom 0 / 2px 16px;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+  }
+
+  /* the propeller scroll affordance: fixed bottom-center — it sits just
+     above the ticker in portrait state, and below the card (the card's
+     reserved 118px bottom padding keeps the two apart) in card state */
+  html[data-stage] .deck-affordance {
+    display: flex;
+  }
+}
+
+.deck-affordance {
+  position: fixed;
+  left: 50%;
+  bottom: 44px;
+  transform: translateX(-50%);
+  z-index: 31;
+  display: none; /* stage-only */
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  pointer-events: none;
+}
+.deck-prop svg {
+  display: block;
+  animation: propSpin var(--prop-dur, 1.5s) linear infinite;
+}
+/* spin faster while the user is touching / attempting to scroll */
+html[data-spin='fast'] .deck-prop svg {
+  --prop-dur: 0.32s;
+}
+@keyframes propSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.deck-affordance-label {
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* card index line — mobile deck + stage only */
+.deck-meta {
+  display: none;
+  margin-bottom: 10px;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+@media (max-width: 767.98px) {
+  .deck-meta {
+    display: block;
+  }
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 64px, 0) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes cardOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -36px, 0) scale(0.985);
+  }
+}
+
 /* ---- hand-inked logo entrance ------------------------------------------------
    The orbit ring inks in first (the open "c" sweep), then the bowl and mast
    complete the mark. Dash lengths are viewBox units of the 256 mark. */
