@@ -208,57 +208,60 @@ function initPaint(
 
     const outer = w / 2 - radius - 6
     const inner = narrow ? outer - 9 : 340 + 34
-    // gutter envelope, needed here so the sweep can land exactly on the
-    // gutter's first position (no kink at the join)
-    const envAt = (y: number) =>
-      inner + (outer - inner) * (0.5 + 0.5 * Math.sin(y / 210 + 1.3))
+    const startY = heroH > 220 && heroTop < 200 ? heroTop + (narrow ? 180 : 300) : 20
+    // gutter sine: wide crossings that swing between the paper edge and the
+    // viewport edge (slow envelope), one full period every ~1500px — visible
+    // twists alternate gutters and the crossings read as passing behind the sheet
+    const period = narrow ? 1000 : 1500
+    const phase = 1.15
+    const ampAt = (y: number) =>
+      inner + (outer - inner) * (0.3 + 0.62 * (0.5 + 0.5 * Math.sin(y / 253 + 1.05)))
+    const gutterX = (y: number) =>
+      ampAt(y) * Math.sin(((2 * Math.PI * (y - startY)) / period) + phase)
     const pts: ThreeTypes.Vector3[] = []
     const push = (x: number, y: number) => pts.push(new THREE.Vector3(x, -y, 0))
 
     if (heroH > 220 && heroTop < 200) {
       // grand S-sweep across the hero's upper whitespace: dives from the top
-      // left, bottoms out right of centre, lifts and exits into the right gutter
-      const gutterStartY = heroTop + (narrow ? 180 : 300)
+      // left, bottoms out right of centre, lifts and exits into the right
+      // gutter, landing exactly on the sine's first position (no kink)
       if (narrow) {
         push(0, heroTop + 26)
         push(outer * 0.35, heroTop + 70)
         push(outer * 0.8, heroTop + 120)
-        push(envAt(gutterStartY), gutterStartY - 12)
+        push(gutterX(startY), startY - 14)
       } else {
         push(-outer + 10, heroTop + 10)
         push(-outer * 0.5, heroTop + 60)
         push(-outer * 0.05, heroTop + 190)
         push(outer * 0.45, heroTop + 262)
-        push(envAt(gutterStartY), gutterStartY - 40)
+        push(gutterX(startY), startY - 36)
       }
     } else {
-      push(outer - 6, 8)
+      push(gutterX(8), 8)
     }
 
-    // gutter slither: one continuous sine crossing centre every 1150px —
-    // hidden behind the paper column except at full-bleed bands, where the
-    // crossing reads as a deliberate sweep. Starts on the right (+1) so it
-    // continues out of the hero sweep.
-    const startY = heroH > 220 && heroTop < 200 ? heroTop + (narrow ? 180 : 300) : 20
     const endY = Math.min(docH - 8, Math.max(footTop - 170, startY + 60))
-    const period = 1150
-    for (let y = startY; y <= endY; y += 26) {
-      const side = Math.cos((Math.PI * (y - startY)) / period)
-      const env = inner + (outer - inner) * (0.5 + 0.5 * Math.sin(y / 210 + 1.3))
-      push(side * env, y)
+    // extend the slither to the next hairpin apex (tangent is vertical there)
+    // so the tail joint can't kink, then lift off outward through the margin
+    // the line is already in — it never crosses back behind the sheet
+    let tipY = startY + ((period / (2 * Math.PI)) * (Math.PI / 2 - phase))
+    while (tipY < endY) tipY += period / 2
+    const doLift = tipY <= docH - 12 && footTop - 30 - tipY > 60
+    const lineEnd = doLift ? tipY : endY
+    const steps = Math.max(1, Math.round((lineEnd - startY) / 30))
+    for (let i = 0; i <= steps; i++) {
+      const y = startY + ((lineEnd - startY) * i) / steps
+      push(gutterX(y), y)
     }
 
-    // tail: lift-off — the brush exits through the margin just above the
-    // footer, staying on the side it arrived on (no crossing behind paper)
-    const lastX = pts.length ? pts[pts.length - 1].x : outer
-    if (footTop > startY + 400) {
-      const s = Math.sign(lastX) || 1
-      const exitX = s * Math.max(Math.abs(lastX), inner)
-      push(exitX * 0.92, footTop - 56)
-      push(s * (outer + 10), footTop - 24)
-      push(s * (outer + 10), footTop - 6)
+    if (doLift) {
+      const s = Math.sign(gutterX(tipY)) || 1
+      push(gutterX(tipY) + s * 30, tipY + 48)
+      push(s * (outer + 10), Math.min(tipY + 130, footTop - 22))
+      push(s * (outer + 10), Math.min(tipY + 160, footTop - 6))
     } else {
-      push(lastX, docH - 10)
+      push(gutterX(lineEnd), Math.min(lineEnd + 40, docH - 10))
     }
 
     curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal')
@@ -324,8 +327,9 @@ function initPaint(
   const clock = new THREE.Clock()
   let t = 0
   let headU = 0
-  let idleHead = 0
   let camY = -(window.scrollY + viewportH / 2)
+  let lastScrollY = window.scrollY
+  let activity = 0
 
   const frame = () => {
     raf = requestAnimationFrame(frame)
@@ -334,22 +338,33 @@ function initPaint(
     t += dt
     uniforms.uTime.value = t
 
-    // reveal head: scroll-driven, slow idle growth, painted path persists
+    // reveal head: driven purely by scroll (no idle growth — the line waits
+    // for the reader), eased so it glides and retracts when scrolling up
     const docH = Math.max(document.documentElement.scrollHeight, viewportH)
     const scrollFrac = docH > viewportH ? window.scrollY / (docH - viewportH) : 0
-    idleHead = Math.max(idleHead + dt * 0.02, headU)
-    const target = Math.min(1.04, Math.max(idleHead, scrollFrac * 1.02))
-    headU += (target - headU) * Math.min(1, dt * 2.8)
+    const target = Math.min(1.04, scrollFrac * 1.04)
+    headU += (target - headU) * Math.min(1, dt * 3.2)
     uniforms.uHead.value = headU
 
-    // brush tip rides the curve + the same slither the shader applies
+    // slither only while the page is actually moving: sway amplitude follows
+    // smoothed scroll velocity and decays to a full stop when the reader rests
+    const dy = window.scrollY - lastScrollY
+    lastScrollY = window.scrollY
+    const act = Math.min(1, Math.abs(dy) / Math.max(1, dt) / 1100)
+    activity += (act - activity) * Math.min(1, dt * 3.5)
+    uniforms.uAmp.value = amp * activity
+
+    // brush tip rides the curve + the same slither the shader applies;
+    // hidden until the first scroll actually reveals the line
     if (head && curve) {
+      head.visible = headU > 0.004
       const u = THREE.MathUtils.clamp(headU, 0, 1)
       const p = curve.getPointAt(u)
-      const swx = Math.sin(u * 70 - t * 1.5) * amp
-      const swy = Math.sin(u * 41 + t * 1.05) * amp
+      const a = uniforms.uAmp.value
+      const swx = Math.sin(u * 70 - t * 1.5) * a
+      const swy = Math.sin(u * 41 + t * 1.05) * a
       head.position.set(p.x + swx, p.y + swy, 0)
-      head.scale.setScalar(1 + 0.07 * Math.sin(t * 2.6))
+      head.scale.setScalar(1 + 0.07 * activity * Math.sin(t * 2.6))
     }
 
     // camera tracks scroll (eased) — world y is inverted document space

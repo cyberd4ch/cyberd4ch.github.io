@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { github, repos, totalStars } from '@/lib/github'
-import { Stamp } from '@/components/Deco'
 import LocalClock from '@/components/LocalClock'
 
 const phrases = [
@@ -50,8 +49,7 @@ export default function Hero() {
         </svg>
       </div>
 
-      {/* roundel stamp */}
-      <Stamp className="absolute right-5 top-14 z-10 hidden h-28 w-28 sm:block md:h-32 md:w-32" />
+      {/* ship fleet forms the portrait over the hero (see ShipCanvas) */}
 
       {/* overlay copy — plain DOM, always readable */}
       <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[680px] flex-1 flex-col px-6">

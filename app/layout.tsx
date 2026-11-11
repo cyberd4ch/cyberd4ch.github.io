@@ -4,6 +4,7 @@ import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
 import Reveal from '@/components/Reveal'
 import PaintCanvas from '@/components/paint/PaintCanvas'
+import ShipCanvas from '@/components/ships/ShipCanvas'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://cyberdach.dev'),
@@ -55,6 +56,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* fixed paint layer: behind the app layer, over the blueprint grid */}
         <PaintCanvas />
         <Reveal />
+        {/* fixed ship fleet: above the app layer — portrait + scatter */}
+        <ShipCanvas />
 
         <div className="relative z-[1] flex min-h-screen flex-col">
           <div className="page-col mx-auto w-full max-w-[680px] px-6 pt-6 pb-5">
