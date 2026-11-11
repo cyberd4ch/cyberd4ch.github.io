@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { FaGithub, FaMailchimp, FaLink, FaStar, FaCodeBranch, FaHeart } from 'react-icons/fa'
+import { FaGithub, FaMailchimp, FaStar, FaCodeBranch, FaHeart } from 'react-icons/fa'
 import { repos, activity, timeAgo, languageColor, github, syncLabel, isStale, totalStars } from '@/lib/github'
 import { posts } from '@/lib/posts'
 import Hero from '@/components/hero/Hero'
@@ -215,15 +215,6 @@ export default function HomePage() {
               aria-label="Email"
             >
               <FaMailchimp size={18} />
-            </a>
-            <a
-              href="https://cyberdach.bearblog.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 hover:bg-[var(--card)] rounded transition-colors"
-              aria-label="Blog"
-            >
-              <FaLink size={18} />
             </a>
             <a
               href="https://github.com/sponsors/cyberd4ch"
