@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title">
+  <title id="title">cyber.dach — stacked lockup: orbit d symbol over worm wordmark</title>
+  <g transform="translate(128,53)">
+    <g fill="none" stroke="#0d1117" stroke-width="20">
+      <circle cx="128" cy="135" r="44"/>
+      <path d="M 205.1 101.7 A 84 84 0 1 1 123 51.1"/>
+      <path d="M 172 179 L 172 27"/>
+    </g>
+  </g>
+  <g transform="translate(96.15,329.1) scale(0.458)" fill="none" stroke="#0d1117" stroke-width="16">
+    <path d="M 79.76 121.37 A 29 29 0 1 0 79.76 154.63"/>
+    <path d="M 114 110 L 136 166"/>
+    <path d="M 158 110 L 136 166 L 136 198"/>
+    <path d="M 192 58 L 192 166"/>
+    <path d="M 192 110 A 29 29 0 0 1 192 166"/>
+    <path d="M 264 138 L 321 138"/>
+    <path d="M 321 138 A 29 29 0 1 0 315.76 154.63"/>
+    <path d="M 350 110 L 350 166"/>
+    <path d="M 350 132 Q 350 110 372 110 L 382 110"/>
+    <path d="M 490 110 A 29 29 0 0 0 490 166"/>
+    <path d="M 490 58 L 490 166"/>
+    <path d="M 561 114 A 25 25 0 0 0 561 162"/>
+    <path d="M 561 110 L 561 166"/>
+    <path d="M 647.76 121.37 A 29 29 0 1 0 647.76 154.63"/>
+    <path d="M 682 58 L 682 166"/>
+    <path d="M 682 132 Q 682 110 708 110 L 708 166"/>
+  </g>
+  <g transform="translate(96.15,329.1) scale(0.458)">
+    <circle cx="418" cy="164" r="10" fill="#0d1117"/>
+  </g>
+</svg>

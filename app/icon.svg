@@ -1,5 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-24 -24 304 304">
-  <rect x="-24" y="-24" width="304" height="304" rx="64" fill="#0d1117"/>
-  <path transform="translate(15,-2)" d="M162 185 L108 216 L54 185 L54 123 L108 92 L162 123 V44"
-        fill="none" stroke="#f7f6f3" stroke-width="20" stroke-linejoin="miter" stroke-linecap="square"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256"><title>cyber.dach</title><g transform="translate(-36.08 -29.48) scale(1.282)">
+  <title id="title">cyber.dach — orbit d: celestial bowl, mast rising through the orbit ring</title>
+  <g fill="none" stroke="#0d1117" stroke-width="20">
+    <!-- celestial bowl (the d bowl) -->
+    <circle cx="128" cy="135" r="44"/>
+    <!-- orbit ring: one sweep, open at one o'clock where the mast rises through -->
+    <path d="M 205.1 101.7 A 84 84 0 1 1 123 51.1"/>
+    <!-- mast / stem rising through the orbit -->
+    <path d="M 172 179 L 172 27"/>
+  </g>
+</g></svg>

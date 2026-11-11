@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-labelledby="title">
+  <title id="title">cyber.dach — mission roundel: planet on a tilted orbit, satellite riding the orbit</title>
+  <!-- mission ring -->
+  <circle cx="128" cy="128" r="104" fill="none" stroke="#0d1117" stroke-width="12"/>
+  <!-- tilted orbit with satellite -->
+  <g transform="rotate(-18 128 132)">
+    <ellipse cx="128" cy="132" rx="58" ry="42" fill="none" stroke="#0d1117" stroke-width="12"/>
+    <circle cx="185.1" cy="124.7" r="11" fill="#0d1117"/>
+  </g>
+  <!-- the planet -->
+  <circle cx="128" cy="132" r="20" fill="#0d1117"/>
+</svg>

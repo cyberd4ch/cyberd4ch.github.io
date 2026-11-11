@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Moon, Sun } from 'lucide-react'
+import MarkGlyph from '@/components/MarkGlyph'
 
 const links = [
   { href: '/', label: 'home' },
@@ -30,23 +31,7 @@ export default function Nav() {
     <nav className="flex items-center justify-between">
       <div className="flex items-center gap-6">
         <Link href="/" aria-label="cyber.dach home" className="flex items-center gap-2">
-          <svg
-            viewBox="0 0 256 256"
-            width={26}
-            height={26}
-            aria-hidden="true"
-            className="text-[var(--fg)]"
-          >
-            <path
-              transform="translate(15,-2)"
-              d="M162 185 L108 216 L54 185 L54 123 L108 92 L162 123 V44"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={20}
-              strokeLinejoin="miter"
-              strokeLinecap="square"
-            />
-          </svg>
+          <MarkGlyph size={24} className="text-[var(--fg)]" />
           <span className="text-sm font-semibold tracking-tight">cyber.dach</span>
         </Link>
         {links.map(({ href, label }) => {
