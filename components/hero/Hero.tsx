@@ -74,7 +74,7 @@ export default function Hero() {
           <p className="mt-3 text-sm sm:text-base">
             telecom engineer <span className="text-[var(--muted)]">×</span> cybersecurity expert
           </p>
-          <p className="mt-2 max-w-[44ch] text-[13px] leading-relaxed text-[var(--muted)] sm:text-sm">
+          <p className="hero-desc mt-2 max-w-[44ch] text-[13px] leading-relaxed text-[var(--muted)] sm:text-sm">
             building resilient systems across networks, security, and software — and writing
             down what i learn along the way.
           </p>

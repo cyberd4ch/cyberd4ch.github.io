@@ -325,11 +325,18 @@ html, body {
     justify-content: flex-end !important;
     align-items: center;
     text-align: center;
-    padding-bottom: 4rem !important;
+    padding-bottom: 2rem !important;
   }
   .hero-copy p {
     margin-left: auto;
     margin-right: auto;
+  }
+  /* keep the copy block short enough for the mark's top band on phones */
+  .hero-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 

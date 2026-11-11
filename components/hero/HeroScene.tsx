@@ -129,30 +129,50 @@ export default function HeroScene({ onReady, onFail }: { onReady?: () => void; o
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 
     // ---- resize / framing ---------------------------------------------------
-    // Fit the whole mark with margin, pulling the camera back on narrow screens.
-    // Wide screens: slide the mark to the right so the left-aligned copy owns
-    // the left half (portrait: mark raised, copy sits below-center via CSS).
+    // Wide screens: copy owns the left half, mark slides right.
+    // Portrait: copy sits bottom-center (CSS), so the mark shrinks to 0.85,
+    // lifts to y=80, and the camera pulls back to clear it by ~20 world units.
     const fit = () => {
       const w = host.clientWidth || 1
       const h = host.clientHeight || 1
       renderer.setSize(w, h, false)
       camera.aspect = w / h
       const tanHalf = Math.tan(DEG(17.5))
-      const distHeight = 150 / tanHalf
-      const distWidth = 104 / (tanHalf * camera.aspect)
+
+      let markY = 28
+      let markScale = 1
+      let extTop = 136 // mast top (108) + y
+      let extBottom = 66 // ring bottom (94) - y
+      let extX = 100 // ring outer radius + margin
+
+      if (camera.aspect >= 1.25) {
+        markScale = 1
+        markY = 28
+        extTop = 136
+        extBottom = 66
+        extX = 104
+      } else if (camera.aspect < 0.9) {
+        // portrait: mark occupies the top band, copy the bottom (CSS clamps it)
+        markScale = 0.82
+        markY = 140
+        extTop = markY + 108 * markScale
+        extBottom = Math.abs(markY - 66 * markScale)
+        extX = 95 * markScale + 14
+      }
+
+      mark.position.set(0, markY, 0)
+      mark.scale.setScalar(markScale)
+
+      const distHeight = (Math.max(extTop, extBottom) + 20) / tanHalf
+      const distWidth = extX / (tanHalf * camera.aspect)
       camera.position.z = Math.max(distHeight, distWidth)
       camera.updateProjectionMatrix()
 
-      const halfWidth = tanHalf * camera.position.z * camera.aspect
       if (camera.aspect >= 1.25) {
+        const halfWidth = tanHalf * camera.position.z * camera.aspect
         mark.position.x = halfWidth - 140
-        mark.position.y = 28
-      } else if (camera.aspect < 0.9) {
-        mark.position.x = 0
-        mark.position.y = 40
       } else {
         mark.position.x = 0
-        mark.position.y = 28
       }
     }
     fit()
