@@ -3,7 +3,7 @@ import './globals.css'
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
 import Reveal from '@/components/Reveal'
-import PaintCanvas from '@/components/paint/PaintCanvas'
+import FlightCanvas from '@/components/flight/FlightCanvas'
 import ShipCanvas from '@/components/ships/ShipCanvas'
 
 export const metadata: Metadata = {
@@ -53,8 +53,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        {/* fixed paint layer: behind the app layer, over the blueprint grid */}
-        <PaintCanvas />
+        {/* fixed flight layer: scroll-scrubbed rocket, behind the app layer */}
+        <FlightCanvas />
         <Reveal />
         {/* fixed ship fleet: above the app layer — portrait + scatter */}
         <ShipCanvas />

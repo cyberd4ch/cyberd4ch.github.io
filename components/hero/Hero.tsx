@@ -36,16 +36,43 @@ export default function Hero() {
 
   return (
     <section className="hero full-bleed relative flex min-h-[560px] flex-col overflow-hidden border-b border-[var(--border)] h-[86svh] max-h-[860px]">
-      {/* static squiggle — shown when the live paint layer is off */}
-      <div className="paint-fallback absolute inset-x-0 top-0 h-[190px]" aria-hidden="true">
-        <svg viewBox="0 0 1200 190" preserveAspectRatio="none" className="h-full w-full">
-          <path
-            d="M -20 36 C 180 -14, 360 120, 590 74 C 670 58, 900 185, 1220 140"
-            fill="none"
-            stroke="var(--red)"
-            strokeWidth="10"
-            strokeLinecap="round"
-          />
+      {/* static parked rocket — shown when the live flight layer is off */}
+      <div
+        className="flight-fallback pointer-events-none absolute inset-x-0 top-[68px] h-[190px] md:top-0"
+        aria-hidden="true"
+      >
+        <svg viewBox="0 0 120 190" width="120" height="190" className="absolute -left-4 top-0">
+          <defs>
+            <clipPath id="flight-fb-hull">
+              <path d="M43 40 L77 40 L77 96 Q77 100 73 100 L47 100 Q43 100 43 96 Z" />
+            </clipPath>
+          </defs>
+
+          {/* launch pad */}
+          <g stroke="var(--fg)">
+            <line x1="14" y1="130" x2="106" y2="130" strokeWidth="2.5" />
+            <line x1="22" y1="130" x2="22" y2="137" strokeWidth="1.5" />
+            <line x1="47" y1="130" x2="47" y2="137" strokeWidth="1.5" />
+            <line x1="73" y1="130" x2="73" y2="137" strokeWidth="1.5" />
+            <line x1="98" y1="130" x2="98" y2="137" strokeWidth="1.5" />
+          </g>
+          <circle cx="8" cy="127" r="2.2" fill="var(--red)" />
+          <circle cx="112" cy="127" r="2.2" fill="var(--red)" />
+
+          {/* fins + engine sit under the hull */}
+          <path d="M45 72 L29 110 L45 106 Z" fill="var(--red)" stroke="var(--fg)" strokeWidth="1.75" strokeLinejoin="round" />
+          <path d="M75 72 L91 110 L75 106 Z" fill="var(--red)" stroke="var(--fg)" strokeWidth="1.75" strokeLinejoin="round" />
+          <path d="M49 100 L71 100 L75 116 L45 116 Z" fill="var(--fg)" stroke="var(--fg)" strokeWidth="1.75" strokeLinejoin="round" />
+
+          {/* nose cone */}
+          <path d="M60 2 Q73 10 76.5 28 L77 40 L43 40 L43.5 28 Q47 10 60 2 Z" fill="var(--red)" stroke="var(--fg)" strokeWidth="1.75" strokeLinejoin="round" />
+
+          {/* hull, band, porthole */}
+          <path d="M43 40 L77 40 L77 96 Q77 100 73 100 L47 100 Q43 100 43 96 Z" fill="var(--rocket-hull)" />
+          <rect x="43" y="40" width="34" height="14" fill="var(--red)" clipPath="url(#flight-fb-hull)" />
+          <path d="M43 40 L77 40 L77 96 Q77 100 73 100 L47 100 Q43 100 43 96 Z" fill="none" stroke="var(--fg)" strokeWidth="1.75" strokeLinejoin="round" />
+          <circle cx="60" cy="68" r="6.5" fill="var(--blue-bright)" stroke="var(--fg)" strokeWidth="2" />
+          <circle cx="58" cy="66" r="1.6" fill="var(--rocket-hull)" />
         </svg>
       </div>
 

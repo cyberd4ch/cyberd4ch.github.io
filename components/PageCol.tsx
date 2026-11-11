@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 
 /**
- * The opaque paper column every page's content sits on. The fixed paint
+ * The opaque paper column every page's content sits on. The fixed flight
  * canvas lives behind the app layer, so this column (680px, `--bg`) hides the
- * snake under text while the blueprint margins and full-bleed bands show it.
+ * rocket under text while the blueprint margins and full-bleed bands show it.
  */
 export default function PageCol({ children }: { children: ReactNode }) {
   return (

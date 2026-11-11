@@ -26,6 +26,7 @@
   --mission: var(--red);    /* legacy alias — beacons */
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --rocket-hull: #f5efe1;   /* flight fallback hull (light paper) */
 }
 
 .dark {
@@ -40,6 +41,7 @@
   --label: #8fb2f2;
   --on-red: #180f0b;
   --grid: rgba(143, 178, 242, 0.05);
+  --rocket-hull: #ede7d8;   /* flight fallback hull (warm paper white) */
 }
 
 * {
@@ -79,10 +81,10 @@ html, body {
   background: var(--bg);
 }
 
-/* the fixed paint layer: full viewport, behind the app layer, never interactive.
+/* the fixed flight layer: full viewport, behind the app layer, never interactive.
    width/height are required: a canvas is a replaced element — inset:0 alone
    leaves it at its intrinsic (drawing-buffer) size, which breaks on DPR > 1 */
-.paint-canvas {
+.flight-canvas {
   position: fixed;
   inset: 0;
   width: 100%;
@@ -92,11 +94,11 @@ html, body {
   display: block;
 }
 
-/* static squiggle shown when the paint layer is off (reduced motion / no WebGL) */
-.paint-fallback {
+/* static parked rocket shown when the flight layer is off (reduced motion / no canvas) */
+.flight-fallback {
   display: none;
 }
-:root[data-paint='off'] .paint-fallback {
+:root[data-flight='off'] .flight-fallback {
   display: block;
 }
 
