@@ -200,6 +200,9 @@ export default function ShipCanvas() {
       let anchorY = 0      // document space — the frame subtracts scrollY
       let heroH = 700
       let docH = 1000
+      // deck-timed dispersal end in scroll px; -1 = not yet measured (the
+      // frame fills it in once data-deck is on and the chapter exists)
+      let deckEnd = -1
 
       // ---- no-fly zones: the document's free space, for safe dispersal --------
       type Zone = { x0: number; y0: number; x1: number; y1: number; area: number }
@@ -290,8 +293,11 @@ export default function ShipCanvas() {
         if (narrow) {
           // phones: the portrait IS the hero — centered on the first screen,
           // sized to fill the space between the telemetry rows (the ticker
-          // strip at the hero's foot is ~34px)
-          const target = Math.min(vh * 0.42, vw - 56)
+          // strip at the hero's foot is ~34px). the hero's own height drives
+          // the size because it is CSS svh-derived and stays put while mobile
+          // browser toolbars collapse/expand mid-scroll (innerHeight is not,
+          // and a rescaling portrait mid-scroll would read as a glitch)
+          const target = Math.min(heroH * 0.47, vw - 56)
           pitch = target / grid.rows
           artW = pitch * grid.cols
           anchorX = Math.round((vw - artW) / 2)
@@ -306,6 +312,8 @@ export default function ShipCanvas() {
         computeZones()
         buildSprites()
         assignHomes(ships.length > 0)
+        // re-measure the deck window on the next frame (geometry may differ)
+        deckEnd = -1
         // live ping table for the flight layer (see lib/fleetBus)
         fleetBus.ships = ships.map(s => ({ x: s.px, y: s.py, s: 0 }))
       }
@@ -490,10 +498,17 @@ export default function ShipCanvas() {
         // in deck mode the first card arrives over ~100svh, so the dispersal
         // runs a little ahead of it and the card never fights the fleet
         const deckOn = document.documentElement.dataset.deck === 'on'
-        const scrollF = Math.max(
-          0,
-          Math.min(1, scrollY / (heroH * (narrow && deckOn ? 0.62 : 0.85)))
-        )
+        if (deckOn && deckEnd < 0) {
+          // the identity card pins at its chapter's offsetTop; the fleet
+          // finishes scattering a beat before the card fully covers the
+          // screen — tied to the deck's real geometry so the timing holds on
+          // any device height instead of a fixed fraction of the hero
+          const ch = document.querySelector<HTMLElement>('[data-chapter-first="true"]')
+          const t = ch?.offsetTop ?? 0
+          deckEnd = t > 0 ? Math.max(heroH * 0.5, t - vh * 0.16) : 0
+        }
+        const windowEnd = narrow && deckOn && deckEnd > 0 ? deckEnd : heroH * 0.85
+        const scrollF = Math.max(0, Math.min(1, scrollY / windowEnd))
         const introDone = t > introTotal
         fleetBus.formed = 1 - scrollF
 
