@@ -3,6 +3,8 @@ export const metadata = {
   description: 'Three candidate marks for cyber.dach: roofline, hex d, and perimeter.',
 }
 
+import PageCol from '@/components/PageCol'
+
 const candidates = [
   {
     id: 'a',
@@ -64,7 +66,8 @@ const kit = [
 
 export default function BrandPage() {
   return (
-    <div className="space-y-10">
+    <PageCol>
+      <div className="space-y-10">
       <section className="stagger-1">
         <h1 className="text-2xl font-medium mb-4">brand exploration</h1>
         <p className="text-[15px] leading-relaxed mb-3">
@@ -79,7 +82,7 @@ export default function BrandPage() {
       </section>
 
       {candidates.map((candidate, index) => (
-        <section key={candidate.id} className={`stagger-${index + 2} space-y-3`}>
+        <section key={candidate.id} className={`reveal d${Math.min(index + 1, 5)} space-y-3`}>
           <div className="flex items-baseline gap-3">
             <img
               src={candidate.mark}
@@ -130,8 +133,8 @@ export default function BrandPage() {
         </section>
       ))}
 
-      <section className="stagger-5 border-t border-[var(--border)] pt-6 space-y-4">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] font-medium">
+      <section className="reveal d1 border-t border-[var(--border)] pt-6 space-y-4">
+        <h2 className="sec-label">
           the kit
         </h2>
         <div className="grid grid-cols-2 gap-3 text-[12px]">
@@ -140,7 +143,7 @@ export default function BrandPage() {
               key={item.file}
               href={`/brand/kit/${item.file}`}
               download
-              className="border border-[var(--border)] rounded-sm p-3 hover:opacity-70 transition-opacity"
+              className="border border-[var(--border)] rounded-sm p-3 hover:border-[var(--red)] transition-colors"
             >
               <span className="block text-[var(--fg)]">{item.label}</span>
               <span className="text-[var(--muted)]">{item.note}</span>
@@ -159,8 +162,8 @@ export default function BrandPage() {
         </ul>
       </section>
 
-      <section className="stagger-5 border-t border-[var(--border)] pt-6">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-3 font-medium">
+      <section className="reveal d2 border-t border-[var(--border)] pt-6">
+        <h2 className="sec-label mb-3">
           recommendation
         </h2>
         <p className="text-[13px] leading-relaxed">
@@ -172,6 +175,7 @@ export default function BrandPage() {
           stacked lockups, a 16 px small cut, favicon + app icons, mockups, and a usage sheet.
         </p>
       </section>
-    </div>
+      </div>
+    </PageCol>
   )
 }

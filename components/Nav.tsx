@@ -28,11 +28,11 @@ export default function Nav() {
   }
 
   return (
-    <nav className="flex items-center justify-between">
-      <div className="flex items-center gap-6">
+    <nav className="flex flex-wrap items-center justify-between gap-y-2">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-6">
         <Link href="/" aria-label="cyber.dach home" className="flex items-center gap-2">
           <MarkGlyph size={24} className="text-[var(--fg)]" />
-          <span className="text-sm font-semibold tracking-tight">cyber.dach</span>
+          <span className="hidden min-[430px]:inline text-sm font-semibold tracking-tight">cyber.dach</span>
         </Link>
         {links.map(({ href, label }) => {
           const active = path === href || (href !== '/' && path.startsWith(href))

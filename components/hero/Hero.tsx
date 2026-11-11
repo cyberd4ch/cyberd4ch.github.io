@@ -1,37 +1,34 @@
 'use client'
 
-import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { github, repos, totalStars } from '@/lib/github'
-import MarkGlyph from '@/components/MarkGlyph'
+import { Stamp } from '@/components/Deco'
 import LocalClock from '@/components/LocalClock'
 
-/** Three.js never runs on the server — static export stays clean. */
-const HeroScene = dynamic(() => import('./HeroScene'), { ssr: false })
+const phrases = [
+  'signal nominal',
+  'telecom × security × code',
+  'painted in real time',
+  'paper trails kept',
+  'scroll = throttle up',
+  'flight line est. 2026',
+  'systems resilient',
+]
 
-type Mode = 'loading' | '3d' | 'static'
+function TickerSegment() {
+  return (
+    <span className="ticker-seg">
+      {phrases.map((p, i) => (
+        <span key={i} className="inline-flex items-center">
+          <span className="text-[var(--blue-bright)]">{p}</span>
+          <span className="px-5 text-[var(--red)]">▸</span>
+        </span>
+      ))}
+    </span>
+  )
+}
 
 export default function Hero() {
-  const [mode, setMode] = useState<Mode>('loading')
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    // Reduced motion: no animation at all — static console.
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setMode('static')
-      return
-    }
-    // No WebGL: static console (the scene double-checks and can also fail over).
-    try {
-      const probe = document.createElement('canvas')
-      const ok = Boolean(probe.getContext('webgl2') || probe.getContext('webgl'))
-      setMode(ok ? '3d' : 'static')
-    } catch {
-      setMode('static')
-    }
-  }, [])
-
   const stats = [
     `${github.user.publicRepos} repos`,
     `${totalStars} stars`,
@@ -40,25 +37,24 @@ export default function Hero() {
 
   return (
     <section className="hero full-bleed relative flex min-h-[560px] flex-col overflow-hidden border-b border-[var(--border)] h-[86svh] max-h-[860px]">
-      {/* backdrop — CSS starfield shows while loading and in static mode */}
-      {mode !== '3d' && <div className="starfield absolute inset-0" aria-hidden="true" />}
-      {mode !== '3d' && (
-        <div className="absolute inset-0 flex items-start justify-center pt-[12%]" aria-hidden="true">
-          <MarkGlyph size={220} className="w-36 text-[var(--fg)] opacity-90 sm:w-44 md:w-52" />
-        </div>
-      )}
+      {/* static squiggle — shown when the live paint layer is off */}
+      <div className="paint-fallback absolute inset-x-0 top-0 h-[190px]" aria-hidden="true">
+        <svg viewBox="0 0 1200 190" preserveAspectRatio="none" className="h-full w-full">
+          <path
+            d="M -20 36 C 180 -14, 360 120, 590 74 C 670 58, 900 185, 1220 140"
+            fill="none"
+            stroke="var(--red)"
+            strokeWidth="10"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
 
-      {/* live 3D backdrop, faded in once the first frame is on screen */}
-      {mode === '3d' && (
-        <div
-          className={`absolute inset-0 transition-opacity duration-700 ${ready ? 'opacity-100' : 'opacity-0'}`}
-        >
-          <HeroScene onReady={() => setReady(true)} onFail={() => setMode('static')} />
-        </div>
-      )}
+      {/* roundel stamp */}
+      <Stamp className="absolute right-5 top-14 z-10 hidden h-28 w-28 sm:block md:h-32 md:w-32" />
 
       {/* overlay copy — plain DOM, always readable */}
-      <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[680px] flex-col px-6">
+      <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[680px] flex-1 flex-col px-6">
         {/* top telemetry */}
         <div className="flex items-center justify-between pt-5 text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
           <span className="cursor">mission control</span>
@@ -74,7 +70,7 @@ export default function Hero() {
           <p className="mt-3 text-sm sm:text-base">
             telecom engineer <span className="text-[var(--muted)]">×</span> cybersecurity expert
           </p>
-          <p className="hero-desc mt-2 max-w-[44ch] text-[13px] leading-relaxed text-[var(--muted)] sm:text-sm">
+          <p className="mt-2 max-w-[44ch] text-[13px] leading-relaxed text-[var(--muted)] sm:text-sm">
             building resilient systems across networks, security, and software — and writing
             down what i learn along the way.
           </p>
@@ -83,7 +79,7 @@ export default function Hero() {
             {stats.map(s => (
               <span
                 key={s}
-                className="border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--muted)]"
+                className="border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--muted)] transition-colors hover:border-[var(--red)]"
               >
                 {s}
               </span>
@@ -93,7 +89,7 @@ export default function Hero() {
           <div className="pointer-events-auto mt-4 flex flex-wrap items-center gap-3">
             <Link
               href="/projects"
-              className="bg-[var(--fg)] px-4 py-2 text-sm font-medium text-[var(--bg)] transition-opacity hover:opacity-80"
+              className="bg-[var(--red)] px-4 py-2 text-sm font-medium text-[var(--on-red)] transition-opacity hover:opacity-85"
             >
               view projects →
             </Link>
@@ -112,13 +108,21 @@ export default function Hero() {
         </div>
 
         {/* bottom telemetry */}
-        <div className="flex items-center justify-between pb-5 text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
+        <div className="flex items-center justify-between pb-4 text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
           <span className="flex items-center gap-2">
             sig
-            <span className="beacon inline-block h-1.5 w-1.5 rounded-full bg-[var(--mission)]" aria-hidden="true" />
+            <span className="beacon inline-block h-1.5 w-1.5 rounded-full bg-[var(--red)]" aria-hidden="true" />
             nominal
           </span>
           <span aria-hidden="true">telemetry ↓</span>
+        </div>
+      </div>
+
+      {/* retro ticker strip */}
+      <div className="ticker relative z-10" aria-hidden="true">
+        <div className="ticker-track">
+          <TickerSegment />
+          <TickerSegment />
         </div>
       </div>
     </section>

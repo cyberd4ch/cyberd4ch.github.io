@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import PageCol from '@/components/PageCol'
 import { posts } from '@/lib/posts'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -37,30 +38,32 @@ export default async function BlogPostPage({ params }: Props) {
   if (!found) notFound()
 
   return (
-    <article className="stagger-1">
-      <Link href="/blog" className="text-xs text-[var(--muted)] underline-link">
-        ← all posts
-      </Link>
-
-      <header className="mt-5 mb-8">
-        <p className="text-xs text-[var(--muted)] mb-2">
-          {found.post.date} · {found.post.category}
-        </p>
-        <h1 className="text-2xl font-medium leading-snug">{found.post.title}</h1>
-        {found.post.excerpt && (
-          <p className="text-sm text-[var(--muted)] mt-3 leading-relaxed">{found.post.excerpt}</p>
-        )}
-      </header>
-
-      <div className="post">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{found.body}</ReactMarkdown>
-      </div>
-
-      <div className="mt-12 pt-6 border-t border-[var(--border)]">
-        <Link href="/blog" className="text-sm underline-link">
-          ← back to the blog
+    <PageCol>
+      <article className="stagger-1">
+        <Link href="/blog" className="text-xs text-[var(--muted)] underline-link">
+          ← all posts
         </Link>
-      </div>
-    </article>
+
+        <header className="mt-5 mb-8">
+          <p className="text-xs text-[var(--muted)] mb-2">
+            {found.post.date} · <span className="text-[var(--label)]">{found.post.category}</span>
+          </p>
+          <h1 className="text-2xl font-medium leading-snug">{found.post.title}</h1>
+          {found.post.excerpt && (
+            <p className="text-sm text-[var(--muted)] mt-3 leading-relaxed">{found.post.excerpt}</p>
+          )}
+        </header>
+
+        <div className="post">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{found.body}</ReactMarkdown>
+        </div>
+
+        <div className="mt-12 pt-6 border-t border-[var(--border)]">
+          <Link href="/blog" className="text-sm underline-link">
+            ← back to the blog
+          </Link>
+        </div>
+      </article>
+    </PageCol>
   )
 }

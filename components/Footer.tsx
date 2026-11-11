@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="mt-16 pt-6 border-t border-[var(--border)] flex items-center justify-between gap-4">
+    <footer className="pt-6 border-t border-[var(--border)] flex items-center justify-between gap-4">
       <p className="text-xs text-[var(--muted)]">
         © {new Date().getFullYear()} cyber.dach
         <span className="mx-2" aria-hidden="true">·</span>

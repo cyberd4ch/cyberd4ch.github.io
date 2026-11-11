@@ -4,25 +4,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   RETRO SELA — NASA 1975 Graphics Standards Manual palette.
+   Light = warm manual-stock cream ("paper"); dark = blue-black night shift.
+   Red #FC3D21 is the paint line / active state / beacons.
+   Blue #0B3D91 is the instrument colour: labels, ticker, information text.
+--------------------------------------------------------------------------- */
 :root {
-  --bg: #f7f6f3;
-  --fg: #0f0e0d;
-  --muted: #7a7470;
-  --border: #ddd9d4;
-  --card: #edeae5;
-  --accent: #0f0e0d;
-  /* mission red — nasa palette, used sparingly (beacon, satellite, one accent) */
-  --mission: #fc3d21;
+  --bg: #f5efe1;            /* manual-stock cream */
+  --fg: #201d17;            /* ink */
+  --muted: #6e675a;
+  --border: #d8cdb4;
+  --card: #ece4d2;
+  --red: #fc3d21;           /* NASA worm red */
+  --blue: #0b3d91;          /* NASA blue */
+  --blue-bright: #0b3d91;   /* blue for text/accents on paper */
+  --label: #0b3d91;         /* hud-label ink */
+  --on-red: #180f0b;        /* ink on red surfaces (readable in both modes) */
+  --grid: rgba(11, 61, 145, 0.055); /* blueprint margin grid */
+  --accent: var(--red);
+  --mission: var(--red);    /* legacy alias — beacons */
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
 }
 
 .dark {
-  --bg: #0f0e0d;
-  --fg: #f7f6f3;
-  --muted: #8b8580;
-  --border: #333333;
-  --card: #1a1918;
+  --bg: #070c16;            /* blue-black night */
+  --fg: #ede7d8;            /* warm paper white — ties the two modes together */
+  --muted: #8391a8;
+  --border: #24314a;
+  --card: #101a2c;
+  --red: #fc3d21;
+  --blue: #0b3d91;
+  --blue-bright: #8fb2f2;
+  --label: #8fb2f2;
+  --on-red: #180f0b;
+  --grid: rgba(143, 178, 242, 0.05);
 }
 
 * {
@@ -33,10 +50,18 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--bg);
 }
 
+/* The page is a technical-drawing sheet: blueprint margin grid on the body,
+   clean paper where the content column sits (page-col paints over it),
+   and the red paint line living in the margins and full-bleed bands. */
 body {
   background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 36px 36px;
   color: var(--fg);
   font-family: var(--font-mono);
   font-size: 14px;
@@ -45,82 +70,165 @@ body {
   min-height: 100vh;
 }
 
-/* Subtle scanline texture on cards */
-.scanlines {
-  position: relative;
-  overflow: hidden;
-}
-.scanlines::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 90px;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0,0,0,0.04) 2px,
-    rgba(0,0,0,0.04) 3px
-  );
-  pointer-events: none;
-  z-index: 1;
+html, body {
+  overflow-x: clip;
 }
 
-/* nav active */
+/* opaque paper column — sits above the fixed paint canvas (z-[1] in layout) */
+.page-col {
+  background: var(--bg);
+}
+
+/* the fixed paint layer: full viewport, behind the app layer, never interactive.
+   width/height are required: a canvas is a replaced element — inset:0 alone
+   leaves it at its intrinsic (drawing-buffer) size, which breaks on DPR > 1 */
+.paint-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* static squiggle shown when the paint layer is off (reduced motion / no WebGL) */
+.paint-fallback {
+  display: none;
+}
+:root[data-paint='off'] .paint-fallback {
+  display: block;
+}
+
+::selection {
+  background: var(--red);
+  color: #fff6ea;
+}
+
+input:focus, textarea:focus {
+  outline: 1px solid var(--red);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+/* ---- scroll reveal (ScrollReveal adds .in-view when a section enters) ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.65s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.65s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal.in-view {
+  opacity: 1;
+  transform: none;
+}
+.reveal.d1 { transition-delay: 70ms; }
+.reveal.d2 { transition-delay: 140ms; }
+.reveal.d3 { transition-delay: 210ms; }
+.reveal.d4 { transition-delay: 280ms; }
+.reveal.d5 { transition-delay: 350ms; }
+
+/* ---- retro ticker strip --------------------------------------------------- */
+.ticker {
+  border-top: 2px solid var(--fg);
+  border-bottom: 2px solid var(--fg);
+  overflow: hidden;
+}
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 38s linear infinite;
+  will-change: transform;
+}
+.ticker-seg {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 6px 0;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+@keyframes tickerScroll {
+  to { transform: translateX(-50%); }
+}
+
+/* ---- roundel stamp (hero, rotated patch) ---------------------------------- */
+.stamp {
+  color: var(--red);
+  transform: rotate(-9deg);
+  opacity: 0.92;
+}
+
+/* ---- worm squiggle divider ------------------------------------------------ */
+.squiggle {
+  color: var(--red);
+  opacity: 0.75;
+}
+
+/* ---- red section tick before labels --------------------------------------- */
+.sec-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+.sec-label::before {
+  content: '';
+  width: 20px;
+  height: 3px;
+  background: var(--red);
+  flex-shrink: 0;
+}
+
+/* legacy small-caps label — now instrument blue */
+.hud-label {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+/* HUD panel: hairline + red corner ticks (top-left, bottom-right) */
+.hud-panel { position: relative; }
+.hud-panel::before,
+.hud-panel::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  pointer-events: none;
+  border: 0 solid var(--red);
+}
+.hud-panel::before {
+  top: -1px;
+  left: -1px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+.hud-panel::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+/* ---- nav / filter active states: red, the retro way ------------------------ */
 .nav-active {
-  background: var(--fg);
-  color: var(--bg);
+  background: var(--red);
+  color: var(--on-red);
   padding: 2px 10px;
   border-radius: 3px;
 }
 
-/* tag pill */
-.tag {
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.02em;
-}
-
-/* link underline */
-.underline-link {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  text-decoration-color: var(--border);
-  transition: text-decoration-color 0.15s;
-}
-.underline-link:hover {
-  text-decoration-color: var(--fg);
-}
-
-/* cursor blink */
-.cursor::after {
-  content: '▌';
-  animation: blink 1s step-end infinite;
-  margin-left: 1px;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-/* stagger animations */
-.stagger-1 { animation: fadeUp 0.45s ease 0.05s both; }
-.stagger-2 { animation: fadeUp 0.45s ease 0.12s both; }
-.stagger-3 { animation: fadeUp 0.45s ease 0.2s both; }
-.stagger-4 { animation: fadeUp 0.45s ease 0.28s both; }
-.stagger-5 { animation: fadeUp 0.45s ease 0.36s both; }
-.stagger-6 { animation: fadeUp 0.45s ease 0.44s both; }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* filter tabs */
 .filter-tab {
   padding: 3px 12px;
   border-radius: 3px;
@@ -132,8 +240,50 @@ body {
   background: var(--card);
 }
 .filter-tab.active {
-  background: var(--fg);
-  color: var(--bg);
+  background: var(--red);
+  color: var(--on-red);
+}
+
+/* ---- links ------------------------------------------------------------------ */
+.underline-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--border);
+  transition: text-decoration-color 0.15s;
+}
+.underline-link:hover {
+  text-decoration-color: var(--red);
+}
+
+/* tag pill */
+.tag {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+/* cursor blink */
+.cursor::after {
+  content: '▌';
+  animation: blink 1s step-end infinite;
+  margin-left: 1px;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* entrance stagger (above-fold only; below-fold uses .reveal) */
+.stagger-1 { animation: fadeUp 0.45s ease 0.05s both; }
+.stagger-2 { animation: fadeUp 0.45s ease 0.12s both; }
+.stagger-3 { animation: fadeUp 0.45s ease 0.2s both; }
+.stagger-4 { animation: fadeUp 0.45s ease 0.28s both; }
+.stagger-5 { animation: fadeUp 0.45s ease 0.36s both; }
+.stagger-6 { animation: fadeUp 0.45s ease 0.44s both; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* project card hover */
@@ -142,7 +292,7 @@ body {
 }
 .project-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: -3px 4px 0 0 var(--red);
 }
 
 /* blog row hover */
@@ -153,13 +303,7 @@ body {
   opacity: 0.7;
 }
 
-/* terminal glow on focus */
-input:focus, textarea:focus {
-  outline: 1px solid var(--fg);
-  outline-offset: 2px;
-}
-
-/* article body */
+/* ---- article body ------------------------------------------------------------ */
 .post {
   font-family: var(--font-sans);
   font-size: 14.5px;
@@ -173,6 +317,16 @@ input:focus, textarea:focus {
   margin-top: 2.2em;
   margin-bottom: 0.2em;
   letter-spacing: -0.01em;
+}
+/* red section tick inside articles */
+.post h2::before {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  background: var(--red);
+  margin-right: 9px;
+  vertical-align: 3px;
 }
 .post h3 {
   font-family: var(--font-mono);
@@ -188,7 +342,7 @@ input:focus, textarea:focus {
   text-decoration-color: var(--border);
   transition: text-decoration-color 0.15s;
 }
-.post a:hover { text-decoration-color: var(--fg); }
+.post a:hover { text-decoration-color: var(--red); }
 .post strong { font-weight: 600; }
 .post ul, .post ol { padding-left: 1.3em; }
 .post ul { list-style: disc; }
@@ -196,7 +350,7 @@ input:focus, textarea:focus {
 .post li { margin-top: 0.45em; }
 .post li > p { margin: 0; }
 .post blockquote {
-  border-left: 2px solid var(--border);
+  border-left: 2px solid var(--red);
   padding-left: 1em;
   color: var(--muted);
 }
@@ -243,41 +397,13 @@ input:focus, textarea:focus {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-/* ---- mission-control additions ------------------------------------------- */
-
-/* let the hero escape the 680px column without touching any other page */
+/* let the hero and ticker escape the 680px column without touching other pages */
 .full-bleed {
   width: 100vw;
   margin-left: calc(50% - 50vw);
 }
-html, body {
-  overflow-x: clip;
-}
 
-/* static CSS starfield: ten dot layers, slow drift (off under reduced motion) */
-.starfield {
-  background-image:
-    radial-gradient(1px 1px at 22% 31%, var(--fg) 50%, transparent 55%),
-    radial-gradient(1px 1px at 68% 14%, var(--muted) 50%, transparent 55%),
-    radial-gradient(1.5px 1.5px at 84% 62%, var(--fg) 50%, transparent 55%),
-    radial-gradient(1px 1px at 41% 74%, var(--muted) 50%, transparent 55%),
-    radial-gradient(1px 1px at 12% 58%, var(--muted) 50%, transparent 55%),
-    radial-gradient(1.5px 1.5px at 57% 42%, var(--fg) 50%, transparent 55%),
-    radial-gradient(1px 1px at 91% 28%, var(--muted) 50%, transparent 55%),
-    radial-gradient(1px 1px at 33% 12%, var(--fg) 50%, transparent 55%),
-    radial-gradient(1px 1px at 74% 88%, var(--muted) 50%, transparent 55%),
-    radial-gradient(1.5px 1.5px at 47% 91%, var(--fg) 50%, transparent 55%);
-  background-repeat: repeat;
-  background-size: 340px 340px, 420px 420px, 380px 380px, 460px 460px, 400px 400px, 350px 350px, 440px 440px, 390px 390px, 410px 410px, 430px 430px;
-  opacity: 0.5;
-  animation: starDrift 240s linear infinite;
-}
-@keyframes starDrift {
-  from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0; }
-  to   { background-position: -340px 120px, 420px -90px, -380px 60px, 460px -140px, -400px 100px, 350px -70px, -440px 130px, 390px -110px, -410px 80px, 430px -60px; }
-}
-
-/* status beacon — the one bit of mission red on screen at a time */
+/* status beacon */
 .beacon {
   animation: beaconPulse 2.4s ease-in-out infinite;
 }
@@ -286,64 +412,16 @@ html, body {
   50% { opacity: 0.25; }
 }
 
-/* small caps HUD label */
-.hud-label {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-/* HUD panel: 1px hairline + corner ticks (top-left, bottom-right) */
-.hud-panel { position: relative; }
-.hud-panel::before,
-.hud-panel::after {
-  content: '';
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  pointer-events: none;
-  border: 0 solid var(--muted);
-}
-.hud-panel::before {
-  top: -1px;
-  left: -1px;
-  border-top-width: 1px;
-  border-left-width: 1px;
-}
-.hud-panel::after {
-  bottom: -1px;
-  right: -1px;
-  border-bottom-width: 1px;
-  border-right-width: 1px;
-}
-
-/* hero copy placement follows the canvas framing in HeroScene:
-   wide screens -> copy left, mark right; portrait -> mark up, copy bottom-center */
-@media (max-aspect-ratio: 9/10) {
-  .hero-copy {
-    justify-content: flex-end !important;
-    align-items: center;
-    text-align: center;
-    padding-bottom: 2rem !important;
-  }
-  .hero-copy p {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  /* keep the copy block short enough for the mark's top band on phones */
-  .hero-desc {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-}
-
+/* ---- reduced motion: everything static, nothing hidden ---------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .starfield { animation: none; }
   .beacon { animation: none; }
+  .ticker-track { animation: none; }
   .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5, .stagger-6 {
     animation: none;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }

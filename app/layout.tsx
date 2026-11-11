@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
+import Reveal from '@/components/Reveal'
+import PaintCanvas from '@/components/paint/PaintCanvas'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://cyberdach.dev'),
@@ -41,8 +43,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f7f6f3' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f0e0d' },
+    { media: '(prefers-color-scheme: light)', color: '#f5efe1' },
+    { media: '(prefers-color-scheme: dark)', color: '#070c16' },
   ],
 }
 
@@ -50,13 +52,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <div className="min-h-screen flex flex-col max-w-[680px] mx-auto px-6 pt-6 pb-8">
-          <Nav />
-          <main className="flex-1 mt-6">
-            {children}
-          </main>
-          <Footer />
+        {/* fixed paint layer: behind the app layer, over the blueprint grid */}
+        <PaintCanvas />
+        <Reveal />
+
+        <div className="relative z-[1] flex min-h-screen flex-col">
+          <div className="page-col mx-auto w-full max-w-[680px] px-6 pt-6 pb-5">
+            <Nav />
+          </div>
+
+          {/* pages own their column (home places the full-bleed hero first) */}
+          <main className="flex-1">{children}</main>
+
+          <div className="page-col mx-auto mt-16 w-full max-w-[680px] px-6 pb-8">
+            <Footer />
+          </div>
         </div>
+
+        {/* no JS: never hide revealed content */}
+        <noscript>
+          <style>{`.reveal{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
       </body>
     </html>
   )

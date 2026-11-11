@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import PageCol from '@/components/PageCol'
 import { posts, BlogCategory } from '@/lib/posts'
 
 type Filter = 'all' | BlogCategory
@@ -18,7 +19,7 @@ export default function BlogPage() {
   const filtered = active === 'all' ? posts : posts.filter(p => p.category === active)
 
   return (
-    <div>
+    <PageCol>
       <h1 className="text-2xl font-medium mb-6 stagger-1">blog</h1>
 
       {/* Filter tabs */}
@@ -39,9 +40,12 @@ export default function BlogPage() {
         {filtered.length === 0 && (
           <p className="text-sm text-[var(--muted)] py-4">no posts in this category yet.</p>
         )}
-        {filtered.map((post) => {
+        {filtered.map((post, i) => {
           const inner = (
             <>
+              <span className="text-[11px] text-[var(--red)] w-7 shrink-0">
+                {String(i + 1).padStart(2, '0')}
+              </span>
               <div className="flex-1 min-w-0">
                 <span className="text-sm underline-link group-hover:text-[var(--fg)]">
                   {post.title}
@@ -89,6 +93,6 @@ export default function BlogPage() {
           live under services.
         </p>
       </div>
-    </div>
+    </PageCol>
   )
 }

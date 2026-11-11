@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import PageCol from '@/components/PageCol'
 import { caseStudies } from '@/lib/caseStudies'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -37,26 +38,30 @@ export default async function CaseStudyPage({ params }: Props) {
   if (!found) notFound()
 
   return (
-    <article className="stagger-1">
-      <Link href="/freelance/" className="text-xs text-[var(--muted)] underline-link">
-        ← services
-      </Link>
-
-      <header className="mt-5 mb-8">
-        <p className="text-xs text-[var(--muted)] mb-2">case study</p>
-        <h1 className="text-2xl font-medium leading-snug">{found.study.title}</h1>
-        <p className="text-sm text-[var(--muted)] mt-3 leading-relaxed">{found.study.summary}</p>
-      </header>
-
-      <div className="post">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{found.body}</ReactMarkdown>
-      </div>
-
-      <div className="mt-12 pt-6 border-t border-[var(--border)]">
-        <Link href="/freelance/" className="text-sm underline-link">
-          ← back to services
+    <PageCol>
+      <article className="stagger-1">
+        <Link href="/freelance/" className="text-xs text-[var(--muted)] underline-link">
+          ← services
         </Link>
-      </div>
-    </article>
+
+        <header className="mt-5 mb-8">
+          <p className="text-xs text-[var(--muted)] mb-2">
+            case study · <span className="text-[var(--label)]">security review</span>
+          </p>
+          <h1 className="text-2xl font-medium leading-snug">{found.study.title}</h1>
+          <p className="text-sm text-[var(--muted)] mt-3 leading-relaxed">{found.study.summary}</p>
+        </header>
+
+        <div className="post">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{found.body}</ReactMarkdown>
+        </div>
+
+        <div className="mt-12 pt-6 border-t border-[var(--border)]">
+          <Link href="/freelance/" className="text-sm underline-link">
+            ← back to services
+          </Link>
+        </div>
+      </article>
+    </PageCol>
   )
 }

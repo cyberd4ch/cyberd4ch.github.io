@@ -39,12 +39,15 @@ export default function RepoList({ repos, languages }: Props) {
         {filtered.map((repo, i) => (
           <article
             key={repo.name}
-            className="project-card bg-[var(--card)] rounded-sm overflow-hidden"
+            className="project-card hud-panel bg-[var(--card)] rounded-sm overflow-hidden"
             style={{ animationDelay: `${0.05 * i}s` }}
           >
             <div className="p-5">
               <div className="flex items-start justify-between gap-3 mb-1">
                 <div className="flex items-baseline gap-2 min-w-0">
+                  <span className="text-[11px] text-[var(--red)] font-medium shrink-0">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
                   <a
                     href={repo.url}
                     target="_blank"

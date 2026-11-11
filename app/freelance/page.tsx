@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PageCol from '@/components/PageCol'
 import { caseStudies } from '@/lib/caseStudies'
 
 export const metadata = {
@@ -36,31 +37,32 @@ const steps = [
 
 export default function FreelancePage() {
   return (
-    <div className="space-y-12">
-      <section className="stagger-1">
-        <h1 className="text-2xl font-medium leading-snug">
-          security review, from the shipped code.
-        </h1>
-        <p className="mt-4 text-[15px] leading-relaxed">
-          I find and explain client-side security bugs in modern web applications —
-          nonce and CSP laundering, DOM XSS, deep-link and redirect handlers, and
-          pre-authentication token flows. I work from the code you actually ship,
-          prove impact with reproducible evidence, and write reports your engineers
-          can act on.
-        </p>
-        <p className="mt-3 text-[13px] text-[var(--muted)] leading-relaxed">
-          Independent research on authorized bug-bounty programs and engagements.
-          Manual, scoped, and honest about the difference between a lead and a bug.
-        </p>
-      </section>
+    <PageCol>
+      <div className="space-y-12">
+        <section className="reveal">
+          <h1 className="text-2xl font-medium leading-snug">
+            security review, from the shipped code.
+          </h1>
+          <p className="mt-4 text-[15px] leading-relaxed">
+            I find and explain client-side security bugs in modern web applications —
+            nonce and CSP laundering, DOM XSS, deep-link and redirect handlers, and
+            pre-authentication token flows. I work from the code you actually ship,
+            prove impact with reproducible evidence, and write reports your engineers
+            can act on.
+          </p>
+          <p className="mt-3 text-[13px] text-[var(--muted)] leading-relaxed">
+            Independent research on authorized bug-bounty programs and engagements.
+            Manual, scoped, and honest about the difference between a lead and a bug.
+          </p>
+        </section>
 
-      <section className="stagger-2">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-4 font-medium">
+      <section className="reveal">
+        <h2 className="sec-label mb-4">
           what I do
         </h2>
         <div className="grid gap-3 sm:grid-cols-2">
           {services.map((s) => (
-            <div key={s.title} className="border border-[var(--border)] rounded-sm p-3">
+            <div key={s.title} className="hud-panel border border-[var(--border)] rounded-sm p-3">
               <h3 className="text-sm font-medium">{s.title}</h3>
               <p className="text-[13px] text-[var(--muted)] leading-relaxed mt-1">{s.body}</p>
             </div>
@@ -68,14 +70,14 @@ export default function FreelancePage() {
         </div>
       </section>
 
-      <section className="stagger-3">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-4 font-medium">
+      <section className="reveal">
+        <h2 className="sec-label mb-4">
           how an engagement runs
         </h2>
         <ol className="space-y-3">
           {steps.map(([n, title, body]) => (
             <li key={n} className="flex gap-4">
-              <span className="text-[11px] text-[var(--muted)] pt-0.5 shrink-0">{n}</span>
+              <span className="text-[11px] text-[var(--red)] pt-0.5 shrink-0 font-medium">{n}</span>
               <div>
                 <span className="text-sm font-medium">{title}</span>
                 <p className="text-[13px] text-[var(--muted)] leading-relaxed">{body}</p>
@@ -85,8 +87,8 @@ export default function FreelancePage() {
         </ol>
       </section>
 
-      <section className="stagger-4">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-4 font-medium">
+      <section className="reveal d1">
+        <h2 className="sec-label mb-4">
           case studies
         </h2>
         <ul className="space-y-3">
@@ -104,8 +106,8 @@ export default function FreelancePage() {
         </ul>
       </section>
 
-      <section className="stagger-4">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-4 font-medium">
+      <section className="reveal d2">
+        <h2 className="sec-label mb-4">
           selected work
         </h2>
         <ul className="space-y-3">
@@ -136,8 +138,8 @@ export default function FreelancePage() {
         </ul>
       </section>
 
-      <section className="stagger-5">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-4 font-medium">
+      <section className="reveal d2">
+        <h2 className="sec-label mb-4">
           what I will not do
         </h2>
         <ul className="text-[13px] text-[var(--muted)] leading-relaxed space-y-1">
@@ -148,8 +150,8 @@ export default function FreelancePage() {
         </ul>
       </section>
 
-      <section className="stagger-6 border-t border-[var(--border)] pt-6">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-3 font-medium">
+      <section className="reveal d3 border-t border-[var(--border)] pt-6">
+        <h2 className="sec-label mb-3">
           get in touch
         </h2>
         <p className="text-[14px] leading-relaxed">
@@ -178,6 +180,7 @@ export default function FreelancePage() {
           </a>
         </div>
       </section>
-    </div>
+      </div>
+    </PageCol>
   )
 }

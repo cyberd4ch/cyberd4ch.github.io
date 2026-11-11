@@ -3,6 +3,8 @@ import { FaGithub, FaMailchimp, FaStar, FaCodeBranch, FaHeart } from 'react-icon
 import { repos, activity, timeAgo, languageColor, github, syncLabel, isStale, totalStars } from '@/lib/github'
 import { posts } from '@/lib/posts'
 import Hero from '@/components/hero/Hero'
+import PageCol from '@/components/PageCol'
+import { Squiggle } from '@/components/Deco'
 
 // Home shows what actually moved recently — pinning only orders the projects page.
 const recentRepos = [...repos].sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)).slice(0, 3)
@@ -12,7 +14,7 @@ const latestPosts = posts.slice(0, 4)
 function SectionHeading({ label, link, linkLabel }: { label: string; link?: string; linkLabel?: string }) {
   return (
     <div className="flex items-baseline justify-between mb-3">
-      <h2 className="hud-label">+ {label} +</h2>
+      <h2 className="sec-label">{label}</h2>
       {link && (
         <Link href={link} className="text-xs underline-link text-[var(--muted)]">
           {linkLabel} →
@@ -27,11 +29,11 @@ export default function HomePage() {
     <div>
       <Hero />
 
-      {/* the layout container provides the 680px column; sections flow inside it */}
-      <div className="space-y-0">
+      {/* the opaque paper column; the paint snake lives in the margins */}
+      <PageCol>
         {/* Mission brief */}
-        <section className="stagger-1 pt-12">
-          <h2 className="hud-label mb-4">+ mission brief +</h2>
+        <section className="reveal pt-4">
+          <h2 className="sec-label mb-4">mission brief</h2>
 
           <div className="space-y-4 text-[15px] leading-relaxed text-[var(--fg)]">
             <p>
@@ -63,8 +65,8 @@ export default function HomePage() {
         </section>
 
         {/* Payload stack — derived from the languages in the account */}
-        <section className="stagger-2 pt-10 border-t border-[var(--border)] mt-10">
-          <h2 className="hud-label mb-3">+ payload stack +</h2>
+        <section className="reveal pt-10 border-t border-[var(--border)] mt-10">
+          <h2 className="sec-label mb-3">payload stack</h2>
           <div className="flex flex-wrap gap-2">
             {repos
               .flatMap(repo => [repo.language, ...repo.topics])
@@ -73,7 +75,7 @@ export default function HomePage() {
               .map(t => (
                 <span
                   key={t}
-                  className="text-xs border border-[var(--border)] px-2.5 py-1 text-[var(--muted)] hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors cursor-default"
+                  className="text-xs border border-[var(--border)] px-2.5 py-1 text-[var(--muted)] hover:border-[var(--blue-bright)] hover:text-[var(--blue-bright)] transition-colors cursor-default"
                 >
                   {t}
                 </span>
@@ -82,7 +84,7 @@ export default function HomePage() {
         </section>
 
         {/* Recent telemetry — most recently pushed repos */}
-        <section className="stagger-3 pt-10 border-t border-[var(--border)] mt-10">
+        <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10">
           <SectionHeading label="recent telemetry" link="/projects" linkLabel="all projects" />
           <div className="space-y-3">
             {recentRepos.map((repo, i) => (
@@ -94,7 +96,7 @@ export default function HomePage() {
                 className="hud-panel block border border-[var(--border)] p-3 hover:border-[var(--fg)] transition-colors"
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[10px] text-[var(--muted)]">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="text-[10px] text-[var(--red)]">{String(i + 1).padStart(2, '0')}</span>
                   <FaGithub size={13} className="text-[var(--muted)]" />
                   <span className="font-semibold text-sm">{repo.name}</span>
                   {repo.language && (
@@ -131,9 +133,9 @@ export default function HomePage() {
         </section>
 
         {/* Activity log — refreshed by the scheduled build */}
-        <section className="stagger-4 pt-10 border-t border-[var(--border)] mt-10">
+        <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10">
           <div className="flex items-baseline justify-between mb-3">
-            <h2 className="hud-label">+ activity log +</h2>
+            <h2 className="sec-label">activity log</h2>
             <span className="text-[10px] text-[var(--muted)]">
               {isStale && <span aria-hidden>⚠ </span>}
               {syncLabel}
@@ -170,7 +172,7 @@ export default function HomePage() {
         </section>
 
         {/* Transmissions — latest writing */}
-        <section className="stagger-5 pt-10 border-t border-[var(--border)] mt-10">
+        <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10">
           <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" />
           <div className="space-y-4">
             {latestPosts.map(post => {
@@ -197,8 +199,8 @@ export default function HomePage() {
         </section>
 
         {/* Ground stations — where to find me */}
-        <section className="stagger-6 pt-10 border-t border-[var(--border)] mt-10 pb-2">
-          <h2 className="hud-label mb-3">+ ground stations +</h2>
+        <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10 pb-2">
+          <h2 className="sec-label mb-3">ground stations</h2>
           <div className="flex items-center gap-4">
             <a
               href={github.user.url}
@@ -231,8 +233,9 @@ export default function HomePage() {
             {totalStars > 0 && `${repos.length} public repos · ${totalStars} stars · `}
             uplink synced every 6 hours.
           </p>
+          <Squiggle className="mt-8" width={130} />
         </section>
-      </div>
+      </PageCol>
     </div>
   )
 }

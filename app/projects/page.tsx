@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import RepoList from './RepoList'
+import PageCol from '@/components/PageCol'
 import {
   repos,
   languages,
@@ -18,10 +19,10 @@ export const metadata = {
 
 export default function ProjectsPage() {
   return (
-    <div>
+    <PageCol>
       <div className="flex items-baseline justify-between mb-2">
         <h1 className="text-2xl font-medium stagger-1">projects</h1>
-        <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">
+        <span className="hud-label">
           {isStale && <span aria-hidden>⚠ </span>}
           {syncLabel}
         </span>
@@ -62,8 +63,8 @@ export default function ProjectsPage() {
         </p>
       )}
 
-      <section className="mb-8 stagger-2">
-        <h2 className="text-xs uppercase tracking-widest text-[var(--muted)] mb-3 font-medium">
+      <section className="mb-8 reveal">
+        <h2 className="sec-label mb-3">
           research &amp; security
         </h2>
         <div className="space-y-3">
@@ -73,11 +74,11 @@ export default function ProjectsPage() {
               href={project.url}
               target={project.url.startsWith('http') ? '_blank' : undefined}
               rel={project.url.startsWith('http') ? 'noopener noreferrer' : undefined}
-              className="block group border border-[var(--border)] rounded-sm p-3 hover:border-[var(--fg)] transition-colors"
+              className="hud-panel block group border border-[var(--border)] rounded-sm p-3 hover:border-[var(--fg)] transition-colors"
             >
               <div className="flex items-center gap-2 mb-1">
                 <span className="font-semibold text-sm">{project.name}</span>
-                <span className="ml-auto text-[10px] uppercase tracking-widest text-[var(--muted)]">
+                <span className="ml-auto text-[10px] uppercase tracking-widest text-[var(--label)]">
                   {project.status}
                 </span>
               </div>
@@ -97,7 +98,7 @@ export default function ProjectsPage() {
         </div>
       </section>
 
-      <div className="stagger-2">
+      <div className="reveal d1">
         <RepoList repos={repos} languages={languages} />
       </div>
 
@@ -112,6 +113,6 @@ export default function ProjectsPage() {
           see all on github
         </a>
       </p>
-    </div>
+    </PageCol>
   )
 }
