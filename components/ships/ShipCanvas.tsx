@@ -18,8 +18,9 @@ import { usePathname } from 'next/navigation'
  * container, the ticker), so a settled fleet never covers text. Ships live
  * in document space and ride the page (viewport y = docY − scrollY), and
  * each ship's wander amplitude is fitted to its zone so it can never drift
- * out of free space. Hovering the formed portrait parts the fleet around
- * the cursor (radial push + a little swirl); the spring settles it back.
+ * out of free space. Hovering (or tapping, on touch) the formed portrait
+ * parts the fleet around the cursor (radial push + a little swirl); the
+ * spring settles it back.
  *
  * One fixed 2D canvas above the page layer — per-ship SVG DOM would be far
  * too heavy at this ship count.
@@ -438,7 +439,12 @@ export default function ShipCanvas() {
       }
 
       // ---- pointer: part the formed fleet around the cursor --------------------
+      // touch/pen included: a tap on the artwork scatters the fleet for a
+      // moment (the browser cancels drag pointers once scrolling takes over,
+      // so a coarse pointer is held alive briefly after pointerdown)
+      const coarse = window.matchMedia('(pointer: coarse)').matches
       const ptr = { x: -1e4, y: -1e4, on: false }
+      let holdTimer = 0
       const onPtrMove = (e: PointerEvent) => {
         ptr.x = e.clientX
         ptr.y = e.clientY
@@ -446,6 +452,13 @@ export default function ShipCanvas() {
       }
       const onPtrGone = () => {
         ptr.on = false
+      }
+      const onPtrDown = (e: PointerEvent) => {
+        ptr.x = e.clientX
+        ptr.y = e.clientY
+        ptr.on = true
+        window.clearTimeout(holdTimer)
+        if (e.pointerType !== 'mouse') holdTimer = window.setTimeout(onPtrGone, 900)
       }
 
       // ---- frame ---------------------------------------------------------------
@@ -470,7 +483,7 @@ export default function ShipCanvas() {
           ptr.on &&
           ptr.x > anchorX - 50 && ptr.x < anchorX + artW + 50 &&
           ptr.y > artY0 - 50 && ptr.y < artY0 + artH + 50
-        const R = narrow ? 78 : 116
+        const R = (narrow ? 78 : 116) * (coarse ? 1.25 : 1)
 
         ctx.clearRect(0, 0, vw, vh)
         for (const s of ships) {
@@ -496,8 +509,8 @@ export default function ShipCanvas() {
             if (d2 < R * R && d2 > 0.01) {
               const d = Math.sqrt(d2)
               const f = 1 - d / R
-              const push = f * f * 42
-              const swirl = f * f * 30
+              const push = f * 80
+              const swirl = f * f * 40
               const nx = dx / d
               const ny = dy / d
               tx += nx * push - ny * swirl
@@ -516,7 +529,11 @@ export default function ShipCanvas() {
 
           const spr = sprites[`${s.v}${s.band}`]
           if (!spr) continue
-          const size2 = pitch * (0.62 + 0.55 * s.w) * (s.band === 2 ? 0.75 + ((s.stag * 997) % 100) / 180 : 1)
+          // scattered ships swell a little — the dispersal reads on every
+          // screen size; the formed portrait keeps its exact mosaic size
+          const size2 =
+            pitch * (0.62 + 0.55 * s.w) * (s.band === 2 ? 0.75 + ((s.stag * 997) % 100) / 180 : 1) *
+            (1 + 0.55 * sEff)
           const rot = s.jr * (1 - sEff) + (s.spin + Math.sin(t * 0.35 + s.ph) * 0.55) * sEff
           ctx.globalAlpha = 1 - 0.12 * sEff
           if (Math.abs(rot) < 0.02) {
@@ -572,6 +589,7 @@ export default function ShipCanvas() {
       size()
       document.documentElement.dataset.ships = 'on'
       window.addEventListener('pointermove', onPtrMove, { passive: true })
+      window.addEventListener('pointerdown', onPtrDown, { passive: true })
       document.documentElement.addEventListener('pointerleave', onPtrGone)
       window.addEventListener('blur', onPtrGone)
       raf = requestAnimationFrame(frame)
@@ -610,6 +628,8 @@ export default function ShipCanvas() {
         cancelAnimationFrame(raf)
         window.removeEventListener('resize', schedule)
         window.removeEventListener('pointermove', onPtrMove)
+        window.removeEventListener('pointerdown', onPtrDown)
+        window.clearTimeout(holdTimer)
         document.documentElement.removeEventListener('pointerleave', onPtrGone)
         window.removeEventListener('blur', onPtrGone)
         document.removeEventListener('visibilitychange', onVis)

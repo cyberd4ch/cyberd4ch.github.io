@@ -76,9 +76,28 @@ html, body {
   overflow-x: clip;
 }
 
-/* opaque paper column — sits above the fixed paint canvas (z-[1] in layout) */
+/* opaque paper column — sits above the fixed flight canvas (z-[1] in layout) */
 .page-col {
   background: var(--bg);
+}
+
+/* narrow screens: the 680 column is full-width and would bury the flight layer
+   for the whole page. Open a dedicated flight gutter on the right — 44px of
+   transparent margin, with .page-col's right padding widened to match so no
+   text ever sits in it (the rocket and its contrail fly there; the blueprint
+   grid shows through). The left keeps a slim 22px see-through margin. */
+@media (max-width: 759.98px) {
+  .page-col {
+    padding-right: 44px;
+    background: linear-gradient(
+      to right,
+      transparent 0,
+      transparent 22px,
+      var(--bg) 22px,
+      var(--bg) calc(100% - 44px),
+      transparent calc(100% - 44px)
+    );
+  }
 }
 
 /* the fixed flight layer: full viewport, behind the app layer, never interactive.

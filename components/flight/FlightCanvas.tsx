@@ -7,21 +7,30 @@ import { useEffect, useRef } from 'react'
  *
  * The ship lives behind the paper column (z-0), visible in the blueprint
  * gutters and full-bleed bands, always passing BEHIND text so content is
- * never obscured. Everything is scrubbed by scroll progress, so every
+ * never obscured. On narrow screens the sheet opens a dedicated 44px flight
+ * gutter (globals.css) and the route hugs it, so the rocket stays visible
+ * down the whole page. Everything is scrubbed by scroll progress, so every
  * animation is exactly reversible:
  *
  *   p = 0        parked vertically on its launch pad (top-left margin)
- *   0 → ~0.17    takeoff: rises off the pad, pitches over through the
- *                hero's upper whitespace, joins the gutter sine
- *   ~0.17 → 1    meanders down the page, nose held up (tail-first descent,
- *                retro-burn) with sway that follows scroll velocity
- *   1            landing: decelerates, decouples — nose, fins and engine
- *                ease apart and dock around the body above the footer
- *   scroll up    the sequence runs backwards: parts reassemble, takeoff,
- *                and the ship meanders back onto its pad
+ *   0 → ~0.17    takeoff: rises off the pad with a rough ignition sputter,
+ *                pitches over through the hero's upper whitespace, joins
+ *                the gutter sine
+ *   ~0.17 → 1    full-blast cruise down the page. The nose flies the route:
+ *                scrolling down points it down the page, scrolling up turns
+ *                it around and it flies back nose-up — with throttle tied
+ *                to scroll speed and a dotted fume trail laid along the
+ *                traversed arc (the flight path, drawn in reverse as you
+ *                scroll back)
+ *   1            landing: throttle cuts, the ship pitches upright for a
+ *                tail-first touchdown, then decouples — nose, fins and
+ *                engine ease apart and dock around the body above the footer
+ *   scroll up    the sequence runs backwards: parts reassemble, engine
+ *                re-lights with a sputter, and the ship meanders back onto
+ *                its pad, sucking up its contrail behind it
  *
- * Sway and flame flicker are gated by smoothed scroll velocity, so a
- * resting page is a still page.
+ * Sway, flicker and exhaust emission are gated by smoothed scroll velocity,
+ * so a resting page is a still page (the trail and docked state persist).
  *
  * Fallbacks: reduced motion / no 2D canvas -> data-flight="off", which
  * shows a static parked-rocket SVG in the hero (globals.css).
@@ -93,13 +102,27 @@ export default function FlightCanvas() {
     let scaleS = 1
     let swayAmp = 10
     let narrow = false
+    let finTip = 31 // fin sweep — folded on narrow so the ship fits its gutter
+    let finBase = 15
+
+    // ---- contrail: static fume dots laid along the route (doc space) ---------
+    type TrailDot = { x: number; y: number; u: number; nx: number; ny: number; wob: number; rj: number }
+    let trail: TrailDot[] = []
+
+    // ---- exhaust: smoke puffs emitted from the engine bell (doc space) ------
+    type Puff = { x: number; y: number; vx: number; vy: number; r0: number; life: number; age: number; a0: number }
+    let puffs: Puff[] = []
+    let emitAcc = 0
+    let flashT = 0 // ignition flash countdown
 
     const buildPath = () => {
       const w = window.innerWidth
       const h = window.innerHeight
       narrow = w < 760
-      scaleS = narrow ? (w < 480 ? 0.52 : 0.62) : 1
+      scaleS = narrow ? (w < 480 ? 0.5 : 0.58) : 1
       swayAmp = narrow ? (w < 480 ? 3 : 6) : 10
+      finTip = narrow ? 22 : 31
+      finBase = narrow ? 13 : 15
       const docH = Math.max(
         document.documentElement.scrollHeight,
         document.body?.scrollHeight ?? 0,
@@ -112,7 +135,7 @@ export default function FlightCanvas() {
       const footTop = footEl ? footEl.getBoundingClientRect().top + window.scrollY : docH
 
       const outer = w / 2 - 14
-      const inner = narrow ? outer - 9 : 340 + 34
+      const inner = narrow ? outer - 22 : 340 + 34
       const cx = w / 2 // path x values are absolute viewport space
       const hasHero = heroH > 220 && heroTop < 200
       const startY = hasHero ? heroTop + (narrow ? 180 : 300) : 140
@@ -120,8 +143,14 @@ export default function FlightCanvas() {
       const phase = 1.15
       const ampAt = (y: number) =>
         inner + (outer - inner) * (0.3 + 0.62 * (0.5 + 0.5 * Math.sin(y / 253 + 1.05)))
-      const gutterX = (y: number) =>
-        cx + ampAt(y) * Math.sin(((2 * Math.PI * (y - startY)) / period) + phase)
+      // narrow: the route lives in the 44px flight gutter (globals.css opens it
+      // and widens .page-col's right padding to match, so text never sits there).
+      // Centered 25px off the right edge — at fin-folded scale the hull keeps
+      // ~2px clear of the text column at w-44 on both narrow tiers.
+      const ampN = w < 480 ? 3 : 4
+      const gutterX = narrow
+        ? (y: number) => cx + (outer - 11) + ampN * Math.sin(y / 253 + 1.05)
+        : (y: number) => cx + ampAt(y) * Math.sin(((2 * Math.PI * (y - startY)) / period) + phase)
 
       const pts: Pt[] = []
       const push = (x: number, y: number) => pts.push({ x, y })
@@ -155,7 +184,7 @@ export default function FlightCanvas() {
       // docked parts span -110·s..+92·s around the ship centre, so keep the
       // centre above the footer with room for the landing pad
       const last = pts[pts.length - 1]
-      const dockX = Math.min(Math.max(last.x, cx + inner + 30), cx + outer - 20)
+      const dockX = narrow ? w - 25 : Math.min(Math.max(last.x, cx + inner + 30), cx + outer - 20)
       dock = {
         x: dockX,
         y: Math.max(endY + 40, Math.min(endY + 130, footTop - 12 - 104 * scaleS)),
@@ -173,6 +202,23 @@ export default function FlightCanvas() {
       }
       totalLen = cum[cum.length - 1]
       joinFrac = cum[joinIdx] / totalLen
+
+      // contrail: deterministic fume dots along the route (doc space). Drawn
+      // only over the traversed arc, so the trail grows with the flight and
+      // reverses away as the ship climbs back — the flight path made visible.
+      trail = []
+      const tStep = narrow ? 11 : 16
+      for (let s = totalLen * 0.012; s < totalLen * 0.995; s += tStep) {
+        const uq = s / totalLen
+        const q = pathPoint(uq)
+        const qa = pathPoint(Math.max(0, uq - 0.004))
+        const qb = pathPoint(Math.min(1, uq + 0.004))
+        const tx = qb.x - qa.x
+        const ty = qb.y - qa.y
+        const tl = Math.hypot(tx, ty) || 1
+        const j = ((Math.round(s * 100) * 7919) % 997) / 997
+        trail.push({ x: q.x, y: q.y, u: uq, nx: -ty / tl, ny: tx / tl, wob: (j - 0.5) * 5.5, rj: 0.7 + 0.55 * j })
+      }
     }
 
     const pathPoint = (u: number): Pt => {
@@ -239,9 +285,9 @@ export default function FlightCanvas() {
       } else if (key === 'finL' || key === 'finR') {
         const s = key === 'finL' ? -1 : 1
         g.beginPath()
-        g.moveTo(15 * s, 6)
-        g.lineTo(31 * s, 44)
-        g.lineTo(15 * s, 40)
+        g.moveTo(finBase * s, 6)
+        g.lineTo(finTip * s, 44)
+        g.lineTo(finBase * s, 40)
         g.closePath()
         g.fillStyle = pal.red
         g.fill()
@@ -322,7 +368,8 @@ export default function FlightCanvas() {
         const f = easeOutBack(Math.max(0, Math.min(1, (dockF - eng.f0) / (eng.f1 - eng.f0))))
         const ex = eng.dx * f
         const ey = eng.dy * f
-        const len = (26 + 30 * thrust) * (0.8 + 0.35 * flick)
+        const len = (18 + 54 * thrust) * (0.8 + 0.4 * flick)
+        const wOut = 5.5 + 3.5 * thrust
         g.save()
         g.translate(x, y)
         g.rotate(rot)
@@ -330,18 +377,18 @@ export default function FlightCanvas() {
         g.translate(ex, ey)
         // outer plume
         g.beginPath()
-        g.moveTo(-7.5, 50)
-        g.quadraticCurveTo(-9, 50 + len * 0.55, 0, 50 + len)
-        g.quadraticCurveTo(9, 50 + len * 0.55, 7.5, 50)
+        g.moveTo(-wOut, 50)
+        g.quadraticCurveTo(-wOut * 1.2, 50 + len * 0.55, 0, 50 + len)
+        g.quadraticCurveTo(wOut * 1.2, 50 + len * 0.55, wOut, 50)
         g.closePath()
         g.fillStyle = pal.flame
         g.globalAlpha = 0.85
         g.fill()
         // inner core
         g.beginPath()
-        g.moveTo(-4, 50)
-        g.quadraticCurveTo(-5, 50 + len * 0.4, 0, 50 + len * 0.6)
-        g.quadraticCurveTo(5, 50 + len * 0.4, 4, 50)
+        g.moveTo(-wOut * 0.53, 50)
+        g.quadraticCurveTo(-wOut * 0.66, 50 + len * 0.4, 0, 50 + len * 0.6)
+        g.quadraticCurveTo(wOut * 0.66, 50 + len * 0.4, wOut * 0.53, 50)
         g.closePath()
         g.fillStyle = pal.flameCore
         g.globalAlpha = 0.95
@@ -364,7 +411,14 @@ export default function FlightCanvas() {
       }
     }
 
-    const drawPad = (x: number, y: number, alpha: number, pal: (typeof PAL)['light']) => {
+    const drawPad = (
+      x: number,
+      y: number,
+      alpha: number,
+      pal: (typeof PAL)['light'],
+      half = 46,
+      beacon = 52
+    ) => {
       if (alpha <= 0.01) return
       const g = ctx
       g.save()
@@ -372,18 +426,18 @@ export default function FlightCanvas() {
       g.strokeStyle = pal.ink
       g.lineWidth = 2.5
       g.beginPath()
-      g.moveTo(x - 46, y)
-      g.lineTo(x + 46, y)
+      g.moveTo(x - half, y)
+      g.lineTo(x + half, y)
       g.stroke()
       g.lineWidth = 1.5
-      for (const sx of [-38, -13, 13, 38]) {
+      for (const sx of [-half * 0.83, -half * 0.28, half * 0.28, half * 0.83]) {
         g.beginPath()
         g.moveTo(x + sx, y)
         g.lineTo(x + sx, y + 7)
         g.stroke()
       }
       g.fillStyle = pal.red
-      for (const bx of [-52, 52]) {
+      for (const bx of [-beacon, beacon]) {
         g.beginPath()
         g.arc(x + bx, y - 3, 2.2, 0, Math.PI * 2)
         g.fill()
@@ -416,6 +470,12 @@ export default function FlightCanvas() {
     let clockLast = 0
     let t = 0
     let p = 0
+    let pPrev = 0
+    let dir = 1 // travel direction: +1 down the route (scrolling down), −1 back up
+    let rot = 0 // persistent ship attitude (eased, snapped when settled)
+    let inited = false
+    let prevThrust = 0
+    let lastRotAttr = ''
     let lastScrollY = window.scrollY
     let activity = 0
 
@@ -455,31 +515,54 @@ export default function FlightCanvas() {
 
       // pad + dock platforms (world space)
       const padF = 1 - smoothstep(0.012, 0.05, p)
-      drawPad(path[0].x, path[0].y - sy + 58 * scaleS + 6, padF, pal)
+      drawPad(path[0].x, path[0].y - sy + 58 * scaleS + 6, padF, pal, 46, 52)
       const dockF = smoothstep(0.955, 1.0, p)
       // landing pad meets the detached engine: engine bottom sits at +92·s
-      if (dockF > 0.01) drawPad(dock.x, dock.y - sy + 92 * scaleS + 6, dockF, pal)
+      if (dockF > 0.01) drawPad(dock.x, dock.y - sy + 92 * scaleS + 6, dockF, pal, narrow ? 20 : 46, narrow ? 14 : 52)
 
       // ship pose
       const u = Math.max(0, Math.min(1, p))
       const pos = pathPoint(u)
       const ahead = pathPoint(Math.min(1, u + 0.012))
       const behind = pathPoint(Math.max(0, u - 0.012))
+
+      // attitude: the ship flies the route. The route is authored pad→dock,
+      // so its tangent always points "down the page"; the direction of travel
+      // decides which end leads — scrolling down flies it forward (nose down
+      // the page), scrolling up turns it around and it flies back nose-up.
+      // At both ends of the route it pitches upright: parked on the pad,
+      // tail-first into the landing burn.
+      const dp = p - pPrev
+      if (dp > 1e-6) dir = 1
+      else if (dp < -1e-6) dir = -1
       const tangent = Math.atan2(ahead.y - behind.y, ahead.x - behind.x)
-      // nose follows the tangent for the launch arc, then pitches up and
-      // stays nose-up for the tail-first meander + landing (rotation 0)
-      const nose = smoothstep(joinFrac * 0.7, joinFrac * 1.15, u)
-      let rot = tangent + Math.PI / 2
-      // blend the long way that keeps the nose swinging through horizontal
-      let base = rot
-      const upright = 0
-      if (nose > 0) {
-        let delta = upright - base
-        while (delta > Math.PI) delta -= 2 * Math.PI
-        while (delta < -Math.PI) delta += 2 * Math.PI
-        base = base + delta * nose
+      let rotTarget = tangent + Math.PI / 2 + (dir < 0 ? Math.PI : 0)
+      const endB = Math.max(1 - smoothstep(0.004, 0.028, u), smoothstep(0.945, 0.985, u))
+      if (endB > 0) {
+        let d = -rotTarget
+        while (d > Math.PI) d -= 2 * Math.PI
+        while (d < -Math.PI) d += 2 * Math.PI
+        rotTarget += d * endB
       }
-      rot = base
+      if (!inited) {
+        rot = rotTarget
+        inited = true
+      } else {
+        let d2 = rotTarget - rot
+        while (d2 > Math.PI) d2 -= 2 * Math.PI
+        while (d2 < -Math.PI) d2 += 2 * Math.PI
+        rot += d2 * Math.min(1, dt * (5 + 10 * activity))
+        if (Math.abs(d2) < 0.0008) rot = rotTarget // snap: a resting page is exactly still
+      }
+      // QA hook: the live attitude (also proves stillness — it stops updating
+      // once the ship settles). rot 0 = nose-up, ±π = nose-down.
+      {
+        const rotAttr = rot.toFixed(3)
+        if (rotAttr !== lastRotAttr) {
+          canvas.dataset.rot = rotAttr
+          lastRotAttr = rotAttr
+        }
+      }
 
       const swayF = smoothstep(0.02, 0.06, p) * (1 - smoothstep(0.945, 0.985, p))
       const a = swayAmp * activity * swayF
@@ -488,7 +571,108 @@ export default function FlightCanvas() {
       const thrust = smoothstep(0.015, 0.05, p) * (1 - smoothstep(0.95, 0.985, p))
       const flick = 0.5 + 0.5 * Math.sin(t * 21) * activity
 
-      drawShip(pos.x + swx, pos.y - sy + swy, rot, dockF, thrust, flick, pal, outline)
+      // ignition: a rough sputter while the engine catches, then full blast.
+      // The gate opens at a resting page (steady burn) — nothing idles.
+      const igniteF = 1 - smoothstep(0.25, 0.75, thrust)
+      const gate =
+        activity > 0.02 && igniteF > 0.05
+          ? Math.sin(t * 33 + Math.sin(t * 11.3) * 2.4) > 0.9 - 1.9 * igniteF
+            ? 1
+            : 0.12
+          : 1
+      const flame = thrust * (1 - 0.88 * igniteF * (1 - gate))
+      if (prevThrust < 0.02 && thrust >= 0.02) flashT = 0.3
+      prevThrust = thrust
+      flashT = Math.max(0, flashT - dt)
+
+      // ---- world anchors (ship + engine bell, document space) --------------
+      const shipX = pos.x + swx
+      const shipY = pos.y + swy
+      const engX = shipX - Math.sin(rot) * 50 * scaleS
+      const engY = shipY + Math.cos(rot) * 50 * scaleS
+
+      // dotted contrail along the traversed arc: fresh gas bright behind the
+      // ship, older puffs bigger and fainter but persistent — the flight path
+      // stays readable after the ship has passed, and reverses away as it
+      // climbs back
+      if (u > 0.014 && trail.length) {
+        const span = Math.max(1e-6, u - 0.012)
+        ctx.fillStyle = pal.ink
+        for (const q of trail) {
+          if (q.u > u - 0.006) continue
+          const age = Math.min(1, (u - q.u) / span)
+          ctx.globalAlpha = (0.06 + 0.3 * (1 - age)) * q.rj
+          const r = (1.3 + 4.2 * age) * (narrow ? scaleS * 1.3 : 1) * q.rj
+          ctx.beginPath()
+          ctx.arc(q.x + q.nx * q.wob, q.y - sy + q.ny * q.wob, r, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        ctx.globalAlpha = 1
+      }
+
+      // exhaust: smoke puffs from the engine bell. Emission is gated by
+      // throttle and scroll activity — a resting page emits nothing and the
+      // leftovers disperse within ~2s, leaving only the contrail
+      const exX = -Math.sin(rot)
+      const exY = Math.cos(rot)
+      emitAcc += flame * (narrow ? 26 : 46) * activity * dt
+      const cap = narrow ? 90 : 200
+      while (emitAcc >= 1) {
+        emitAcc -= 1
+        if (puffs.length >= cap) break
+        const j = Math.random()
+        const j2 = Math.random() - 0.5
+        const sp = (30 + 90 * flame) * (0.45 + 0.8 * j)
+        puffs.push({
+          x: engX + exX * (2 + 6 * j) - exY * j2 * 13,
+          y: engY + exY * (2 + 6 * j) + exX * j2 * 13,
+          vx: exX * sp - exY * j2 * 26 + (Math.random() - 0.5) * 10,
+          vy: exY * sp + exX * j2 * 26 - (10 + 14 * Math.random()),
+          r0: (1.6 + 2.2 * j) * (narrow ? 0.7 : 1),
+          life: 1.2 + 0.9 * j,
+          age: 0,
+          a0: 0.15 + 0.15 * flame,
+        })
+      }
+      for (let i = puffs.length - 1; i >= 0; i--) {
+        const q = puffs[i]
+        q.age += dt
+        if (q.age >= q.life) {
+          puffs.splice(i, 1)
+          continue
+        }
+        const dec = Math.exp(-1.5 * dt)
+        q.vx *= dec
+        q.vy *= dec
+        q.x += q.vx * dt
+        q.y += q.vy * dt
+      }
+      if (puffs.length) {
+        ctx.fillStyle = pal.ink
+        for (const q of puffs) {
+          const f = q.age / q.life
+          ctx.globalAlpha = q.a0 * (1 - f) * (0.5 + 0.5 * flame)
+          ctx.beginPath()
+          ctx.arc(q.x, q.y - sy, q.r0 + 15 * f * (narrow ? 0.6 : 1), 0, Math.PI * 2)
+          ctx.fill()
+        }
+        ctx.globalAlpha = 1
+      }
+
+      drawShip(shipX, shipY - sy, rot, dockF, flame, flick, pal, outline)
+
+      // ignition flash at the bell
+      if (flashT > 0) {
+        const k = flashT / 0.3
+        ctx.globalAlpha = 0.5 * k * k
+        ctx.fillStyle = pal.flameCore
+        ctx.beginPath()
+        ctx.arc(engX, engY - sy, (6 + 24 * (1 - k)) * scaleS, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.globalAlpha = 1
+      }
+
+      pPrev = p
     }
 
     buildPath()
