@@ -4,12 +4,9 @@ import { FaGithub, FaStar, FaUsers } from 'react-icons/fa'
 
 /**
  * Mobile identity card — the hero copy reimagined as the deck's first card,
- * restyled on the watermelon profile-card: tinted pill chips for the roles,
- * compact icon+label/value data rows for the live GitHub stats, and the nav
- * items that leave the phone navbar (projects / blog / services) as its
- * action buttons next to sponsor. "home" stays off the card (the logo in
- * the bar is home). Replaces the old view projects / read the blog link
- * pair on small screens.
+ * SELA style: pastel role chips, compact data rows for the live GitHub
+ * stats, and the nav items as black/outline buttons next to sponsor. "home"
+ * stays off the card (the logo in the bar is home).
  */
 export default function IdentityCard() {
   const rows = [
@@ -20,56 +17,43 @@ export default function IdentityCard() {
 
   return (
     <div>
-      <h2 className="text-4xl font-semibold tracking-tight">cyber.dach</h2>
+      <h2 className="text-[34px] leading-none font-bold tracking-[-0.035em]">cyber.dach</h2>
 
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        <span className="rounded-full border border-[var(--red)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--red)]">
-          telecom engineer
-        </span>
-        <span className="rounded-full border border-[var(--red)] px-2.5 py-0.5 text-[11px] font-bold text-[var(--red)]">
-          cybersecurity engineer
-        </span>
+      <div className="chips mt-4">
+        <span>telecom engineer</span>
+        <span>cybersecurity engineer</span>
       </div>
 
-      <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">
+      <p className="mt-4 text-[13px] leading-relaxed text-[var(--muted)]">
         building resilient systems across networks, security, and software — and writing
         down what i learn along the way.
       </p>
 
-      <div className="mt-4 border-t border-[var(--border)] pt-1">
+      <div className="mt-5 border-t border-[var(--hairline)] pt-1">
         {rows.map(r => (
           <div key={r.label} className="flex items-center gap-2 py-1.5 text-[13px]">
             <span className="text-[var(--muted)]">{r.icon}</span>
             <span className="text-[var(--muted)]">{r.label}</span>
-            <span className="ml-auto font-semibold tabular-nums">{r.value}</span>
+            <span className="ml-auto font-bold tabular-nums">{r.value}</span>
           </div>
         ))}
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <Link
-          href="/projects"
-          className="rounded-lg bg-[var(--red)] px-3 py-2.5 text-center text-sm font-medium text-[var(--on-red)] transition-opacity hover:opacity-85"
-        >
+        <Link href="/projects" className="btn-solid text-center">
           projects
         </Link>
-        <Link
-          href="/blog"
-          className="rounded-lg border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--fg)]"
-        >
+        <Link href="/blog" className="btn-line text-center">
           blog
         </Link>
-        <Link
-          href="/freelance"
-          className="rounded-lg border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--fg)]"
-        >
+        <Link href="/freelance" className="btn-line text-center">
           services
         </Link>
         <a
           href="https://github.com/sponsors/cyberd4ch"
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-lg border border-[var(--border)] px-3 py-2.5 text-center text-sm transition-colors hover:border-[var(--red)]"
+          className="btn-line text-center"
         >
           ♥ sponsor
         </a>

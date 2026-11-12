@@ -7,7 +7,7 @@ export default function Footer() {
         <span className="inline-flex items-center gap-1.5">
           status
           <span
-            className="beacon inline-block h-1.5 w-1.5 rounded-full bg-[var(--mission)]"
+            className="beacon inline-block h-1.5 w-1.5 rounded-full bg-[var(--navy)]"
             aria-hidden="true"
           />
           nominal

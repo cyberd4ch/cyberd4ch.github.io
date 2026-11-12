@@ -19,7 +19,6 @@ import Hero from '@/components/hero/Hero'
 import PageCol from '@/components/PageCol'
 import Chapter from '@/components/deck/Chapter'
 import IdentityCard from '@/components/deck/IdentityCard'
-import DeckDriver from '@/components/deck/DeckDriver'
 import DeckStage from '@/components/deck/DeckStage'
 import { Squiggle } from '@/components/Deco'
 
@@ -44,32 +43,23 @@ function SectionHeading({ label, link, linkLabel }: { label: string; link?: stri
 export default function HomePage() {
   return (
     <div>
-      <DeckDriver />
       <DeckStage />
       <Hero />
 
-      {/* the opaque paper column; the paint snake lives in the margins.
-          on phones this column is a card deck (see components/deck) — each
-          chapter is one card that rides up through the screen; on desktop
-          the chapter wrappers dissolve and this flows exactly as before. */}
+      {/* the opaque paper column; the aircraft lives in the margins.
+          on phones this column is a gesture-driven card stage (see
+          components/deck) — each chapter is one card, collapsed to its bar,
+          opened by its button; on desktop the wrappers dissolve and this
+          flows exactly as before. */}
       <PageCol>
         {/* identity card: the hero copy as the deck's first card (phones only;
             desktop keeps the hero copy up in the hero) */}
-        <Chapter
-          h={150}
-          first
-          mobileOnly
-          index={1}
-          total={9}
-          label="identity card"
-          icon={<FaUserAstronaut size={15} />}
-          tail="the operator"
-        >
+        <Chapter mobileOnly index={1} total={9} label="identity card" icon={<FaUserAstronaut size={15} />}>
           <IdentityCard />
         </Chapter>
 
         {/* Mission brief — one card per paragraph on phones */}
-        <Chapter h={112} index={2} total={9} label="mission brief" icon={<FaBullseye size={15} />} tail="who i am">
+        <Chapter index={2} total={9} label="mission brief" icon={<FaBullseye size={15} />}>
           <section className="reveal pt-4 max-md:pt-0">
             <h2 className="sec-label mb-4">mission brief</h2>
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
@@ -79,7 +69,7 @@ export default function HomePage() {
             </p>
           </section>
         </Chapter>
-        <Chapter h={112} index={3} total={9} label="mission brief" icon={<FaBullseye size={15} />} tail="what i build">
+        <Chapter index={3} total={9} label="mission brief" icon={<FaBullseye size={15} />}>
           <section className="reveal mt-4 max-md:mt-0">
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
               i&apos;m also a builder — i write code across the stack and care about systems that are{' '}
@@ -88,7 +78,7 @@ export default function HomePage() {
             </p>
           </section>
         </Chapter>
-        <Chapter h={112} index={4} total={9} label="mission brief" icon={<FaBullseye size={15} />} tail="how this site works">
+        <Chapter index={4} total={9} label="mission brief" icon={<FaBullseye size={15} />}>
           <section className="reveal mt-4 max-md:mt-0">
             <p className="text-[15px] leading-relaxed text-[var(--fg)]">
               everything on this site is pulled live from{' '}
@@ -107,29 +97,24 @@ export default function HomePage() {
         </Chapter>
 
         {/* Payload stack — derived from the languages in the account */}
-        <Chapter h={132} index={5} total={9} label="payload stack" icon={<FaRocket size={15} />} tail="hauled from the repos">
-          <section className="reveal pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
+        <Chapter index={5} total={9} label="payload stack" icon={<FaRocket size={15} />}>
+          <section className="reveal pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">payload stack</h2>
-            <div className="flex flex-wrap gap-2">
+            <div className="chips">
               {repos
                 .flatMap(repo => [repo.language, ...repo.topics])
                 .filter((value, index, all): value is string => Boolean(value) && all.indexOf(value) === index)
                 .slice(0, 12)
                 .map(t => (
-                  <span
-                    key={t}
-                    className="text-xs border border-[var(--border)] px-2.5 py-1 text-[var(--muted)] hover:border-[var(--blue-bright)] hover:text-[var(--blue-bright)] transition-colors cursor-default max-md:rounded-full max-md:font-semibold"
-                  >
-                    {t}
-                  </span>
+                  <span key={t}>{t}</span>
                 ))}
             </div>
           </section>
         </Chapter>
 
         {/* Recent telemetry — most recently pushed repos */}
-        <Chapter h={148} index={6} total={9} label="recent telemetry" icon={<FaChartLine size={15} />} tail="live from github">
-          <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
+        <Chapter index={6} total={9} label="recent telemetry" icon={<FaChartLine size={15} />}>
+          <section className="reveal d1 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="recent telemetry" link="/projects" linkLabel="all projects" />
             <div className="space-y-3">
               {recentRepos.map((repo, i) => (
@@ -138,12 +123,12 @@ export default function HomePage() {
                   href={repo.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hud-panel block border border-[var(--border)] p-3 hover:border-[var(--fg)] transition-colors"
+                  className="hud-panel block p-3 hover:border-[var(--border)] hover:border-solid transition-colors"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[10px] text-[var(--red)]">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="text-[10px] text-[var(--navy)] font-bold">{String(i + 1).padStart(2, '0')}</span>
                     <FaGithub size={13} className="text-[var(--muted)]" />
-                    <span className="font-semibold text-sm">{repo.name}</span>
+                    <span className="font-bold text-sm tracking-[-0.02em]">{repo.name}</span>
                     {repo.language && (
                       <span className="flex items-center gap-1 text-[10px] text-[var(--muted)]">
                         <span
@@ -165,6 +150,7 @@ export default function HomePage() {
                           <FaStar size={9} /> {repo.stars}
                         </span>
                       )}
+                      {repo.stars > 0 && repo.forks > 0 && ' · '}
                       {repo.forks > 0 && (
                         <span className="flex items-center gap-1">
                           <FaCodeBranch size={9} /> {repo.forks}
@@ -179,8 +165,8 @@ export default function HomePage() {
         </Chapter>
 
         {/* Activity log — refreshed by the scheduled build */}
-        <Chapter h={148} index={7} total={9} label="activity log" icon={<FaBolt size={15} />} tail="last 90 days">
-          <section className="reveal d1 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
+        <Chapter index={7} total={9} label="activity log" icon={<FaBolt size={15} />}>
+          <section className="reveal d1 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="sec-label">activity log</h2>
               <span className="text-[10px] text-[var(--muted)]">
@@ -189,7 +175,7 @@ export default function HomePage() {
               </span>
             </div>
             {isStale && (
-              <p className="text-[11px] text-[var(--fg)] border border-[var(--border)] px-3 py-2 mb-3">
+              <p className="text-[11px] text-[var(--fg)] border border-[var(--hairline)] rounded-lg px-3 py-2 mb-3">
                 the scheduled GitHub sync may have stopped — this feed is from the last successful
                 build.
               </p>
@@ -220,15 +206,15 @@ export default function HomePage() {
         </Chapter>
 
         {/* Transmissions — latest writing */}
-        <Chapter h={142} index={8} total={9} label="transmissions" icon={<FaSatelliteDish size={15} />} tail="latest writing">
-          <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
+        <Chapter index={8} total={9} label="transmissions" icon={<FaSatelliteDish size={15} />}>
+          <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" />
             <div className="space-y-4">
               {latestPosts.map(post => {
                 const external = post.url.startsWith('http')
                 return (
                   <Link key={post.id} href={post.url} className="blog-row block" target={external ? '_blank' : undefined}>
-                    <h3 className="text-sm font-medium">{post.title}</h3>
+                    <h3 className="text-sm font-bold tracking-[-0.02em]">{post.title}</h3>
                     <p className="text-[10px] uppercase tracking-widest text-[var(--muted)] mt-0.5 mb-1">
                       {post.date} · {post.category}
                     </p>
@@ -249,35 +235,35 @@ export default function HomePage() {
         </Chapter>
 
         {/* Ground stations — where to find me */}
-        <Chapter h={120} index={9} total={9} label="ground stations" icon={<FaBroadcastTower size={15} />} tail="say hello">
-          <section className="reveal d2 pt-10 border-t border-[var(--border)] mt-10 pb-2 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
+        <Chapter index={9} total={9} label="ground stations" icon={<FaBroadcastTower size={15} />}>
+          <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 pb-2 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">ground stations</h2>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <a
                 href={github.user.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 hover:bg-[var(--card)] rounded transition-colors"
+                className="btn-line p-2"
                 aria-label="GitHub"
               >
-                <FaGithub size={18} />
+                <FaGithub size={16} />
               </a>
               <a
                 href="mailto:hello@cyberdach.dev"
-                className="p-2 hover:bg-[var(--card)] rounded transition-colors"
+                className="btn-line p-2"
                 aria-label="Email"
               >
-                <FaMailchimp size={18} />
+                <FaMailchimp size={16} />
               </a>
               <a
                 href="https://github.com/sponsors/cyberd4ch"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 hover:bg-[var(--card)] rounded transition-colors"
+                className="btn-line p-2"
                 aria-label="Sponsor"
                 title="Sponsor"
               >
-                <FaHeart size={18} />
+                <FaHeart size={16} />
               </a>
             </div>
             <p className="mt-4 text-[11px] text-[var(--muted)]">

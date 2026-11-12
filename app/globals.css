@@ -1,47 +1,73 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+/* ---------------------------------------------------------------------------
+   SELA — Space Exploration Logo Archive redesign.
+   Structure borrowed from spaceexplorationlogoarchive.webflow.io: Alte Haas
+   Grotesk, black-on-paper, 1px dotted black borders, 10px rounded pastel
+   tiles, blurred sticky bar, tight negative tracking.
+   Palette drawn from the real profile photo (public/avatar.jpg):
+   navy backdrop #2f3e81, charcoal #242326/#17171a, skin #c8a694,
+   cream highlight #ebe2d6, mouth rose #8c7573, collar brown #5b463e.
+--------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Alte Haas Grotesk';
+  src: url('/fonts/AlteHaasGroteskRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alte Haas Grotesk';
+  src: url('/fonts/AlteHaasGroteskBold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ---------------------------------------------------------------------------
-   RETRO SELA — NASA 1975 Graphics Standards Manual palette.
-   Light = warm manual-stock cream ("paper"); dark = blue-black night shift.
-   Red #FC3D21 is the paint line / active state / beacons.
-   Blue #0B3D91 is the instrument colour: labels, ticker, information text.
---------------------------------------------------------------------------- */
 :root {
-  --bg: #f5efe1;            /* manual-stock cream */
-  --fg: #201d17;            /* ink */
-  --muted: #6e675a;
-  --border: #d8cdb4;
-  --card: #ece4d2;
-  --red: #fc3d21;           /* NASA worm red */
-  --blue: #0b3d91;          /* NASA blue */
-  --blue-bright: #0b3d91;   /* blue for text/accents on paper */
-  --label: #0b3d91;         /* hud-label ink */
-  --on-red: #180f0b;        /* ink on red surfaces (readable in both modes) */
-  --grid: rgba(11, 61, 145, 0.055); /* blueprint margin grid */
-  --accent: var(--red);
-  --mission: var(--red);    /* legacy alias — beacons */
-  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
-  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --rocket-hull: #f5efe1;   /* flight fallback hull (light paper) */
+  --bg: #fafafa;               /* SELA paper */
+  --fg: #17171a;               /* photo charcoal ink */
+  --muted: #6b6a70;
+  --border: #17171a;           /* dotted black — SELA */
+  --hairline: #d9d8dc;         /* faint separators where dotted is too loud */
+  --card: #ffffff;
+  --navy: #2f3e81;             /* photo backdrop — primary accent */
+  --skin: #c8a694;
+  --rose: #8c7573;
+  --accent: var(--navy);
+  --mission: var(--navy);      /* legacy alias — beacon */
+  --red: #ea384c;              /* SELA red — active states only */
+  --on-red: #ffffff;
+  --chip-blue: #93d3e5;
+  --chip-yellow: #ffdd7c;
+  --chip-pink: #ffc5c8;
+  --chip-green: #b9e4aa;
+  --chip-cream: #fffac3;
+  --sticky: rgba(255, 255, 255, 0.72);
+  --shadow: rgba(23, 23, 26, 0.10);
+  --font-sans: 'Alte Haas Grotesk', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 .dark {
-  --bg: #070c16;            /* blue-black night */
-  --fg: #ede7d8;            /* warm paper white — ties the two modes together */
-  --muted: #8391a8;
-  --border: #24314a;
-  --card: #101a2c;
-  --red: #fc3d21;
-  --blue: #0b3d91;
-  --blue-bright: #8fb2f2;
-  --label: #8fb2f2;
-  --on-red: #180f0b;
-  --grid: rgba(143, 178, 242, 0.05);
-  --rocket-hull: #ede7d8;   /* flight fallback hull (warm paper white) */
+  --bg: #101012;
+  --fg: #ebe2d6;
+  --muted: #9b9893;
+  --border: #ebe2d6;
+  --hairline: #2c2c30;
+  --card: #17171a;
+  --navy: #8ea2e8;
+  --skin: #c8a694;
+  --rose: #a98884;
+  --accent: var(--navy);
+  --mission: var(--navy);
+  --red: #ff4d64;
+  --on-red: #ffffff;
+  --sticky: rgba(16, 16, 18, 0.72);
+  --shadow: rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -51,29 +77,42 @@
 }
 
 html {
-  scroll-behavior: smooth;
   background-color: var(--bg);
 }
 
-/* The page is a technical-drawing sheet: blueprint margin grid on the body,
-   clean paper where the content column sits (page-col paints over it),
-   and the red paint line living in the margins and full-bleed bands. */
 body {
   background-color: var(--bg);
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 36px 36px;
   color: var(--fg);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.7;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.008em;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
 
+h1, h2, h3, h4 {
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
 html, body {
   overflow-x: clip;
+}
+
+::selection {
+  background: var(--navy);
+  color: #fff;
+}
+
+input:focus, textarea:focus {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
 }
 
 /* opaque paper column — sits above the fixed flight canvas (z-[1] in layout) */
@@ -81,11 +120,10 @@ html, body {
   background: var(--bg);
 }
 
-/* narrow screens: the 680 column is full-width and would bury the flight layer
-   for the whole page. Open a dedicated flight gutter on the right — 44px of
-   transparent margin, with .page-col's right padding widened to match so no
-   text ever sits in it (the rocket and its contrail fly there; the blueprint
-   grid shows through). The left keeps a slim 22px see-through margin. */
+/* narrow screens: the 680 column is full-width and would bury the flight
+   layer for the whole page. Open a dedicated flight gutter on the right —
+   44px of transparent margin, with .page-col's right padding widened to
+   match so no text ever sits in it. */
 @media (max-width: 759.98px) {
   .page-col {
     padding-right: 44px;
@@ -100,9 +138,8 @@ html, body {
   }
 }
 
-/* the fixed flight layer: full viewport, behind the app layer, never interactive.
-   width/height are required: a canvas is a replaced element — inset:0 alone
-   leaves it at its intrinsic (drawing-buffer) size, which breaks on DPR > 1 */
+/* the fixed flight layer: full viewport, behind the app layer, never
+   interactive. width/height are required: a canvas is a replaced element */
 .flight-canvas {
   position: fixed;
   inset: 0;
@@ -113,30 +150,105 @@ html, body {
   display: block;
 }
 
-/* static parked rocket shown when the flight layer is off (reduced motion / no canvas) */
-.flight-fallback {
-  display: none;
-}
-:root[data-flight='off'] .flight-fallback {
+/* ship fleet (fixed layer above content: portrait + scatter) */
+.ships-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
   display: block;
 }
 
-::selection {
-  background: var(--red);
-  color: #fff6ea;
+/* ---- SELA floating bar -----------------------------------------------------
+   The nav: blurred sticky strip, dotted black border, 10px corners. */
+.nav-bar {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: min(100% - 24px, 648px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 10px 9px 14px;
+  background: var(--sticky);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+.nav-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.03em;
+  color: var(--fg);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  min-width: 0;
+}
+.nav-links a {
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  padding: 4px 9px;
+  border-radius: 7px;
+  white-space: nowrap;
+}
+.nav-links a:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.dark .nav-links a:hover {
+  background: rgba(235, 226, 214, 0.1);
+}
+.nav-active {
+  background: var(--fg) !important;
+  color: var(--bg) !important;
+}
+/* the theme control: system → light → dark, one compact cycling button */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  border: 1px dotted var(--border);
+  background: transparent;
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.theme-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+.dark .theme-toggle:hover {
+  background: rgba(235, 226, 214, 0.08);
+}
+@media (max-width: 480px) {
+  .theme-toggle span { display: none; }
+  .nav-links { gap: 0; }
+  .nav-links a { padding: 4px 7px; font-size: 13px; }
+  .nav-mark span { display: none; }
 }
 
-input:focus, textarea:focus {
-  outline: 1px solid var(--red);
-  outline-offset: 2px;
-}
-
-:focus-visible {
-  outline: 2px solid var(--red);
-  outline-offset: 2px;
-}
-
-/* ---- scroll reveal (ScrollReveal adds .in-view when a section enters) ---- */
+/* ---- scroll reveal -------------------------------------------------------- */
 .reveal {
   opacity: 0;
   transform: translateY(18px);
@@ -154,119 +266,56 @@ input:focus, textarea:focus {
 .reveal.d4 { transition-delay: 280ms; }
 .reveal.d5 { transition-delay: 350ms; }
 
-/* ---- retro ticker strip --------------------------------------------------- */
-.ticker {
-  border-top: 2px solid var(--fg);
-  border-bottom: 2px solid var(--fg);
-  overflow: hidden;
-}
-.ticker-track {
-  display: flex;
-  width: max-content;
-  animation: tickerScroll 38s linear infinite;
-  will-change: transform;
-}
-.ticker-seg {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
-  padding: 6px 0;
-  font-size: 10px;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-}
-@keyframes tickerScroll {
-  to { transform: translateX(-50%); }
-}
-
-/* ---- ship fleet (fixed layer above content: portrait + scatter) ------------ */
-.ships-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  pointer-events: none;
-  display: block;
-}
-
 /* ---- worm squiggle divider ------------------------------------------------ */
 .squiggle {
-  color: var(--red);
-  opacity: 0.75;
+  color: var(--navy);
+  opacity: 0.8;
 }
 
-/* ---- red section tick before labels --------------------------------------- */
+/* ---- section labels: SELA bold, no ticks ---------------------------------- */
 .sec-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--label);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--fg);
 }
-.sec-label::before {
-  content: '';
-  width: 20px;
-  height: 3px;
-  background: var(--red);
-  flex-shrink: 0;
-}
-
-/* legacy small-caps label — now instrument blue */
 .hud-label {
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--label);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--fg);
 }
 
-/* HUD panel: hairline + red corner ticks (top-left, bottom-right) */
-.hud-panel { position: relative; }
-.hud-panel::before,
-.hud-panel::after {
-  content: '';
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  pointer-events: none;
-  border: 0 solid var(--red);
-}
-.hud-panel::before {
-  top: -1px;
-  left: -1px;
-  border-top-width: 1px;
-  border-left-width: 1px;
-}
-.hud-panel::after {
-  bottom: -1px;
-  right: -1px;
-  border-bottom-width: 1px;
-  border-right-width: 1px;
+/* SELA tile: solid hairline card with the dotted-black hover lift */
+.hud-panel {
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
+  background: var(--card);
 }
 
-/* ---- nav / filter active states: red, the retro way ------------------------ */
-.nav-active {
-  background: var(--red);
-  color: var(--on-red);
-  padding: 2px 10px;
-  border-radius: 3px;
-}
+/* ---- nav active state (solid black block, SELA) --------------------------- */
+/* .nav-active styles live with .nav-bar above */
 
 .filter-tab {
-  padding: 3px 12px;
-  border-radius: 3px;
+  padding: 4px 12px;
+  border: 1px dotted var(--border);
+  border-radius: 8px;
   font-size: 13px;
   cursor: pointer;
+  background: transparent;
+  color: var(--fg);
   transition: background 0.15s, color 0.15s;
 }
 .filter-tab:hover {
-  background: var(--card);
+  background: rgba(0, 0, 0, 0.05);
+}
+.dark .filter-tab:hover {
+  background: rgba(235, 226, 214, 0.08);
 }
 .filter-tab.active {
-  background: var(--red);
-  color: var(--on-red);
+  background: var(--fg);
+  color: var(--bg);
+  border-style: solid;
 }
 
 /* ---- links ------------------------------------------------------------------ */
@@ -274,18 +323,41 @@ input:focus, textarea:focus {
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
-  text-decoration-color: var(--border);
-  transition: text-decoration-color 0.15s;
+  text-decoration-color: var(--hairline);
+  transition: text-decoration-color 0.15s, color 0.15s;
 }
 .underline-link:hover {
-  text-decoration-color: var(--red);
+  text-decoration-color: var(--navy);
+  color: var(--navy);
 }
 
-/* tag pill */
+/* SELA pastel chips — the tag pills; color cycles by position */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips > * {
+  font-size: 12.5px;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: default;
+  background: var(--chip-cream);
+}
+.chips > *:nth-child(5n + 1) { background: var(--chip-blue); }
+.chips > *:nth-child(5n + 2) { background: var(--chip-yellow); }
+.chips > *:nth-child(5n + 3) { background: var(--chip-pink); }
+.chips > *:nth-child(5n + 4) { background: var(--chip-green); }
+.chips > *:nth-child(5n + 5) { background: var(--chip-cream); }
+.dark .chips > * {
+  color: #17171a;
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+/* fallback tag (used off the home page) */
 .tag {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
 }
 
 /* cursor blink */
@@ -311,13 +383,48 @@ input:focus, textarea:focus {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* project card hover */
+/* SELA button — solid black pill; used by primary CTAs */
+.btn-solid {
+  display: inline-block;
+  background: var(--fg);
+  color: var(--bg);
+  border: 1px solid var(--fg);
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn-solid:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 0 var(--navy);
+}
+.btn-line {
+  display: inline-block;
+  background: transparent;
+  color: var(--fg);
+  border: 1px dotted var(--border);
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  transition: border-style 0.15s, transform 0.15s;
+}
+.btn-line:hover {
+  border-style: solid;
+  transform: translateY(-1px);
+}
+
+/* project card hover: the dotted border firms up, tile lifts */
 .project-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .project-card:hover {
   transform: translateY(-2px);
-  box-shadow: -3px 4px 0 0 var(--red);
+  border-color: var(--border) !important;
+  box-shadow: 0 4px 14px var(--shadow);
 }
 
 /* blog row hover */
@@ -330,33 +437,20 @@ input:focus, textarea:focus {
 
 /* ---- article body ------------------------------------------------------------ */
 .post {
-  font-family: var(--font-sans);
-  font-size: 14.5px;
-  line-height: 1.75;
+  font-size: 15px;
+  line-height: 1.7;
 }
 .post > * + * { margin-top: 1em; }
 .post h2 {
-  font-family: var(--font-mono);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 17px;
+  font-weight: 700;
   margin-top: 2.2em;
   margin-bottom: 0.2em;
-  letter-spacing: -0.01em;
-}
-/* red section tick inside articles */
-.post h2::before {
-  content: '';
-  display: inline-block;
-  width: 14px;
-  height: 3px;
-  background: var(--red);
-  margin-right: 9px;
-  vertical-align: 3px;
+  letter-spacing: -0.02em;
 }
 .post h3 {
-  font-family: var(--font-mono);
-  font-size: 13.5px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   margin-top: 1.8em;
 }
 .post p { color: var(--fg); }
@@ -364,37 +458,42 @@ input:focus, textarea:focus {
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
-  text-decoration-color: var(--border);
+  text-decoration-color: var(--hairline);
   transition: text-decoration-color 0.15s;
 }
-.post a:hover { text-decoration-color: var(--red); }
-.post strong { font-weight: 600; }
+.post a:hover { text-decoration-color: var(--navy); }
+.post strong { font-weight: 700; }
 .post ul, .post ol { padding-left: 1.3em; }
 .post ul { list-style: disc; }
 .post ol { list-style: decimal; }
 .post li { margin-top: 0.45em; }
 .post li > p { margin: 0; }
 .post blockquote {
-  border-left: 2px solid var(--red);
+  border-left: 2px solid var(--navy);
   padding-left: 1em;
   color: var(--muted);
 }
 .post hr {
   border: 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px dotted var(--border);
   margin: 2.2em 0;
 }
 .post code {
   font-family: var(--font-mono);
   font-size: 12.5px;
-  background: var(--card);
+  background: var(--chip-cream);
+  color: var(--fg);
   padding: 1px 5px;
-  border-radius: 3px;
+  border-radius: 5px;
+}
+.dark .post code {
+  background: rgba(255, 250, 195, 0.14);
+  color: var(--fg);
 }
 .post pre {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
+  border: 1px solid var(--hairline);
+  border-radius: 10px;
   padding: 12px 14px;
   overflow-x: auto;
   line-height: 1.6;
@@ -411,7 +510,7 @@ input:focus, textarea:focus {
   font-size: 13px;
 }
 .post th, .post td {
-  border: 1px solid var(--border);
+  border: 1px solid var(--hairline);
   padding: 6px 10px;
   text-align: left;
 }
@@ -419,10 +518,10 @@ input:focus, textarea:focus {
 /* scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-/* let the hero and ticker escape the 680px column without touching other pages */
+/* let the hero escape the 680px column without touching other pages */
 .full-bleed {
   width: 100vw;
   margin-left: calc(50% - 50vw);
@@ -437,57 +536,13 @@ input:focus, textarea:focus {
   display: none;
 }
 
-/* ---- mobile story deck --------------------------------------------------------
-   Phones only: the home page becomes a card deck. Each chapter reserves
-   --chapter-h viewport heights; its card sticks to the screen for the dwell
-   and is pushed off the top by the next card rising from below — every card
-   travels upward, in one side and out the other. Desktop dissolves the
-   wrappers with display:contents, so sections flow exactly as before. */
-@media (max-width: 767.98px) {
-  .chapter {
-    height: var(--chapter-h, 128svh);
-  }
-  .chapter-card {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100svh;
-    display: flex;
-    align-items: center;
-  }
-  .chapter-panel {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    width: 100%;
-    max-height: calc(100vh - 96px);
-    max-height: calc(100svh - 96px);
-    overflow-y: auto;
-    padding: 20px 18px 24px;
-  }
-  /* the drawer wrapper dissolves in the sticky flow */
-  .deck-drawer {
-    display: contents;
-  }
-}
-@media (min-width: 768px) {
-  .chapter,
-  .deck-drawer,
-  .chapter-card,
-  .chapter-panel {
-    display: contents;
-  }
-  .chapter-mobile-only {
-    display: none !important;
-  }
-}
-
 /* ---- presentation stage --------------------------------------------------------
-   The gesture-driven mobile flow (components/deck/DeckStage): the page itself
-   is locked — html/body don't scroll, touchmove is prevented — and each
-   chapter becomes a fixed full-screen layer, shown one at a time by JS while
-   swipes cycle portrait ⇄ card. The attribute is only ever set on phones by
-   JS, but the media query keeps the rules honest regardless. Desktop never
-   enters the stage and keeps native scrolling exactly as before. */
+   Gesture-driven mobile flow (components/deck/DeckStage): the page never
+   scrolls — gestures move cards in and out of view. Each chapter is a fixed
+   full-screen layer; one card at a time is shown, COLLAPSED to its bottom
+   bar, with a button that opens the drawer (the sheet rolls up from the
+   bar, children revealing in a stagger). Desktop never enters the stage:
+   wrappers dissolve and sections flow exactly as they always did. */
 html[data-stage] {
   overflow: hidden;
   overscroll-behavior: none;
@@ -495,171 +550,194 @@ html[data-stage] {
 html[data-stage] body {
   overflow: hidden;
 }
+/* the stage's story lives entirely on the fixed card layers — the flow
+   column is empty there (chapters are position:fixed) and the footer must
+   not peek under the deck bar */
+html[data-stage] .footer-col {
+  display: none;
+}
+/* plain flow (desktop, reduced-motion phones): wrappers dissolve */
+.chapter-card,
+.deck-card,
+.deck-sheet {
+  display: contents;
+}
+.deck-bar,
+.deck-head {
+  display: none !important;
+}
+.chapter-mobile-only {
+  display: none;
+}
+@media (min-width: 768px) {
+  .chapter-mobile-only {
+    display: none !important;
+  }
+}
+
 @media (max-width: 767.98px) {
   html[data-stage] .chapter {
     position: fixed;
     inset: 0;
-    z-index: 30; /* over the content, under the nav/utility layers */
-    height: auto;
+    z-index: 30; /* over the content, under the nav bar */
     display: none;
   }
   html[data-stage] .chapter.chapter-on {
     display: block;
   }
-  html[data-stage] .chapter-card {
-    position: static;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    /* the padding reserves the nav strip up top and the propeller
-       affordance strip below — the card lives strictly between them */
-    padding: 92px 18px 118px;
-  }
-  html[data-stage] .chapter-panel {
-    position: relative;
-    max-height: 100%;
-    overscroll-behavior: contain; /* inner scrolling never rubber-bands the page */
-    /* watermelon profile-card port: a soft sheet with a gentle lift */
-    border-radius: 18px;
-    box-shadow: 0 22px 60px rgb(0 0 0 / 0.14);
-  }
-  /* the drawer: DeckStage drives --cardP (0..1) per frame from the scrub;
-     the clip rolls the drawer open from the bottom edge upward — trailing
-     meta text first, card content uncovering as it rises — and freezing
-     mid-gesture freezes it exactly where it rolled to. display:block
-     overrides the sticky flow's display:contents (which would dissolve
-     the box and silently drop the clip + translate). */
-  html[data-stage] .deck-drawer {
+  html[data-stage] .chapter-mobile-only {
     display: block;
+  }
+  html[data-stage] .chapter-card,
+  html[data-stage] .deck-card,
+  html[data-stage] .deck-sheet {
+    display: flex;
+  }
+  html[data-stage] .deck-bar {
+    display: flex !important;
+  }
+  html[data-stage] .deck-head {
+    display: flex !important;
+  }
+  /* the card lives between the nav strip and the bottom margin, anchored to
+     the bottom edge — watermelon bottom-sheet posture */
+  html[data-stage] .chapter-card {
     position: absolute;
     inset: 0;
-    clip-path: inset(calc((1 - var(--cardP, 0)) * 100%) 0 0 0);
-    transform: translate3d(0, calc((1 - var(--cardP, 0)) * 44px), 0);
-    will-change: clip-path, transform;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 78px 14px 22px;
+    pointer-events: none;
+  }
+  html[data-stage] .deck-card {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+    /* the deck driver's scrub transform lands here */
+    will-change: transform;
+  }
+  /* the sheet: the SELA card body. DeckStage drives --cardP (0..1) per frame
+     from the drawer spring; the top-inset clip rolls it open bottom-up from
+     the bar line, and the stagger formula fades children in as it clears */
+  html[data-stage] .deck-sheet {
+    position: relative;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: calc(100dvh - 172px);
+    overflow: hidden;
+    flex-direction: column;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 18px 44px var(--shadow);
+    clip-path: inset(calc((1 - var(--cardP, 0)) * 100%) 0 0 0 round 14px);
+  }
+  /* sheet content only scrolls once the drawer is fully open */
+  html[data-stage] .deck-body {
+    min-height: 0;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    padding: 16px 16px 20px;
+  }
+  html[data-stage] .deck-card[data-open] .deck-body {
+    overflow-y: auto;
+  }
+  /* staggered child reveal: each child (--n, set inline) fades + rises in
+     as --cardP clears its threshold — pure CSS, reversible, no class flips */
+  html[data-stage] .deck-body > * {
+    --rev: clamp(0, calc((var(--cardP, 0) - 0.18 - var(--n, 0) * 0.1) * 6), 1);
+    opacity: var(--rev);
+    transform: translateY(calc((1 - var(--rev)) * 12px));
+  }
+  /* the collapsed bar: tile + label + index + the drawer button */
+  html[data-stage] .deck-bar {
+    position: relative;
+    align-items: center;
+    gap: 10px;
+    height: 54px;
+    padding: 0 8px 0 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 10px 28px var(--shadow);
+  }
+  .deck-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 9px;
+    color: #17171a;
+  }
+  .deck-tile:nth-child(5n + 1) { background: var(--chip-blue); }
+  .deck-tile:nth-child(5n + 2) { background: var(--chip-yellow); }
+  .deck-tile:nth-child(5n + 3) { background: var(--chip-pink); }
+  .deck-tile:nth-child(5n + 4) { background: var(--chip-green); }
+  .deck-tile:nth-child(5n + 5) { background: var(--chip-cream); }
+  .deck-bar-label {
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .deck-bar-idx {
+    margin-left: auto;
+    flex: none;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .deck-toggle {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border: 1px dotted var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .deck-toggle svg {
+    transform: rotate(calc(180deg * var(--cardP, 0)));
+    transition: none;
+  }
+  .deck-toggle:active {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  /* the header inside the sheet (tile + label), seen once it opens */
+  .deck-head {
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px 0;
+  }
+  .deck-head-label {
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
   /* the fleet's canvas mounts body-level above the app wrapper so the
      scattered fleet rides over normal page content — but during the stage
-     the card drawer must cover it as it rolls up, so the canvas drops
-     below the app layer for the stage's lifetime */
+     the card must cover it as it rolls up, so the canvas drops below the
+     app layer for the stage's lifetime */
   html[data-stage] .ships-canvas {
     z-index: 0;
   }
-  /* the hero's own bottom telemetry yields to the stage affordance */
-  html[data-stage] .hero-foot {
-    display: none;
-  }
-  html[data-stage] .deck-affordance {
-    display: flex;
-  }
 }
 
-.deck-affordance {
-  position: fixed;
-  left: 50%;
-  bottom: 44px;
-  transform: translateX(-50%);
-  z-index: 31;
-  display: none; /* stage-only */
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  pointer-events: none;
-}
-/* the propeller is grabbable: with no scroll running it can be hand-spun
-   (DeckStage tracks the drag + inertia); its rotation is otherwise set
-   directly from the scrub, clockwise scrolling down, counterclockwise up */
-.deck-prop {
-  pointer-events: auto;
-  touch-action: none;
-  cursor: grab;
-  border-radius: 50%;
-}
-.deck-prop:active {
-  cursor: grabbing;
-}
-.deck-prop svg {
-  display: block; /* no CSS animation — JS owns the angle */
-  transform-origin: 50% 50%;
-}
-.deck-affordance-label {
-  font-size: 10px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-/* drawer header bar (watermelon profile-card port): icon tile + label left,
-   card index right — mobile deck + stage only */
-.deck-head {
-  display: none;
-}
-@media (max-width: 767.98px) {
-  .deck-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-  /* the drawer header bar already names the chapter — the section's own HUD
-     label would echo it right below (links beside them stay). Applies to the
-     sticky flow too: the header bar renders on every mobile card. */
-  .chapter-panel .sec-label {
-    display: none;
-  }
-}
-.deck-tile {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  flex: none;
-  border-radius: 10px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--red);
-}
-.deck-head-label {
-  min-width: 0;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.deck-head-idx {
-  margin-left: auto;
-  flex: none;
-  font-size: 10px;
-  letter-spacing: 0.22em;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-/* trailing line under the card — stage only, inside the clipped drawer, so
-   it is the first thing revealed as the drawer rolls up from the bottom */
-.deck-tail {
-  display: none;
-}
-html[data-stage] .deck-tail {
-  display: block;
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 100px;
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--red);
-  white-space: nowrap;
-}
-
-/* ---- hand-inked logo entrance ------------------------------------------------
-   The orbit ring inks in first (the open "c" sweep), then the bowl and mast
-   complete the mark. Dash lengths are viewBox units of the 256 mark. */
+/* ---- hand-inked logo entrance ------------------------------------------------ */
 .logo-draw {
   animation: logoInk var(--logo-dur, 0.9s) cubic-bezier(0.55, 0.06, 0.35, 1) var(--logo-delay, 0s)
     forwards;
@@ -670,7 +748,6 @@ html[data-stage] .deck-tail {
 @keyframes logoInk {
   to { stroke-dashoffset: 0; }
 }
-/* the wordmark waits for the mark, then rises in */
 .logo-word {
   animation: fadeUp 0.5s ease 1.75s both;
 }
@@ -687,7 +764,6 @@ html[data-stage] .deck-tail {
 /* ---- reduced motion: everything static, nothing hidden ---------------------- */
 @media (prefers-reduced-motion: reduce) {
   .beacon { animation: none; }
-  .ticker-track { animation: none; }
   .stagger-1, .stagger-2, .stagger-3, .stagger-4, .stagger-5, .stagger-6 {
     animation: none;
   }

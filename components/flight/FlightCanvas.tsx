@@ -4,75 +4,80 @@ import { useEffect, useRef } from 'react'
 import { fleetBus } from '@/lib/fleetBus'
 
 /**
- * The flight layer — a retro rocket that replaces the old paint snake.
+ * The flight layer — themed vintage aircraft that replace the old paint
+ * snake. The vehicle is picked by the theme MODE (lib/theme.ts data-theme):
  *
- * The ship lives behind the paper column (z-0), visible in the blueprint
- * gutters and full-bleed bands, always passing BEHIND text so content is
- * never obscured. On narrow screens the sheet opens a dedicated 44px flight
- * gutter (globals.css) and the route hugs it, so the rocket stays visible
- * down the whole page. Everything is scrubbed by scroll progress, so every
- * animation is exactly reversible:
+ *   system → vintage chopper   (idling rotor, skids)
+ *   light  → vintage Cessna    (taildragger, front propeller)
+ *   dark   → soviet capsule rocket
  *
- *   p = 0        parked vertically on its launch pad (top-left margin)
- *   0 → ~0.17    takeoff: rises off the pad with a rough ignition sputter,
- *                pitches over through the hero's upper whitespace, joins
- *                the gutter sine
- *   ~0.17 → 1    full-blast cruise down the page. The nose flies the route:
- *                scrolling down points it down the page, scrolling up turns
- *                it around and it flies back nose-up — with throttle tied
- *                to scroll speed and a dotted fume trail laid along the
- *                traversed arc (the flight path, drawn in reverse as you
- *                scroll back)
- *   1            landing: throttle cuts, the ship pitches upright for a
- *                tail-first touchdown, then decouples — nose, fins and
- *                engine ease apart and dock around the body above the footer
- *   scroll up    the sequence runs backwards: parts reassemble, engine
- *                re-lights with a sputter, and the ship meanders back onto
+ * The ship lives behind the paper column (z-0), visible in the gutters and
+ * full-bleed bands, always passing BEHIND text so content is never obscured.
+ * On narrow screens the sheet opens a dedicated 44px flight gutter
+ * (globals.css) and the route hugs it, so the ship stays visible down the
+ * whole page. Everything is scrubbed by scroll progress, so every animation
+ * is exactly reversible:
+ *
+ *   p = 0        parked on its pad (top-left margin)
+ *   0 → ~0.17    takeoff: lifts off with a sputter (rotor spooling, prop
+ *                winding, or ignition), pitches over through the hero's
+ *                upper whitespace, joins the gutter sine
+ *   ~0.17 → 1    cruise down the page. The nose flies the route: scrolling
+ *                down points it down the page, scrolling up turns it around
+ *                and it flies back — with throttle tied to scroll speed and
+ *                a dotted fume trail laid along the traversed arc (the
+ *                flight path, drawn in reverse as you scroll back)
+ *   ~0.95 → 1    landing: throttle cuts, the ship pitches upright and
+ *                settles tail-first onto the dock pad in the bottom-right
+ *                margin (wheels/skids/nozzle first)
+ *   scroll up    the sequence runs backwards: the ship meanders back onto
  *                its pad, sucking up its contrail behind it
  *
  * On phones the ship also strafes the fleet: while it flies near the hero
- * during a dispersal or reform it fires "space balls" ahead of its nose;
- * every ball that connects bursts and shoves the mini ships aside (the
- * fleet reads impacts from lib/fleetBus). The ship and its pad scale down
- * on narrow screens so the flight line never crowds the first screen.
+ * during a dispersal or reform it fires ahead of its nose; every ball that
+ * connects bursts and shoves the mini ships aside (the fleet reads impacts
+ * from lib/fleetBus). The ship and its pad scale down on narrow screens so
+ * the flight line never crowds the first screen.
  *
  * Sway, flicker and exhaust emission are gated by smoothed scroll velocity,
- * so a resting page is a still page (the trail and docked state persist).
- *
- * Fallbacks: reduced motion / no 2D canvas -> data-flight="off", which
- * shows a static parked-rocket SVG in the hero (globals.css).
+ * so a resting page is a still page (the trail and docked state persist;
+ * the chopper's rotor alone keeps idling — it's a rotor).
  */
 
 const PAL = {
   light: {
-    red: '#fc3d21',
-    cream: '#f5efe1',
-    ink: '#201d17',
-    blue: '#0b3d91',
-    flame: '#fc3d21',
+    red: '#ea384c',
+    cream: '#ebe2d6',
+    ink: '#17171a',
+    blue: '#2f3e81',
+    flame: '#ea384c',
     flameCore: '#fff3d6',
   },
   dark: {
-    red: '#fc3d21',
-    cream: '#ede7d8',
-    ink: '#ede7d8',
-    blue: '#8fb2f2',
-    flame: '#fc3d21',
-    flameCore: '#fff3d6',
+    red: '#ff4d64',
+    cream: '#2a2a30',
+    ink: '#ebe2d6',
+    blue: '#8ea2e8',
+    flame: '#ff4d64',
+    flameCore: '#ffe9c9',
   },
 }
 
 type Pt = { x: number; y: number }
 
+/**
+ * Stage parallax: on the presentation stage (lib/fleetBus.virtual) the
+ * aircraft flies 2.2× the fleet's virtual travel — one card of scrub moves
+ * it 2.2 cards of flight — so the flight path visibly leaves the landing
+ * area behind and fakes depth beyond it. The route extends past the real
+ * document by the same factor, keeping the dock reachable exactly at the
+ * last stop.
+ */
+const PARALLAX = 2.2
+
 function smoothstep(a: number, b: number, x: number) {
   const t = Math.max(0, Math.min(1, (x - a) / (b - a)))
   return t * t * (3 - 2 * t)
-}
-
-function easeOutBack(t: number) {
-  const c = 1.35
-  const u = t - 1
-  return 1 + (c + 1) * u * u * u + c * u * u
 }
 
 export default function FlightCanvas() {
@@ -83,19 +88,9 @@ export default function FlightCanvas() {
     if (!canvas) return
     const root = document.documentElement
 
-    const bail = () => {
-      root.dataset.flight = 'off'
-    }
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      bail()
-      return
-    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const ctx = canvas.getContext('2d', { alpha: true })
-    if (!ctx) {
-      bail()
-      return
-    }
+    if (!ctx) return
 
     let dead = false
 
@@ -109,8 +104,20 @@ export default function FlightCanvas() {
     let scaleS = 1
     let swayAmp = 10
     let narrow = false
-    let finTip = 31 // fin sweep — folded on narrow so the ship fits its gutter
-    let finBase = 15
+
+    // ---- themed aircraft -------------------------------------------------------
+    // Three vehicles share one flight plan; the theme MODE picks which one
+    // is airborne (lib/theme.ts): system → chopper, light → Cessna, dark →
+    // soviet capsule rocket. All are drawn in ship-local units, nose up
+    // (−y), ~130 units tall, so the same route/pose/attack code drives all.
+    type VehicleKind = 'cessna' | 'chopper' | 'vostok'
+    let vehicle: VehicleKind = 'chopper'
+    const pickVehicle = (): VehicleKind => {
+      const m = document.documentElement.dataset.theme
+      return m === 'light' ? 'cessna' : m === 'dark' ? 'vostok' : 'chopper'
+    }
+    let spin = 0 // prop/rotor angle accumulator (rad)
+    let spinV = 0 // current angular speed (rad/s)
 
     // ---- contrail: static fume dots laid along the route (doc space) ---------
     type TrailDot = { x: number; y: number; u: number; nx: number; ny: number; wob: number; rj: number }
@@ -141,13 +148,17 @@ export default function FlightCanvas() {
       // first screen (the portrait owns it)
       scaleS = narrow ? (w < 480 ? 0.42 : 0.48) : 1
       swayAmp = narrow ? (w < 480 ? 3 : 6) : 10
-      finTip = narrow ? 22 : 31
-      finBase = narrow ? 13 : 15
       const docH = Math.max(
         document.documentElement.scrollHeight,
         document.body?.scrollHeight ?? 0,
         h
       )
+      // presentation stage: the stage's travel length lives on
+      // fleetBus.spanPx (N stops × posPx). The route is authored straight
+      // against the parallaxed virtual travel so the ship, flying 2.2× the
+      // fleet, still ends docked on screen at the last stop — the flight
+      // path visibly outgrows the landing area, faking depth beyond it
+      const spanPx = Math.max(1, fleetBus.virtual ? fleetBus.spanPx : docH - h)
       const heroEl = document.querySelector('.hero') as HTMLElement | null
       const footEl = document.querySelector('footer') as HTMLElement | null
       const heroTop = heroEl ? heroEl.getBoundingClientRect().top + window.scrollY : 0
@@ -193,7 +204,9 @@ export default function FlightCanvas() {
       push(gutterX(startY), startY)
       const joinIdx = pts.length - 1
 
-      const endY = Math.min(docH - 8, Math.max(footTop - 170, startY + 60))
+      const endY = fleetBus.virtual
+        ? Math.max(startY + 600, PARALLAX * spanPx + h - 120)
+        : Math.min(docH - 8, Math.max(footTop - 170, startY + 60))
       const steps = Math.max(8, Math.round((endY - startY) / 26))
       for (let i = 1; i <= steps; i++) {
         const y = startY + ((endY - startY) * i) / steps
@@ -272,169 +285,308 @@ export default function FlightCanvas() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
 
-    // ---- rocket parts ----------------------------------------------------------
-    // dock offsets in ship-local units (nose up = -y), staggered sub-windows
-    type Part = {
-      key: 'nose' | 'finL' | 'finR' | 'engine' | 'body'
-      dx: number; dy: number; rot: number
-      f0: number; f1: number
-    }
-    const PARTS: Part[] = [
-      { key: 'nose', dx: 0, dy: -46, rot: -0.17, f0: 0.0, f1: 0.55 },
-      { key: 'finL', dx: -26, dy: 16, rot: -0.35, f0: 0.15, f1: 0.75 },
-      { key: 'finR', dx: 26, dy: 16, rot: 0.35, f0: 0.15, f1: 0.75 },
-      { key: 'engine', dx: 0, dy: 42, rot: 0, f0: 0.35, f1: 1.0 },
-      { key: 'body', dx: 0, dy: 0, rot: 0, f0: 0, f1: 0.01 },
-    ]
-
-    const drawPart = (
+    // ---- vehicle drawing ---------------------------------------------------------
+    // Flame behind the hull (rocket only), then the hull in local units.
+    const drawFlame = (
       g: CanvasRenderingContext2D,
-      key: Part['key'],
-      pal: (typeof PAL)['light'],
-      outline: string
+      wOut: number,
+      y0: number,
+      len: number,
+      pal: (typeof PAL)['light']
     ) => {
-      g.lineWidth = 1.75
-      g.strokeStyle = outline
-      g.lineJoin = 'round'
-      if (key === 'nose') {
-        g.beginPath()
-        g.moveTo(0, -64)
-        g.quadraticCurveTo(13, -56, 16.5, -38)
-        g.lineTo(17, -26)
-        g.lineTo(-17, -26)
-        g.lineTo(-16.5, -38)
-        g.quadraticCurveTo(-13, -56, 0, -64)
-        g.closePath()
-        g.fillStyle = pal.red
-        g.fill()
-        g.stroke()
-      } else if (key === 'finL' || key === 'finR') {
-        const s = key === 'finL' ? -1 : 1
-        g.beginPath()
-        g.moveTo(finBase * s, 6)
-        g.lineTo(finTip * s, 44)
-        g.lineTo(finBase * s, 40)
-        g.closePath()
-        g.fillStyle = pal.red
-        g.fill()
-        g.stroke()
-      } else if (key === 'engine') {
-        g.beginPath()
-        g.moveTo(-11, 34)
-        g.lineTo(11, 34)
-        g.lineTo(15, 50)
-        g.lineTo(-15, 50)
-        g.closePath()
-        g.fillStyle = pal.ink
-        g.fill()
-        g.stroke()
-      } else {
-        // body: cream hull + red band + porthole
-        g.beginPath()
-        g.moveTo(-17, -26)
-        g.lineTo(17, -26)
-        g.lineTo(17, 30)
-        g.quadraticCurveTo(17, 34, 13, 34)
-        g.lineTo(-13, 34)
-        g.quadraticCurveTo(-17, 34, -17, 30)
-        g.closePath()
-        g.fillStyle = pal.cream
-        g.fill()
-        g.stroke()
-        g.save()
-        g.beginPath()
-        g.moveTo(-17, -26)
-        g.lineTo(17, -26)
-        g.lineTo(17, 30)
-        g.quadraticCurveTo(17, 34, 13, 34)
-        g.lineTo(-13, 34)
-        g.quadraticCurveTo(-17, 34, -17, 30)
-        g.closePath()
-        g.clip()
-        g.fillStyle = pal.red
-        g.fillRect(-17, -26, 34, 14)
-        g.restore()
-        g.beginPath()
-        g.moveTo(-17, -26)
-        g.lineTo(17, -26)
-        g.lineTo(17, 30)
-        g.quadraticCurveTo(17, 34, 13, 34)
-        g.lineTo(-13, 34)
-        g.quadraticCurveTo(-17, 34, -17, 30)
-        g.closePath()
-        g.stroke()
-        // porthole
-        g.beginPath()
-        g.arc(0, 2, 6.5, 0, Math.PI * 2)
-        g.fillStyle = pal.blue
-        g.fill()
-        g.lineWidth = 2
-        g.stroke()
-        g.beginPath()
-        g.arc(-2, 0, 1.6, 0, Math.PI * 2)
-        g.fillStyle = pal.cream
-        g.fill()
-      }
+      g.beginPath()
+      g.moveTo(-wOut, y0)
+      g.quadraticCurveTo(-wOut * 1.2, y0 + len * 0.55, 0, y0 + len)
+      g.quadraticCurveTo(wOut * 1.2, y0 + len * 0.55, wOut, y0)
+      g.closePath()
+      g.fillStyle = pal.flame
+      g.globalAlpha = 0.85
+      g.fill()
+      g.beginPath()
+      g.moveTo(-wOut * 0.53, y0)
+      g.quadraticCurveTo(-wOut * 0.66, y0 + len * 0.4, 0, y0 + len * 0.6)
+      g.quadraticCurveTo(wOut * 0.66, y0 + len * 0.4, wOut * 0.53, y0)
+      g.closePath()
+      g.fillStyle = pal.flameCore
+      g.globalAlpha = 0.95
+      g.fill()
+      g.globalAlpha = 1
     }
 
-    const drawShip = (
+    // one spinning blade pair through (cx, cy) at `ang` — prop, rotors
+    const drawBar = (g: CanvasRenderingContext2D, len: number, w: number, fill: string) => {
+      g.fillStyle = fill
+      g.beginPath()
+      g.moveTo(-len, -w / 2)
+      g.lineTo(len, -w / 3)
+      g.lineTo(len, w / 3)
+      g.lineTo(-len, w / 2)
+      g.closePath()
+      g.fill()
+    }
+
+    const drawVehicle = (
       x: number,
       y: number,
       rot: number,
-      dockF: number,
       thrust: number,
       flick: number,
+      spinAng: number,
       pal: (typeof PAL)['light'],
       outline: string
     ) => {
       const g = ctx
-      // flame first (behind everything), rides the engine part
-      if (thrust > 0.01) {
-        const eng = PARTS[3]
-        const f = easeOutBack(Math.max(0, Math.min(1, (dockF - eng.f0) / (eng.f1 - eng.f0))))
-        const ex = eng.dx * f
-        const ey = eng.dy * f
-        const len = (18 + 54 * thrust) * (0.8 + 0.4 * flick)
-        const wOut = 5.5 + 3.5 * thrust
-        g.save()
-        g.translate(x, y)
-        g.rotate(rot)
-        g.scale(scaleS, scaleS)
-        g.translate(ex, ey)
-        // outer plume
+      g.save()
+      g.translate(x, y)
+      g.rotate(rot)
+      g.scale(scaleS, scaleS)
+      g.lineJoin = 'round'
+      g.lineCap = 'round'
+      g.lineWidth = 1.75
+      g.strokeStyle = outline
+
+      if (vehicle === 'vostok') {
+        // ---- soviet capsule rocket: sphere capsule + strapped module + fins
+        if (thrust > 0.01) {
+          drawFlame(g, 5.5 + 3.5 * thrust, 44, (18 + 54 * thrust) * (0.8 + 0.4 * flick), pal)
+        }
+        // capsule sphere
         g.beginPath()
-        g.moveTo(-wOut, 50)
-        g.quadraticCurveTo(-wOut * 1.2, 50 + len * 0.55, 0, 50 + len)
-        g.quadraticCurveTo(wOut * 1.2, 50 + len * 0.55, wOut, 50)
-        g.closePath()
-        g.fillStyle = pal.flame
-        g.globalAlpha = 0.85
+        g.arc(0, -10, 23, 0, Math.PI * 2)
+        g.fillStyle = pal.cream
         g.fill()
-        // inner core
+        // navy band (clipped into the sphere) + roundel + hatch
+        g.save()
         g.beginPath()
-        g.moveTo(-wOut * 0.53, 50)
-        g.quadraticCurveTo(-wOut * 0.66, 50 + len * 0.4, 0, 50 + len * 0.6)
-        g.quadraticCurveTo(wOut * 0.66, 50 + len * 0.4, wOut * 0.53, 50)
+        g.arc(0, -10, 23, 0, Math.PI * 2)
+        g.clip()
+        g.fillStyle = pal.blue
+        g.fillRect(-24, -2, 48, 7)
+        g.restore()
+        g.beginPath()
+        g.arc(0, -10, 23, 0, Math.PI * 2)
+        g.stroke()
+        g.beginPath()
+        g.arc(0, -20, 5, 0, Math.PI * 2)
+        g.fillStyle = pal.blue
+        g.fill()
+        g.stroke()
+        g.beginPath()
+        g.arc(-9, -13, 3, 0, Math.PI * 2)
+        g.fillStyle = pal.red
+        g.fill()
+        // instrument module + skirt
+        g.beginPath()
+        g.moveTo(-14, 13)
+        g.lineTo(14, 13)
+        g.lineTo(10, 34)
+        g.lineTo(-10, 34)
         g.closePath()
-        g.fillStyle = pal.flameCore
-        g.globalAlpha = 0.95
+        g.fillStyle = pal.cream
+        g.fill()
+        g.stroke()
+        // swept fins
+        g.beginPath()
+        g.moveTo(-10, 20)
+        g.lineTo(-21, 46)
+        g.lineTo(-10, 34)
+        g.closePath()
+        g.fillStyle = pal.red
+        g.fill()
+        g.stroke()
+        g.beginPath()
+        g.moveTo(10, 20)
+        g.lineTo(21, 46)
+        g.lineTo(10, 34)
+        g.closePath()
+        g.fillStyle = pal.red
+        g.fill()
+        g.stroke()
+        // nozzle
+        g.beginPath()
+        g.moveTo(-6, 34)
+        g.lineTo(6, 34)
+        g.lineTo(8, 44)
+        g.lineTo(-8, 44)
+        g.closePath()
+        g.fillStyle = pal.ink
+        g.fill()
+        g.stroke()
+      } else if (vehicle === 'cessna') {
+        // ---- vintage Cessna taildragger: high wing, front prop, tailwheel
+        // fuselage (rounded, nose up)
+        g.beginPath()
+        g.moveTo(-9, -30)
+        g.quadraticCurveTo(-9, -36, -4, -37)
+        g.lineTo(4, -37)
+        g.quadraticCurveTo(9, -36, 9, -30)
+        g.lineTo(9, 24)
+        g.quadraticCurveTo(9, 28, 5, 28)
+        g.lineTo(-5, 28)
+        g.quadraticCurveTo(-9, 28, -9, 24)
+        g.closePath()
+        g.fillStyle = pal.cream
+        g.fill()
+        g.stroke()
+        // windshield strip (navy)
+        g.fillStyle = pal.blue
+        g.fillRect(-6.5, -31, 13, 5)
+        g.strokeRect(-6.5, -31, 13, 5)
+        // high wing across the cabin
+        g.beginPath()
+        g.rect(-31, -11, 62, 7)
+        g.fillStyle = pal.blue
+        g.fill()
+        g.stroke()
+        // wing struts
+        g.beginPath()
+        g.moveTo(-18, -5)
+        g.lineTo(-9, 8)
+        g.moveTo(18, -5)
+        g.lineTo(9, 8)
+        g.stroke()
+        // tail fin (rudder red) + tailplane
+        g.beginPath()
+        g.moveTo(-3, 16)
+        g.lineTo(-11, 33)
+        g.lineTo(-3, 31)
+        g.closePath()
+        g.fillStyle = pal.red
+        g.fill()
+        g.stroke()
+        g.beginPath()
+        g.rect(-14, 24, 28, 3.5)
+        g.fillStyle = pal.blue
+        g.fill()
+        g.stroke()
+        // taildragger gear: mains under the wing + tailwheel
+        g.beginPath()
+        g.moveTo(-9, 18)
+        g.lineTo(-15, 30)
+        g.moveTo(9, 18)
+        g.lineTo(15, 30)
+        g.stroke()
+        g.beginPath()
+        g.arc(-15, 31, 3.4, 0, Math.PI * 2)
+        g.fillStyle = pal.ink
+        g.fill()
+        g.stroke()
+        g.beginPath()
+        g.arc(15, 31, 3.4, 0, Math.PI * 2)
+        g.fill()
+        g.stroke()
+        g.beginPath()
+        g.arc(-2, 32, 2.1, 0, Math.PI * 2)
+        g.fill()
+        g.stroke()
+        // prop: spinner + two blades + motion blur disc when throttled
+        g.beginPath()
+        g.arc(0, -39, 2.6, 0, Math.PI * 2)
+        g.fillStyle = pal.red
+        g.fill()
+        g.stroke()
+        if (thrust > 0.02) {
+          g.globalAlpha = 0.16 + 0.1 * thrust
+          g.beginPath()
+          g.ellipse(0, -39, 16, 2.6, 0, 0, Math.PI * 2)
+          g.fillStyle = outline
+          g.fill()
+          g.globalAlpha = 1
+        }
+        g.save()
+        g.translate(0, -39)
+        g.rotate(spinAng)
+        drawBar(g, 15.5, 2.3, outline)
+        g.restore()
+      } else {
+        // ---- vintage chopper: bubble cabin, skids, idling main rotor
+        // tail boom first (behind the cabin)
+        g.beginPath()
+        g.rect(-2.4, 14, 4.8, 34)
+        g.fillStyle = pal.blue
+        g.fill()
+        g.stroke()
+        // tail fin + tail rotor
+        g.beginPath()
+        g.moveTo(2.4, 40)
+        g.lineTo(9, 50)
+        g.lineTo(2.4, 48)
+        g.closePath()
+        g.fillStyle = pal.red
+        g.fill()
+        g.stroke()
+        g.beginPath()
+        g.arc(6, 46, 2.2, 0, Math.PI * 2)
+        g.fillStyle = pal.cream
+        g.fill()
+        g.stroke()
+        g.save()
+        g.translate(6, 46)
+        g.rotate(spinAng * 2.2)
+        drawBar(g, 7, 1.8, outline)
+        g.restore()
+        // cabin
+        g.beginPath()
+        g.moveTo(-13, 10)
+        g.quadraticCurveTo(-13, -16, 0, -17)
+        g.quadraticCurveTo(13, -16, 13, 10)
+        g.quadraticCurveTo(13, 15, 8, 15)
+        g.lineTo(-8, 15)
+        g.quadraticCurveTo(-13, 15, -13, 10)
+        g.closePath()
+        g.fillStyle = pal.cream
+        g.fill()
+        g.stroke()
+        // windshield (navy bubble)
+        g.beginPath()
+        g.moveTo(-9, -4)
+        g.quadraticCurveTo(-9, -14, 0, -15)
+        g.quadraticCurveTo(9, -14, 9, -4)
+        g.quadraticCurveTo(0, -1, -9, -4)
+        g.closePath()
+        g.fillStyle = pal.blue
+        g.fill()
+        g.stroke()
+        // skids + struts
+        g.beginPath()
+        g.moveTo(-18, 27)
+        g.lineTo(18, 27)
+        g.moveTo(-14, 32)
+        g.lineTo(14, 32)
+        g.moveTo(-13, 15)
+        g.lineTo(-16, 27)
+        g.moveTo(13, 15)
+        g.lineTo(16, 27)
+        g.moveTo(-7, 15)
+        g.lineTo(-8, 27)
+        g.moveTo(7, 15)
+        g.lineTo(8, 27)
+        g.stroke()
+        // main rotor: mast + hub + blades + blur disc (always idling)
+        g.beginPath()
+        g.moveTo(0, -17)
+        g.lineTo(0, -26)
+        g.stroke()
+        g.beginPath()
+        g.arc(0, -27, 2.6, 0, Math.PI * 2)
+        g.fillStyle = pal.red
+        g.fill()
+        g.stroke()
+        g.globalAlpha = 0.15 + 0.12 * thrust
+        g.beginPath()
+        g.ellipse(0, -27, 34, 2.8, 0, 0, Math.PI * 2)
+        g.fillStyle = outline
         g.fill()
         g.globalAlpha = 1
-        g.restore()
-      }
-      for (const part of PARTS) {
-        const f = easeOutBack(Math.max(0, Math.min(1, (dockF - part.f0) / (part.f1 - part.f0))))
-        const px = part.dx * f
-        const py = part.dy * f
-        const pr = part.rot * f
         g.save()
-        g.translate(x, y)
-        g.rotate(rot + pr)
-        g.scale(scaleS, scaleS)
-        g.translate(px, py)
-        drawPart(g, part.key, pal, outline)
+        g.translate(0, -27)
+        g.rotate(spinAng)
+        drawBar(g, 34, 2.6, outline)
+        g.rotate(Math.PI / 2)
+        drawBar(g, 34, 2.2, outline)
         g.restore()
       }
+      g.restore()
     }
 
     const drawPad = (
@@ -473,10 +625,15 @@ export default function FlightCanvas() {
 
     // ---- theme -----------------------------------------------------------------
     let dark = document.documentElement.classList.contains('dark')
+    vehicle = pickVehicle()
     const themeObserver = new MutationObserver(() => {
       dark = document.documentElement.classList.contains('dark')
+      vehicle = pickVehicle()
     })
-    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    })
 
     // ---- lifecycle ---------------------------------------------------------------
     let raf = 0
@@ -503,6 +660,7 @@ export default function FlightCanvas() {
     let prevThrust = 0
     let lastRotAttr = ''
     let lastScrollY = window.scrollY
+    let lastVirtual = fleetBus.virtual
     let activity = 0
 
     const frame = () => {
@@ -517,12 +675,20 @@ export default function FlightCanvas() {
       const vh = window.innerHeight
       const docH = Math.max(document.documentElement.scrollHeight, vh)
       // presentation stage: the document never scrolls — the flight layer
-      // reads the stage's virtual Y instead, so the rocket keeps flying as
-      // the user steps through the portrait ⇄ card cycle
-      const scrollY = fleetBus.virtual ? fleetBus.y : window.scrollY
+      // reads the stage's virtual Y instead (multiplied for parallax), so
+      // the aircraft keeps flying as the user steps through cards, faster
+      // than the fleet moves. A virtual flip rebuilds the (longer) route.
+      const virt = fleetBus.virtual
+      if (virt !== lastVirtual) {
+        lastVirtual = virt
+        size()
+        buildPath()
+      }
+      const scrollY = virt ? fleetBus.y * PARALLAX : window.scrollY
 
       // flight progress: purely scroll-driven, eased, fully reversible
-      const scrollFrac = docH > vh ? scrollY / (docH - vh) : 0
+      const span = Math.max(0, fleetBus.virtual ? fleetBus.spanPx : docH - vh) * (virt ? PARALLAX : 1)
+      const scrollFrac = span > 0 ? scrollY / span : 0
       const target = Math.min(1, scrollFrac)
       p += (target - p) * Math.min(1, dt * 3.2)
       if (Math.abs(target - p) < 0.0008) p = target // snap: a resting page is exactly still
@@ -548,11 +714,11 @@ export default function FlightCanvas() {
       const padBeacon = Math.round(52 * (narrow ? scaleS * 1.3 : 1))
       drawPad(path[0].x, path[0].y - sy + 58 * scaleS + 6, padF, pal, padHalf, padBeacon)
       const dockF = smoothstep(0.955, 1.0, p)
-      // landing pad meets the detached engine: engine bottom sits at +92·s
+      // landing pad meets the landing gear: gear bottom sits at +50·s
       if (dockF > 0.01)
         drawPad(
           dock.x,
-          dock.y - sy + 92 * scaleS + 6,
+          dock.y - sy + 50 * scaleS + 6,
           dockF,
           pal,
           Math.round((narrow ? 20 : 46) * (narrow ? scaleS * 1.3 : 1)),
@@ -698,7 +864,20 @@ export default function FlightCanvas() {
         ctx.globalAlpha = 1
       }
 
-      drawShip(shipX, shipY - sy, rot, dockF, flame, flick, pal, outline)
+      // prop/rotor speed: the chopper idles forever, the prop winds with
+      // throttle, the rocket has none — all eased so throttle changes read
+      const spinTarget =
+        vehicle === 'chopper'
+          ? 2.2 + 11 * flame
+          : vehicle === 'cessna'
+            ? flame > 0.02
+              ? 7 + 42 * flame
+              : 0
+            : 0
+      spinV += (spinTarget - spinV) * Math.min(1, dt * 5)
+      spin += spinV * dt
+
+      drawVehicle(shipX, shipY - sy, rot, flame, flick, spin, pal, outline)
 
       // ---- strafing run -------------------------------------------------------
       // the ship attacks the mini ships whenever it is flying near the hero
@@ -781,8 +960,8 @@ export default function FlightCanvas() {
         }
       }
 
-      // ignition flash at the bell
-      if (flashT > 0) {
+      // ignition flash at the bell (rocket only)
+      if (flashT > 0 && vehicle === 'vostok') {
         const k = flashT / 0.3
         ctx.globalAlpha = 0.5 * k * k
         ctx.fillStyle = pal.flameCore

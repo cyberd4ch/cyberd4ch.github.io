@@ -1,76 +1,97 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { Children } from 'react'
 
 /**
- * One mobile story chapter. On phones the home page becomes a card deck:
- * each chapter reserves `h` viewport-heights of scroll and its card sticks
- * to the screen for the dwell, then gets pushed up off the top by the next
- * card arriving from below — every card travels upward, in one side and out
- * the other. On desktop the wrappers dissolve via `display: contents`, so
- * the sections flow exactly as they always did.
+ * One mobile story chapter. On the presentation stage (DeckStage, phones)
+ * chapters are fixed full-screen layers: the card shows COLLAPSED — just its
+ * bottom bar (tile, label, index, drawer button) — and the button springs
+ * the sheet open (children revealing in a stagger driven by --cardP).
+ * DeckStage owns all animation state; this component is pure markup.
  *
- * On the presentation stage (DeckStage, phones) chapters become fixed
- * full-screen layers shown one at a time instead — the same card content,
- * scrubbed by the gesture. Each chapter renders as a drawer: the card panel
- * plus a trailing meta line underneath, wrapped in `.deck-drawer` so
- * DeckStage can clip it bottom-up in sync with the scroll (--cardP). The
- * header bar above the content (tile + label + index) ports the watermelon
- * profile-card's compact small-screen design.
+ * On desktop (and without the stage) every wrapper dissolves via
+ * `display: contents`, so the sections flow exactly as they always did.
  */
+const TILE_BG = [
+  'var(--chip-blue)',
+  'var(--chip-yellow)',
+  'var(--chip-pink)',
+  'var(--chip-green)',
+  'var(--chip-cream)',
+]
+
 export default function Chapter({
   children,
-  h = 128,
-  first = false,
   mobileOnly = false,
   index,
   total,
   label,
   icon,
-  tail,
 }: {
   children: ReactNode
-  /** chapter scroll length, in small-viewport heights */
-  h?: number
-  /** marks the first chapter for the deck driver's lift-off override */
-  first?: boolean
   /** chapter exists only on phones (identity card; desktop keeps the hero copy) */
   mobileOnly?: boolean
-  /** 1-based card index / deck size — renders the drawer's header bar + meta */
+  /** 1-based card index / deck size — renders the bar + header */
   index?: number
   total?: number
-  /** chapter name for the header bar */
+  /** chapter name for the bar + header */
   label?: string
   /** small glyph for the header tile */
   icon?: ReactNode
-  /** trailing text under the card — the first thing the drawer reveals */
-  tail?: string
 }) {
+  const n = index ?? 1
+  const tileBg = TILE_BG[(n - 1) % TILE_BG.length]
   return (
-    <div
-      className={mobileOnly ? 'chapter chapter-mobile-only' : 'chapter'}
-      data-chapter-first={first ? 'true' : undefined}
-      style={{ '--chapter-h': `${h}svh` } as CSSProperties}
-    >
-      <div className="deck-drawer">
-        <div className="chapter-card">
-          <div className="chapter-panel no-scrollbar">
-            {index != null && total != null && (
-              <div className="deck-head">
-                {icon && <span className="deck-tile">{icon}</span>}
-                {label && <span className="deck-head-label">{label}</span>}
-                <span className="deck-head-idx">
-                  {String(index).padStart(2, '0')} / {String(total).padStart(2, '0')}
+    <div className={mobileOnly ? 'chapter chapter-mobile-only' : 'chapter'}>
+      <div className="chapter-card">
+        <div className="deck-card">
+          <div className="deck-sheet">
+            <div className="deck-head">
+              {icon && (
+                <span className="deck-tile" style={{ background: tileBg } as CSSProperties}>
+                  {icon}
                 </span>
-              </div>
+              )}
+              {label && <span className="deck-head-label">{label}</span>}
+            </div>
+            <div className="deck-body">
+              {Children.map(children, (child, i) => (
+                <div style={{ '--n': i } as CSSProperties}>{child}</div>
+              ))}
+            </div>
+          </div>
+          <div className="deck-bar">
+            {icon && (
+              <span className="deck-tile" style={{ background: tileBg } as CSSProperties}>
+                {icon}
+              </span>
             )}
-            {children}
+            {label && <span className="deck-bar-label">{label}</span>}
+            {index != null && total != null && (
+              <span className="deck-bar-idx">
+                {String(index).padStart(2, '0')} / {String(total).padStart(2, '0')}
+              </span>
+            )}
+            {index != null && (
+              <button
+                type="button"
+                className="deck-toggle"
+                aria-expanded={false}
+                aria-label={label ? `open ${label}` : 'open card'}
+              >
+                <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true">
+                  <path
+                    d="M3 6l5 5 5-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
-        {index != null && total != null && (
-          <span className="deck-tail">
-            {String(index).padStart(2, '0')} / {String(total).padStart(2, '0')}
-            {tail ? ` — ${tail}` : ''}
-          </span>
-        )}
       </div>
     </div>
   )

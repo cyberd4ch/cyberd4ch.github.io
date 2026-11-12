@@ -38,11 +38,11 @@ type Ship = {
   delay: number                   // intro attraction delay (s)
   stag: number                    // dissolve stagger 0..1
   v: 0 | 1 | 2                    // variant: rocket / fighter / saucer
-  band: 0 | 1 | 2 | 3 | 4        // 0 red skin, 1 navy accent, 2 ink, 3 hat tint, 4 eye white
+  band: 0 | 1 | 2 | 3 | 4 | 5    // 0 skin, 1 accent, 2 ink, 3 felt, 4 eye white, 5 mouth
   w: number                       // size weight
   cyf: number                     // cell row as a fraction of the art height (0 top .. 1 bottom)
-  eye: 0 | 1                      // inside the blink band
-  ord: number                     // draw-order rank: skin 0, hat 1, whites 2, ink 3
+  pupil: 0 | 1                    // inside a lens — the glance spot
+  ord: number                     // draw-order rank: skin 0, hat 1, whites 2, ink/mouth 3
   jr: number                      // static rotation jitter (formation)
   spin: number                    // scatter spin base (rad/s)
   px: number; py: number          // spring position (viewport space)
@@ -50,30 +50,33 @@ type Ship = {
 }
 
 type Grid = {
-  cells: { cx: number; cy: number; cyf: number; dark: boolean; hat: boolean; wt: boolean; w: number }[]
+  cells: { cx: number; cy: number; cyf: number; dark: boolean; hat: boolean; wt: boolean; mo: boolean; pupil: boolean; w: number }[]
   cols: number
   rows: number
 }
 
 const VARIANTS = ['rocket', 'fighter', 'saucer'] as const
 
-// blink band: eye rows as a fraction of the (head-cropped) art height —
+// eye band: lens rows as a fraction of the (bust-cropped) art height —
 // calibrated against the avatar's actual geometry, see qa-shots previews
-const EYE0 = 0.46
-const EYE1 = 0.76 // covers the full lens circles (they reach head row ~50)
+const EYE0 = 0.33
+const EYE1 = 0.41
 
 function bandColors(dark: boolean) {
+  // the profile photo's own palette: skin #c8a694, navy backdrop #2f3e81,
+  // charcoal ink #17171a, cream highlight #ebe2d6, mouth rose #8c7573
   return dark
-    ? { bright: '#fc3d21', mid: '#8fb2f2', dark: '#ede7d8', tint: '#e0c9a4', wt: '#070c16' }
-    : { bright: '#fc3d21', mid: '#0b3d91', dark: '#201d17', tint: '#e6b98c', wt: '#f5efe1' }
+    ? { bright: '#c8a694', mid: '#8ea2e8', dark: '#ebe2d6', tint: '#56565c', wt: '#101012', mouth: '#a98884' }
+    : { bright: '#c8a694', mid: '#2f3e81', dark: '#17171a', tint: '#ebe2d6', wt: '#fafafa', mouth: '#8c7573' }
 }
 
 /**
  * Downsample an image source into the ship grid (same pipeline as the QA
- * preview harness, qa-shots/sample-preview.js). The source is head-cropped —
- * the avatar is a bust portrait, so the crop throws away the empty navy
- * margins and most of the suit, filling the frame with the head. Cells
- * classify as (thresholds calibrated against the avatar's real pixels):
+ * preview harness, qa-shots/sample-preview.js). The source is bust-cropped —
+ * the avatar is a head-and-shoulders portrait, so the crop keeps the head
+ * AND the upper body (collar, shoulders, a sliver of the suit), filling the
+ * frame with the whole figure. Cells classify as (thresholds calibrated
+ * against the avatar's real pixels):
  *  - dark: well below the backdrop luminance, or a neutral mid-gray —
  *    pupils, brows, glasses frames, line art, collar. Drawn small and last,
  *    so features stay crisp on top of the skin mass.
@@ -85,17 +88,23 @@ function bandColors(dark: boolean) {
  *  - otherwise skin: warm + brighter than the backdrop, drawn large — the
  *    face's mass. Cool bright cells (blue backdrop) drop as background.
  *
- * The glasses (and now the nose + mouth, which sit in the same centered
- * strip) get a second pass: the feature box is re-sampled at 2× and its
- * cells (fractional grid coords) replace the head-resolution ones — a lens
- * is ~4 cells wide in the head grid, which no amount of styling can make
- * read as an eye.
+ * The glasses (and the nose + mouth, which sit in the same centered strip)
+ * get a second pass: the feature box is re-sampled at 2× and its cells
+ * (fractional grid coords) replace the head-resolution ones — a lens is
+ * ~4 cells wide in the head grid, which no amount of styling can make read
+ * as an eye.
+ *
+ * Two tags come out of the sampler:
+ *  - pupil: ink cells inside a lens cluster — the glance spots
+ *  - mo: ink cells in the mouth band, thinned + shrunk — a small, subtle lip
  */
 function sampleGrid(src: CanvasImageSource, sw: number, sh: number, sampleCols: number): Grid {
-  const sX = sw * 0.22
-  const sY = sh * 0.155
-  const sW = sw * 0.48
-  const sH = sh * 0.465
+  // x-tight: the avatar's side margins are empty navy — cropping them away
+  // lets the figure (head + shoulders + suit) fill the frame vertically
+  const sX = sw * 0.16
+  const sY = sh * 0.055
+  const sW = sw * 0.68
+  const sH = sh * 0.885
   const rows0 = Math.max(2, Math.round((sampleCols * sH) / sW))
   const oc = document.createElement('canvas')
   oc.width = sampleCols
@@ -162,14 +171,13 @@ function sampleGrid(src: CanvasImageSource, sw: number, sh: number, sampleCols: 
   const head = classify(data, sampleCols, rows0, bg)
 
   // ---- face patch: re-sample the feature box at 2× -------------------------
-  // box in head-grid units (fractions of the 76×74 head grid, calibrated on
-  // the avatar: brow line through the lenses, down past the nose outline
-  // (head rows ~44–54) to the mouth (~56–62)), sampled fine and spliced in
-  // with fractional coordinates
-  const bx0 = Math.round(sampleCols * (24 / 76))
-  const bx1 = Math.round(sampleCols * (48 / 76))
-  const by0 = Math.round(rows0 * (30 / 74))
-  const by1 = Math.round(rows0 * (62 / 74))
+  // box as fractions of the bust crop (calibrated on the avatar: brow line
+  // through the lenses, down past the nose outline to the lips), sampled
+  // fine and spliced in with fractional coordinates
+  const bx0 = Math.round(sampleCols * 0.304)
+  const bx1 = Math.round(sampleCols * 0.537)
+  const by0 = Math.round(rows0 * 0.322)
+  const by1 = Math.round(rows0 * 0.557)
   const PCOLS = Math.max(4, (bx1 - bx0) * 2)
   const pW = ((bx1 - bx0) / sampleCols) * sW
   const pH = ((by1 - by0) / rows0) * sH
@@ -184,7 +192,11 @@ function sampleGrid(src: CanvasImageSource, sw: number, sh: number, sampleCols: 
   const patch = classify(pdata, PCOLS, PROWS, bg)
   const stepX = (bx1 - bx0) / PCOLS
   const stepY = (by1 - by0) / PROWS
-  const cells0 = head.filter(
+  type RawCell = {
+    cx: number; cy: number; dark: boolean; hat: boolean; wt: boolean
+    mo?: boolean; pupil?: boolean; w: number
+  }
+  const cells0: RawCell[] = head.filter(
     c => !(c.cx > bx0 && c.cx < bx1 && c.cy > by0 && c.cy < by1) // strictly inside: superseded
   )
   cells0.push(
@@ -195,6 +207,49 @@ function sampleGrid(src: CanvasImageSource, sw: number, sh: number, sampleCols: 
       cy: by0 + (c.cy + 0.5) * stepY - 0.5,
     }))
   )
+
+  // ---- mouth: thin + shrink the lip band ------------------------------------
+  // lip ink sits at fy ≈ 0.475–0.515 of the crop, centred on the face —
+  // keep 2 of 3 cells at a reduced weight so the mouth reads as a small
+  // dotted line, not a dark slab
+  for (const c of cells0) {
+    if (!c.dark) continue
+    const fy = rows0 > 1 ? c.cy / (rows0 - 1) : 0
+    if (fy > 0.472 && fy < 0.518 && c.cx > sampleCols * 0.40 && c.cx < sampleCols * 0.60) {
+      if ((c.cx * 7 + Math.round(c.cy * 2) * 3) % 3 === 0) continue // thinning
+      c.mo = true
+      c.w = Math.min(c.w, 0.62)
+    }
+  }
+
+  // ---- pupils: the ink spots inside the lenses -------------------------------
+  // white cells cluster into lenses (glasses → two, split at the widest cx
+  // gap); every ink cell inside a lens's bbox is a glance spot
+  const wtCells = cells0.filter(c => c.wt)
+  if (wtCells.length >= 3) {
+    const sorted = [...wtCells].sort((a, b) => a.cx - b.cx)
+    let bestGap = 0
+    let split = -1
+    for (let i = 1; i < sorted.length; i++) {
+      const gap = sorted[i].cx - sorted[i - 1].cx
+      if (gap > bestGap) {
+        bestGap = gap
+        split = i
+      }
+    }
+    const lenses =
+      split > 0 && bestGap > 1.5 ? [sorted.slice(0, split), sorted.slice(split)] : [sorted]
+    for (const lens of lenses) {
+      const x0 = Math.min(...lens.map(c => c.cx)) - 0.8
+      const x1 = Math.max(...lens.map(c => c.cx)) + 0.8
+      const y0 = Math.min(...lens.map(c => c.cy)) - 0.8
+      const y1 = Math.max(...lens.map(c => c.cy)) + 0.8
+      for (const c of cells0) {
+        if (!c.dark || c.mo) continue
+        if (c.cx > x0 && c.cx < x1 && c.cy > y0 && c.cy < y1) c.pupil = true
+      }
+    }
+  }
 
   let minX = sampleCols, maxX = -1, minY = rows0, maxY = -1
   for (const c of cells0) {
@@ -215,7 +270,9 @@ function sampleGrid(src: CanvasImageSource, sw: number, sh: number, sampleCols: 
         ...c,
         cx: c.cx - minX,
         cy: c.cy - minY,
-        // global art fraction 0..1 — drives the blink band + idle gestures
+        mo: !!c.mo,
+        pupil: !!c.pupil,
+        // global art fraction 0..1 — drives the eye band + idle gestures
         cyf: rows > 1 ? (c.cy - minY) / (rows - 1) : 0,
       })),
     cols,
@@ -281,7 +338,7 @@ export default function ShipCanvas() {
             img.onerror = () => rej(new Error('avatar load failed'))
             img.src = '/avatar.jpg'
           })
-          grid = sampleGrid(img, img.naturalWidth, img.naturalHeight, 76)
+          grid = sampleGrid(img, img.naturalWidth, img.naturalHeight, 64)
         } catch {
           const mc = markCanvas()
           grid = sampleGrid(mc, 256, 256, 76)
@@ -302,11 +359,15 @@ export default function ShipCanvas() {
 
       // ---- theme tracking (sprite colours swap with the palette) -------------
       let dark = document.documentElement.classList.contains('dark')
+      let pal = bandColors(dark) // tile fills read this directly
+      let spriteTimer = 0
       const themeObserver = new MutationObserver(() => {
         const d = document.documentElement.classList.contains('dark')
         if (d !== dark) {
           dark = d
-          buildSprites()
+          // debounced: a rebuild allocates ~130 sprite canvases in one go
+          window.clearTimeout(spriteTimer)
+          spriteTimer = window.setTimeout(buildSprites, 140)
         }
       })
       themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
@@ -319,14 +380,14 @@ export default function ShipCanvas() {
       let anchorY = 0      // doc space natively; viewport space on the stage
       let heroH = 700
       let docH = 1000
-      // deck-timed dispersal end in scroll px; -1 = not yet measured (the
-      // frame fills it in once data-deck is on and the chapter exists)
-      let deckEnd = -1
       // presentation stage state (lib/fleetBus, components/deck/DeckStage)
       let stageOn = fleetBus.virtual
       let formedCur = 1    // eased toward fleetBus.formedTarget on the clock
       let idleK = 0        // eased 0..1 gate for the idle facial gestures
-      let blinkAt = 3.5    // clock time of the next blink
+      let glanceT = 0      // current pupil offset, -1..1 (× max shift)
+      let glanceGoal = 0
+      let glanceHold = 0   // clock time the current goal expires
+      let glanceNext = 3.2 // clock time of the next glance decision
 
       // ---- no-fly zones: the document's free space, for safe dispersal --------
       type Zone = { x0: number; y0: number; x1: number; y1: number; area: number }
@@ -354,7 +415,6 @@ export default function ShipCanvas() {
           })
         }
         document.querySelectorAll('.page-col').forEach(grab)
-        document.querySelectorAll('.ticker').forEach(grab)
         // hero copy container (max-w-[680px] inside the full-bleed hero)
         document.querySelectorAll('.max-w-\\[680px\\]').forEach(grab)
 
@@ -428,34 +488,29 @@ export default function ShipCanvas() {
           anchorX = Math.round((vw - artW) / 2)
           anchorY = Math.round(heroTop + (heroH - artH) / 2)
         } else if (narrow) {
-          // phones: the portrait IS the hero — centered on the first screen,
-          // sized to fill the space between the telemetry rows (the ticker
-          // strip at the hero's foot is ~34px). the hero's own height drives
-          // the size because it is CSS svh-derived and stays put while mobile
-          // browser toolbars collapse/expand mid-scroll (innerHeight is not,
-          // and a rescaling portrait mid-scroll would read as a glitch)
-          const target = Math.min(heroH * 0.47, vw - 56)
-          pitch = target / grid.rows
+          // phones (no stage — e.g. reduced motion): the portrait IS the
+          // hero — centered on the first screen. The hero's own height
+          // drives the size because it is CSS svh-derived and stays put
+          // while mobile browser toolbars collapse/expand mid-scroll
+          pitch = Math.min((vw - 40) / grid.cols, (heroH - 120) / grid.rows)
           pitchY = pitch
           artW = pitch * grid.cols
+          const artH = pitchY * grid.rows
           anchorX = Math.round((vw - artW) / 2)
-          anchorY = heroTop + Math.round((heroH - 34 - pitchY * grid.rows) / 2) + 4
+          anchorY = heroTop + Math.round((heroH - artH) / 2)
         } else {
-          const artH = vw < 1100 ? 310 : 380
-          // 76 columns would widen the desktop art past the copy column —
-          // cap the width and let the art run a touch shorter instead
-          pitch = Math.min(artH / grid.rows, 400 / grid.cols)
+          const artH = vw < 1100 ? 330 : 400
+          // cap the width so the fuller bust never crowds the copy column
+          pitch = Math.min(artH / grid.rows, 340 / grid.cols)
           pitchY = pitch
           artW = pitch * grid.cols
           anchorX = vw - 26 - artW
-          anchorY = heroTop + 84
+          anchorY = heroTop + 64
         }
         if (!stageOn) computeZones()
         else zones = [] // stage scatters on an off-screen ring, zones unused
         buildSprites()
         assignHomes(ships.length > 0)
-        // re-measure the deck window on the next frame (geometry may differ)
-        deckEnd = -1
         // live ping table for the flight layer (see lib/fleetBus)
         fleetBus.ships = ships.map(s => ({ x: s.px, y: s.py, s: 0 }))
       }
@@ -464,13 +519,15 @@ export default function ShipCanvas() {
       const sprites: Record<string, HTMLCanvasElement> = {}
       const spritesRot: Record<string, HTMLCanvasElement> = {}
       const buildSprites = () => {
-        const pal = bandColors(dark)
-        const ss = Math.max(1, Math.min(3, Math.round(window.devicePixelRatio || 1)))
+        pal = bandColors(dark)
+        // capped at 2: a third device pixel buys sharpness the 2.4× cell
+        // oversampling already provides, at 2.25× the sprite memory
+        const ss = Math.max(1, Math.min(2, Math.round(window.devicePixelRatio || 1)))
         // 2.4× the cell: the largest drawn size (scattered swell × 1.55, then
         // stretchH 1.35 tall) must stay ≤ the bitmap or ships draw upscaled+blurry
         const sp = Math.ceil(Math.max(pitch, pitchY) * 2.4 * ss)
         for (const v of [0, 1, 2]) {
-          for (const band of [0, 1, 2, 3, 4]) {
+          for (const band of [0, 1, 2, 3, 4, 5]) {
             const s = document.createElement('canvas')
             s.width = sp
             s.height = sp
@@ -482,6 +539,7 @@ export default function ShipCanvas() {
               band === 1 ? pal.mid :
               band === 2 ? pal.dark :
               band === 3 ? pal.tint :
+              band === 5 ? pal.mouth :
               pal.wt
             const B = sp / ss
             // the sprite bitmap is stretched onto size2×sizeH at draw time — the
@@ -633,12 +691,21 @@ export default function ShipCanvas() {
             delay: 0.12 + (Math.hypot(hx - cx0, hy - cy0) / diag) * 0.65 + ((hash >>> 14) % 100) / 500,
             stag: (hash % 1000) / 1000,
             v: (hash % 3) as 0 | 1 | 2,
-            band: (cell.dark ? 2 : cell.wt ? 4 : cell.hat ? 3 : hash % 100 < 8 ? 1 : 0) as 0 | 1 | 2 | 3 | 4,
-            w: cell.w,
+            band: (
+              cell.mo ? 5
+              : cell.dark ? 2
+              : cell.wt && cyf >= EYE0 - 0.05 && cyf <= EYE1 + 0.08 ? 4
+              : cell.hat && cyf <= 0.3 ? 3
+              : hash % 100 < 3 ? 1
+              : 0
+            ) as 0 | 1 | 2 | 3 | 4 | 5,
+            w: cell.hat && cyf <= 0.3 ? Math.max(cell.w, 0.8) : cell.w,
             cyf,
-            eye: (cell.wt || cell.dark) && cyf >= EYE0 && cyf <= EYE1 ? 1 : 0,
-            ord: cell.dark ? 3 : cell.wt ? 2 : cell.hat ? 1 : 0,
-            jr: (((hash >>> 16) % 9) - 4) * 0.055,
+            pupil: cell.pupil && cyf >= EYE0 && cyf <= EYE1 ? 1 : 0,
+            ord: cell.dark ? 3 : cell.wt && cyf >= EYE0 - 0.05 && cyf <= EYE1 + 0.08 ? 2 : cell.hat && cyf <= 0.3 ? 1 : 0,
+            // the suit slab reads best with its ships nearly aligned — the
+            // mass merges into the cartoon's flat fill
+            jr: (cell.dark && cyf > 0.58 ? 0.35 : 1) * (((hash >>> 16) % 9) - 4) * 0.055,
             spin: (((hash >>> 3) % 10) / 10 - 0.5) * 1.1,
             px: sx, py: sy, vx: 0, vy: 0,
           }
@@ -721,44 +788,42 @@ export default function ShipCanvas() {
           formedCur += (fleetBus.formedTarget - formedCur) * Math.min(1, dt * 3)
           if (Math.abs(fleetBus.formedTarget - formedCur) < 0.002) formedCur = fleetBus.formedTarget
         } else {
-          // formation factor: 1 at the top, 0 once the hero has scrolled away.
-          // in deck mode the first card arrives over ~100svh, so the dispersal
-          // runs a little ahead of it and the card never fights the fleet
-          const deckOn = document.documentElement.dataset.deck === 'on'
-          if (deckOn && deckEnd < 0) {
-            // the identity card pins at its chapter's offsetTop; the fleet
-            // finishes scattering a beat before the card fully covers the
-            // screen — tied to the deck's real geometry so the timing holds on
-            // any device height instead of a fixed fraction of the hero
-            const ch = document.querySelector<HTMLElement>('[data-chapter-first="true"]')
-            const t = ch?.offsetTop ?? 0
-            deckEnd = t > 0 ? Math.max(heroH * 0.5, t - vh * 0.16) : 0
-          }
-          const windowEnd = narrow && deckOn && deckEnd > 0 ? deckEnd : heroH * 0.85
+          // formation factor: 1 at the top, 0 once the hero has scrolled away
+          const windowEnd = heroH * 0.85
           scrollF = Math.max(0, Math.min(1, scrollY / windowEnd))
         }
         const disp = stageOn ? 1 - formedCur : scrollF
         const introDone = t > introTotal
         fleetBus.formed = stageOn ? formedCur : 1 - scrollF
 
-        // idle facial life: breath + sway + blinks — only on the stage, only
-        // while the portrait is fully formed and untouched for a beat
+        // idle facial life: breath + sway + the pupil glance — while the
+        // portrait is fully formed and untouched for a beat. On the stage
+        // that means no recent scrub; on desktop the portrait idles whenever
+        // the page is at rest near the top.
         const idle =
-          stageOn && introDone && formedCur > 0.985 &&
+          introDone &&
+          (stageOn ? formedCur > 0.985 : fleetBus.formed > 0.985) &&
           performance.now() - fleetBus.lastInput > 1400
         idleK += ((idle ? 1 : 0) - idleK) * Math.min(1, dt * 2.5)
-        let blink = 0
+        // the glance: the black pupil spots (and only they) ease left↔right
+        // between occasional looks, while the rest of the fleet keeps its
+        // idle motion — breath and sway never stop under it
         if (idleK > 0.02) {
-          if (t >= blinkAt) {
-            const bp = (t - blinkAt) / 0.26
-            if (bp >= 1) blinkAt = t + 2.4 + Math.random() * 3.6
-            else blink = Math.sin(Math.PI * bp)
+          if (t > glanceNext) {
+            const pick = Math.random()
+            glanceGoal = pick < 0.3 ? 0 : (pick < 0.65 ? -1 : 1) * (0.55 + Math.random() * 0.45)
+            glanceHold = t + 0.9 + Math.random() * 1.1
+            glanceNext = glanceHold + 1.4 + Math.random() * 2.6
+          } else if (t > glanceHold && glanceGoal !== 0) {
+            glanceGoal = 0 // drift home between looks
           }
+          glanceT += (glanceGoal - glanceT) * Math.min(1, dt * 6.5)
+        } else {
+          glanceT += (0 - glanceT) * Math.min(1, dt * 4)
         }
         const stretchH = narrow ? Math.min(1.35, pitchY / pitch || 1) : 1
         const swayX = Math.sin(t * 0.6 + 1.2) * 2.1 * idleK
         const breathY = Math.sin(t * 1.8) * 1.7 * idleK
-        const artCx = anchorX + artW / 2
 
         // hover is active only over the artwork (portrait bbox + a little slack)
         const artH = pitchY * grid.rows
@@ -837,12 +902,12 @@ export default function ShipCanvas() {
           }
 
           // idle facial life: sway leads at the top rows (a head tilting),
-          // breath leads at the bottom (a chest rising), eye cells blink —
-          // shrink + pinch toward the eye-line centre
+          // breath leads at the bottom (a chest rising) — and the pupil
+          // spots glance left↔right while everything else keeps moving
           if (idleK > 0.02 && sEff < 0.4) {
             tx += swayX * (0.45 + 0.55 * (1 - s.cyf))
             ty += breathY * (1 - s.cyf * 0.55)
-            if (s.eye && blink > 0) tx += (artCx - tx) * 0.22 * blink
+            if (s.pupil) tx += glanceT * pitch * 0.45
           }
 
           // spring (slightly underdamped: rushes home with a soft overshoot)
@@ -865,18 +930,44 @@ export default function ShipCanvas() {
             pitch * (0.62 + 0.55 * s.w) * (s.band === 2 ? 0.75 + ((s.stag * 997) % 100) / 180 : 1) *
             (1 + 0.55 * sEff)
           let sizeH = size2 * stretchH
-          if (narrow) {
-            // feature prominence on the big portrait: the skin mass renders
-            // large and dense, hat felt renders lighter, eye whites are holes
-            // at full pitch, ink stays small + crisp (and draws last via the
-            // assignHomes sort)
-            if (s.band === 3) size2 *= 0.72
-            else if (s.band === 4) size2 *= 1.05
-            else if (s.band !== 2) size2 *= 1.42
+          // ---- flat-tile mode ------------------------------------------------
+          // the cartoon reads best FLAT: at rest, the solid fills (skin, hat,
+          // suit, eye whites) draw as rounded tiles instead of ship sprites —
+          // features (pupils, mouth, outlines, wingmen) stay ships, and the
+          // scattered fleet is always ships. The mix crossfades tile→sprite,
+          // so the portrait visibly dissolves INTO a fleet as it disperses
+          const tileBand =
+            s.band === 0 || s.band === 3 || s.band === 4 || (s.band === 2 && s.cyf > 0.58)
+          const mixA = Math.max(0, Math.min(1, 1 - sEff * 2))
+          if (tileBand && mixA > 0.01) {
+            size2 = pitch * (s.band === 2 ? 1.05 : 0.62 + 0.55 * s.w) * 1.06
+            sizeH = size2 * stretchH
+            ctx.globalAlpha = mixA
+            ctx.fillStyle =
+              s.band === 0 ? pal.bright : s.band === 3 ? pal.tint : s.band === 4 ? pal.wt : pal.dark
+            const tr = Math.min(1.4, size2 * 0.22)
+            ctx.beginPath()
+            if (ctx.roundRect) ctx.roundRect(s.px - size2 / 2, s.py - sizeH / 2, size2, sizeH, tr)
+            else ctx.rect(s.px - size2 / 2, s.py - sizeH / 2, size2, sizeH)
+            ctx.fill()
           }
-          if (s.eye && blink > 0 && sEff < 0.4) sizeH *= 1 - 0.75 * blink
+          const sprA = tileBand ? 1 - mixA : 1
+          if (sprA < 0.01) continue
+          if (narrow && mixA > 0) {
+            // feature prominence on the big portrait: the cartoon's flat
+            // fills read as SOLID masses — hat felt and the cream face are
+            // the two big shapes (drawn large + dense), the orange shirt is
+            // skin-family, lens whites are holes at full pitch, the mouth
+            // line is a shade under the skin size, and ink stays small +
+            // crisp in the face but swells below it (the suit slab)
+            if (s.band === 3) size2 *= 1.6
+            else if (s.band === 4) size2 *= 1.05
+            else if (s.band === 5) size2 *= 0.9
+            else if (s.band === 2) size2 *= s.cyf > 0.58 ? 2.05 : 1
+            else size2 *= 1.42
+          }
           const rot = s.jr * (1 - sEff) + (s.spin + Math.sin(t * 0.35 + s.ph) * 0.55) * sEff
-          ctx.globalAlpha = 1 - 0.12 * sEff
+          ctx.globalAlpha = sprA * (1 - 0.12 * sEff)
           if (sEff === 0 && s.jr !== 0) {
             // formed + jittered: the pre-baked rotation bucket
             const ji = Math.round(s.jr / 0.055) + 4
@@ -937,6 +1028,7 @@ export default function ShipCanvas() {
           if (narrow) {
             if (s.band === 3) size2 *= 0.72
             else if (s.band === 4) size2 *= 1.05
+            else if (s.band === 5) size2 *= 0.9
             else if (s.band !== 2) size2 *= 1.42
           }
           ctx.globalAlpha = 1
@@ -998,6 +1090,7 @@ export default function ShipCanvas() {
         window.removeEventListener('pointermove', onPtrMove)
         window.removeEventListener('pointerdown', onPtrDown)
         window.clearTimeout(holdTimer)
+        window.clearTimeout(spriteTimer)
         document.documentElement.removeEventListener('pointerleave', onPtrGone)
         window.removeEventListener('blur', onPtrGone)
         document.removeEventListener('visibilitychange', onVis)

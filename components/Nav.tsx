@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import { Moon, Sun } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Monitor, Sun, Moon } from 'lucide-react'
 import MarkGlyph from '@/components/MarkGlyph'
+import { nextMode, readMode, writeMode, type ThemeMode } from '@/lib/theme'
 
 const links = [
   { href: '/', label: 'home' },
@@ -13,65 +14,55 @@ const links = [
   { href: '/freelance', label: 'services' },
 ]
 
+const MODE_META: Record<ThemeMode, { icon: typeof Sun; label: string }> = {
+  system: { icon: Monitor, label: 'system' },
+  light: { icon: Sun, label: 'light' },
+  dark: { icon: Moon, label: 'dark' },
+}
+
 export default function Nav() {
   const path = usePathname()
-  const [isDark, setIsDark] = useState(false)
+  const [mode, setMode] = useState<ThemeMode>('system')
 
   useEffect(() => {
-    // Check current theme on mount
-    setIsDark(document.documentElement.classList.contains('dark'))
+    setMode(readMode())
   }, [])
 
-  const toggleTheme = () => {
-    document.documentElement.classList.toggle('dark')
-    setIsDark(!isDark)
+  const cycle = () => {
+    const m = nextMode(mode)
+    writeMode(m)
+    setMode(m)
   }
 
-  // One row everywhere: on phones every page's bar carries only the logo and
-  // the theme toggle — the deck's cards carry the nav items on home, and the
-  // other pages get them back once there's room.
-  const hideLinksOnMobile = true
+  // One row everywhere: on the stage (mobile home) the bar floats above the
+  // cards, so the toggler stays reachable mid-deck.
+  const Active = MODE_META[mode].icon
 
   return (
-    <nav className="flex items-center justify-between gap-3">
-      <div className="flex min-w-0 items-center gap-x-3 sm:gap-x-5">
-        <Link href="/" aria-label="cyber.dach home" className="flex shrink-0 items-center gap-2">
-          <MarkGlyph size={26} draw className="text-[var(--fg)]" />
-          <span className="logo-word hidden min-[430px]:inline text-sm font-semibold tracking-tight">
-            cyber.dach
-          </span>
-        </Link>
-        <div
-          className={`no-scrollbar flex min-w-0 items-center gap-x-3 overflow-x-auto sm:gap-x-5 ${
-            hideLinksOnMobile ? 'max-md:hidden' : ''
-          }`}
-        >
-          {links.map(({ href, label }) => {
-            const active = path === href || (href !== '/' && path.startsWith(href))
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`whitespace-nowrap max-md:text-[13px] ${
-                  active
-                    ? 'nav-active text-sm font-medium'
-                    : 'text-sm text-[var(--fg)] hover:opacity-70 transition-opacity'
-                }`}
-              >
-                {label}
-              </Link>
-            )
-          })}
-        </div>
-      </div>
+    <header className="nav-bar">
+      <Link href="/" className="nav-mark" aria-label="cyber.dach home">
+        <MarkGlyph className="h-5 w-5" />
+        <span>cyber.dach</span>
+      </Link>
+
+      <nav className="nav-links" aria-label="primary">
+        {links.map(l => (
+          <Link key={l.href} href={l.href} className={path === l.href ? 'nav-active' : undefined}>
+            {l.label}
+          </Link>
+        ))}
+      </nav>
 
       <button
-        onClick={toggleTheme}
-        className="shrink-0 rounded p-1.5 text-[var(--fg)] transition-colors hover:bg-[var(--card)]"
-        aria-label="Toggle theme"
+        type="button"
+        onClick={cycle}
+        className="theme-toggle"
+        aria-label={`theme: ${MODE_META[mode].label} — click for ${MODE_META[nextMode(mode)].label}`}
+        title={`theme: ${MODE_META[mode].label}`}
       >
-        {isDark ? <Sun size={16} /> : <Moon size={16} />}
+        <Active size={14} strokeWidth={2.2} />
+        <span aria-hidden="true">{MODE_META[mode].label}</span>
       </button>
-    </nav>
+    </header>
   )
 }

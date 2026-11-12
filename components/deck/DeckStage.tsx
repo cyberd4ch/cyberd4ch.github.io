@@ -1,141 +1,145 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { fleetBus } from '@/lib/fleetBus'
 
 /**
- * The presentation stage — phones only (styled via html[data-stage] in
- * globals.css). Takes the home page's mobile flow over from the sticky card
- * deck: the document itself never scrolls (html/body locked, touchmove
- * prevented) and the whole story lives on a continuous scrub.
+ * The presentation stage — phones only (html[data-stage] in globals.css).
+ * Takes the home page's mobile flow over entirely: the document NEVER
+ * scrolls, and the whole story lives on one continuous position `pos` in
+ * 0..N (N chapters ⇒ 0 = the portrait, k = chapter k's card, collapsed).
  *
- * One float drives everything — the beat position `raw` in 0..2N beats
- * (9 chapters ⇒ 18): even beats are the portrait, odd beat 2k+1 is chapter
- * k's card, fully open. Gestures move `raw` directly, so every animation is
- * scrubbed by the finger and stopping mid-gesture freezes the scene exactly
- * where it rolled to:
+ * Gestures move pos; the screen itself never moves:
  *
- *   touch     — 1:1 drag scrub; release springs to the nearest beat, with
- *               the release velocity folding into which beat it picks
+ *   touch     — 1:1 drag scrub; release springs to the nearest stop with
+ *               the release velocity folded into the target (fling-aware)
  *   wheel     — accumulates like touch; 160ms of quiet idle-snaps to the
- *               nearest beat (desktop/QA path)
- *   keys      — ArrowDown/Up/PageUp/Space spring a beat at a time
+ *               nearest stop (desktop/QA path)
+ *   keys      — ArrowDown/Up/PageUp/Space step a stop at a time
+ *   button    — each card's drawer button opens/closes the sheet
  *
- * While scrubbing, each frame maps the position onto the scene:
+ * Both ends rubber-band and there is NO release/unlock: the user can always
+ * pull back to the landing area. Pulling past the last card springs home.
  *
- *   portrait  — dispersal is continuous: formedTarget = 1 − distance from
- *               the nearest even beat, so the face melts apart as the card
- *               approaches and re-forms between cards
- *   card      — the drawer (chapter panel + trailing meta) reveals bottom-up
- *               through a top-inset clip driven by --cardP (1 − distance
- *               from the nearest odd beat): halt mid-gesture and you see
- *               exactly that fraction of the drawer, trailing text first
- *   flight    — fleetBus.y rides pos linearly, so the rocket flies the route
- *               as the deck turns and docks at the final portrait
- *   propeller — rotation is scroll: pos deltas wind it clockwise scrolling
- *               down and counterclockwise up. It never spins on its own at
- *               rest, but it can be grabbed and spun (with inertia) whenever
- *               no scroll is happening.
+ * Rendering (per frame, from the eased position):
  *
- * Pulling past the final portrait (beat 2N) rubber-bands, and releasing
- * there unlocks the page and hands back native scrolling (at the footer).
- * Drags that start inside a scrollable card panel scroll the panel instead,
- * until the panel hits its edge and the stage takes the gesture back.
+ *   portrait  — disperses continuously: formedTarget = 1 − distance from 0,
+ *               so the face melts apart as the first card approaches and
+ *               stays dispersed while any card is up
+ *   cards     — each mounted card rides a translate/scale mapped from pos:
+ *               it rises from below as pos crosses into it, slides up out
+ *               as pos crosses past it, and the outgoing card eases back
+ *               (scale + shadow) under the incoming one
+ *   drawer    — a second spring (stiffness 180 / damping 20, a touch of
+ *               overshoot) drives --cardP on the shown card: the sheet
+ *               clips open bottom-up from the bar and the children stagger
+ *               in via the CSS formula. Any scrub auto-collapses it.
+ *   flight    — fleetBus.y rides pos linearly; FlightCanvas multiplies it
+ *               (parallax) so the aircraft flies a longer route than the
+ *               screen — the flight path seems to leave the landing area
+ *
+ * A drag that starts inside an OPEN card's body scrolls the body, until the
+ * body hits its edge and the stage takes the gesture back.
  */
 
-const TOUCH_PX_PER_BEAT = 64 // px of drag per beat — the 1:1 scrub gearing
-const WHEEL_PX_PER_BEAT = 120 // one wheel notch ≈ one beat (QA STEP=360 ⇒ deltaY≈120)
+const WHEEL_PX_PER_POS = 110 // one wheel notch ≈ one card (QA STEP=360 ⇒ deltaY≈120)
 const SNAP_IDLE = 160 // ms of wheel quiet before the idle-snap engages
-const FLING_LEAD = 0.22 // s of release velocity folded into the snap target
-const SPRING_RATE = 9 // 1/s — exponential approach rate (dt-based, device-agnostic)
-const RESIST = 0.35 // rubber-band stiffness past the ends
-const PROP_DEG_PER_BEAT = 300 // propeller wind-up per beat of scroll
+const FLING_LEAD = 0.18 // s of release velocity folded into the spring target
+const RESIST = 0.32 // rubber-band stiffness past the ends
+// springs (per-second constants, semi-implicit Euler):
+const P_K = 170 // deck spring — near-critical, scrubs settle crisply
+const P_C = 24
+const D_K = 180 // drawer spring — ζ≈0.75, a slight watermelon overshoot
+const D_C = 20
 
 export default function DeckStage() {
-  const hostRef = useRef<HTMLDivElement>(null)
-  const propRef = useRef<HTMLSpanElement>(null)
-  const svgRef = useRef<SVGSVGElement>(null)
-  const labelRef = useRef<HTMLSpanElement>(null)
-
   useEffect(() => {
     const root = document.documentElement
-    const host = hostRef.current
-    const prop = propRef.current
-    const svg = svgRef.current
-    const label = labelRef.current
-    if (!host || !prop || !svg || !label) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const mq = window.matchMedia('(max-width: 767.98px)')
     let enabled = false
-    let released = false
     let dead = false
     let chapters: HTMLElement[] = []
-    let N = 0 // chapters; the beat dial runs 0..2N
-    let spanPx = 1
+    let mounted = new Set<number>() // chapter indices currently displayed
+    let N = 0
+    let posPx = 300 // px of drag per pos unit (1:1 scrub gearing)
 
-    // ---- continuous scrub state ---------------------------------------------
-    let raw = 0 // un-rubber-banded beat position (the source of truth)
+    // ---- continuous pos state ---------------------------------------------
+    let raw = 0 // un-rubber-banded position (source of truth)
     let target = 0 // spring destination
+    let vel = 0 // spring velocity (pos/s)
     let springing = false
-    let settleRelease = false // spring lands on 2N because the user pulled past it
+    let shown = 0 // chapter index currently "current" (0 = portrait)
+    // drawer
+    let d = 0 // sheet position 0..1 on the shown card
+    let dTarget = 0
+    let dVel = 0
+    let dSpringing = false
     let lastWheel = 0
     let raf = 0
     let lastT = 0
-    let lastPos = 0
-    let shown = -1 // chapter index currently mounted, -1 = none
-    let lastP = -1 // last --cardP value written to the shown chapter
 
     // touch gesture
     let tracking = false
     let startY = 0
     let startRaw = 0
     let lastY = 0
-    let nestPanel: HTMLElement | null = null
+    let nestBody: HTMLElement | null = null
     let vSamples: { t: number; p: number }[] = []
 
-    // propeller drag + inertia
-    let propDrag = false
-    let propAngle = 0
-    let propVel = 0 // deg/s after release
-    let propDirty = true
-    let propCx = 0
-    let propCy = 0
-    let propBase = 0 // angle when the drag started
-    let propCont = 0 // accumulated unwrapped drag angle (rad)
-    let prevA = 0 // continuous angle tracker
-    let lastPropT = 0
-
-    const clampBeat = (v: number) => Math.max(0, Math.min(2 * N, v))
-    const rubber = (v: number) =>
-      v < 0 ? v * RESIST : v > 2 * N ? 2 * N + (v - 2 * N) * RESIST : v
+    const clampPos = (v: number) => Math.max(0, Math.min(N, v))
 
     const measure = () => {
-      // the stage's chapters are fixed (out of flow), so the document
-      // height is stable while enabled — hero + footer only
-      spanPx = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+      const vh = window.innerHeight
+      posPx = Math.max(180, Math.round(vh * 0.52))
+      // the story is virtual: N stops × posPx px of travel (the document
+      // never scrolls, so nothing on it measures the ride)
+      fleetBus.spanPx = Math.max(1, N * posPx)
     }
 
     // ---- chapter mounting -----------------------------------------------------
+    // chapters are logical stops 1..N (the hero is not a chapter), but the
+    // NodeList is 0-based — every accessor maps stop i → array slot i−1
+    const chapterEl = (i: number) => chapters[i - 1] ?? null
+    const cardEl = (i: number) => chapterEl(i)?.querySelector<HTMLElement>('.deck-card') ?? null
+
     const showChapter = (i: number) => {
-      chapters.forEach(c => {
-        if (c !== chapters[i]) c.classList.remove('chapter-on')
-      })
-      chapters[i].classList.add('chapter-on')
+      chapterEl(i)?.classList.add('chapter-on')
+      mounted.add(i)
     }
     const hideChapter = (i: number) => {
-      chapters[i].classList.remove('chapter-on')
-      chapters[i].style.removeProperty('--cardP')
+      if (!mounted.has(i)) return
+      const el = chapterEl(i)
+      el.classList.remove('chapter-on')
+      const card = cardEl(i)
+      if (card) {
+        card.style.transform = ''
+        card.style.zIndex = ''
+        card.removeAttribute('data-open')
+        card.style.setProperty('--cardP', '0')
+      }
+      mounted.delete(i)
     }
 
-    const springTo = (t: number, settleRel = false) => {
-      target = clampBeat(t)
-      settleRelease = settleRel && raw > 2 * N
+    const setDrawer = (v: number) => {
+      dTarget = Math.max(0, Math.min(1, v))
+      dSpringing = true
+    }
+    const collapseDrawer = () => {
+      if (dTarget !== 0 || d !== 0) {
+        dTarget = 0
+        dSpringing = true
+      }
+    }
+
+    const springTo = (t: number) => {
+      target = clampPos(t)
       springing = true
       lastWheel = 0
     }
 
-    // release velocity (beats/s) from the recent touch samples
+    // release velocity (pos/s) from the recent touch samples
     const velocity = () => {
       const now = performance.now()
       vSamples = vSamples.filter(s => now - s.t < 100)
@@ -148,113 +152,106 @@ export default function DeckStage() {
 
     // ---- the frame loop ---------------------------------------------------------
     const frame = (now: number) => {
-      if (dead || released) return
+      if (dead || !enabled) return
       raf = requestAnimationFrame(frame)
       const dt = Math.min(0.05, lastT ? (now - lastT) / 1000 : 0.016)
       lastT = now
 
-      // wheel went quiet: idle-snap to the nearest beat
-      if (!springing && !tracking && !propDrag && lastWheel && now - lastWheel > SNAP_IDLE) {
-        springTo(Math.round(raw), raw > 2 * N)
+      // wheel went quiet: idle-snap to the nearest stop
+      if (!springing && !tracking && lastWheel && now - lastWheel > SNAP_IDLE) {
+        springTo(Math.round(raw))
       }
 
+      // deck spring (semi-implicit Euler; ζ≈0.92 — crisp, tiny overshoot)
       if (springing) {
-        const d = (target - raw) * (1 - Math.exp(-dt * SPRING_RATE))
-        raw += d
-        if (Math.abs(target - raw) < 0.002) {
+        const a = (target - raw) * P_K - vel * P_C
+        vel += a * dt
+        raw += vel * dt
+        if (Math.abs(target - raw) < 0.0025 && Math.abs(vel) < 0.02) {
           raw = target
+          vel = 0
           springing = false
-          if (settleRelease) {
-            release()
-            return
+        }
+      }
+
+      // drawer spring (ζ≈0.75 — a soft watermelon overshoot)
+      if (dSpringing) {
+        const a = (dTarget - d) * D_K - dVel * D_C
+        dVel += a * dt
+        d += dVel * dt
+        d = Math.max(-0.04, Math.min(1.04, d)) // let it overshoot just past the stops
+        if (Math.abs(dTarget - d) < 0.0025 && Math.abs(dVel) < 0.03) {
+          d = dTarget
+          dVel = 0
+          dSpringing = false
+        }
+      }
+
+      // render position (rubber-banded at both ends; no unlock, ever)
+      const p = raw < 0 ? raw * RESIST : raw > N ? N + (raw - N) * RESIST : raw
+
+      // flight + formation ride the same dial
+      const y = p * posPx
+      if (Math.abs(y - fleetBus.y) > 0.01) fleetBus.y = y
+      fleetBus.formedTarget = Math.max(0, Math.min(1, 1 - p))
+
+      // which card is current
+      const idx = Math.max(0, Math.min(N, Math.round(p)))
+      if (idx !== shown) {
+        shown = idx
+        // arriving at a card: it starts collapsed (fresh sheet)
+        d = 0
+        dTarget = 0
+        dVel = 0
+        dSpringing = false
+      }
+
+      // mount window: |p − i| < 1 keeps at most the incoming + outgoing pair
+      for (let i = 1; i <= N; i++) {
+        if (p > i - 1 && p < i + 1) showChapter(i)
+        else hideChapter(i)
+      }
+
+      // card transforms: rise from below on enter, slide up out on exit
+      const vh = window.innerHeight
+      const ride = vh * 1.04
+      for (const i of mounted) {
+        const card = cardEl(i)
+        if (!card) continue
+        const e = Math.max(0, Math.min(1, p - (i - 1))) // enter 0..1
+        const x = Math.max(0, Math.min(1, p - i)) // exit 0..1
+        const ty = (1 - e) * ride - x * ride
+        const s = 1 - 0.05 * x
+        card.style.transform = `translate3d(0, ${ty.toFixed(1)}px, 0) scale(${s.toFixed(3)})`
+        card.style.zIndex = String(30 + i)
+        if (i === shown) {
+          card.style.setProperty('--cardP', d.toFixed(4))
+          const open = d > 0.995 && dTarget === 1
+          if (open !== card.hasAttribute('data-open')) {
+            if (open) card.setAttribute('data-open', '')
+            else card.removeAttribute('data-open')
+            const btn = card.querySelector<HTMLButtonElement>('.deck-toggle')
+            if (btn) btn.setAttribute('aria-expanded', String(open))
           }
         }
       }
-
-      // propeller inertia after a hand-spin
-      if (!propDrag && propVel !== 0) {
-        propAngle += propVel * dt
-        propVel *= Math.exp(-dt * 2.4)
-        if (Math.abs(propVel) < 6) propVel = 0
-        propDirty = true
-      }
-
-      const pos = rubber(raw)
-
-      // propeller rotation IS the scroll: clockwise down, counterclockwise up
-      if (pos !== lastPos) {
-        propAngle += (pos - lastPos) * PROP_DEG_PER_BEAT
-        propDirty = true
-        lastPos = pos
-      }
-      if (propDirty) {
-        svg.style.transform = `rotate(${propAngle.toFixed(2)}deg)`
-        propDirty = false
-      }
-
-      // flight + formation ride the same dial
-      const y = (pos / (2 * N)) * spanPx
-      if (Math.abs(y - fleetBus.y) > 0.01) fleetBus.y = y
-      const dEven = Math.abs(pos - 2 * Math.round(pos / 2))
-      fleetBus.formedTarget = Math.max(0, Math.min(1, 1 - dEven))
-
-      // drawer reveal: nearest odd beat's chapter, opened by 1 − distance
-      const k = Math.round((pos - 1) / 2)
-      const odd = 2 * k + 1
-      const cardP = Math.max(0, Math.min(1, 1 - Math.abs(pos - odd)))
-      if (cardP > 0.001 && k >= 0 && k < N) {
-        if (shown !== k) {
-          showChapter(k)
-          shown = k
-          lastP = -1
-        }
-        if (cardP !== lastP) {
-          chapters[k].style.setProperty('--cardP', cardP.toFixed(3))
-          lastP = cardP
-        }
-      } else if (shown >= 0) {
-        hideChapter(shown)
-        shown = -1
-      }
-
-      const final = Math.round(pos) >= 2 * N
-      const txt = final ? 'resume scroll ↓' : 'scroll down'
-      if (label.textContent !== txt) label.textContent = txt
     }
 
-    // ---- stage lifecycle --------------------------------------------------------
-    const release = () => {
-      if (released) return
-      released = true
-      chapters.forEach((_, i) => hideChapter(i))
-      cancelAnimationFrame(raf)
-      delete root.dataset.stage
-      fleetBus.resetStage()
-      host.style.display = 'none'
-      // every card has been seen — hand the page back at the footer
-      window.scrollTo(0, document.documentElement.scrollHeight - window.innerHeight)
-    }
-
-    const disable = (silent = false) => {
+    // ---- lifecycle ---------------------------------------------------------------
+    const disable = () => {
       if (!enabled) return
       enabled = false
-      if (released) return
-      if (silent) {
-        // teardown/route change: restore without jump-scrolling
-        chapters.forEach((_, i) => hideChapter(i))
-        cancelAnimationFrame(raf)
-        delete root.dataset.stage
-        fleetBus.resetStage()
-        host.style.display = ''
-        return
-      }
-      release()
+      cancelAnimationFrame(raf)
+      for (const i of Array.from(mounted)) hideChapter(i) // reset card styles too
+      mounted.clear()
+      chapters.forEach(el => el.classList.remove('chapter-on'))
+      delete root.dataset.stage
+      fleetBus.resetStage()
     }
 
     const enable = () => {
-      if (enabled || released || dead) return
       chapters = Array.from(document.querySelectorAll<HTMLElement>('.chapter'))
-      if (chapters.length < 2) return
+      if (chapters.length < 1 || enabled) return
       N = chapters.length
       enabled = true
       root.dataset.stage = 'on'
@@ -264,41 +261,24 @@ export default function DeckStage() {
       fleetBus.lastInput = performance.now()
       raw = 0
       target = 0
+      vel = 0
       springing = false
-      settleRelease = false
-      shown = -1
-      lastP = -1
-      lastPos = 0
-      propAngle = 0
-      propVel = 0
-      propDirty = true
+      d = 0
+      dTarget = 0
+      dVel = 0
+      dSpringing = false
+      shown = 0
+      mounted.clear()
       window.scrollTo(0, 0)
       measure()
-      host.style.display = ''
-      label.textContent = 'scroll down'
       lastT = performance.now()
       raf = requestAnimationFrame(frame)
     }
 
     // ---- gestures ----------------------------------------------------------------
     const onTouchStart = (e: TouchEvent) => {
-      if (released || !enabled) return
+      if (!enabled) return
       fleetBus.lastInput = performance.now()
-      // grabbing the propeller spins it by hand — never scrubs the deck
-      if ((e.target as Element | null)?.closest?.('.deck-prop')) {
-        propDrag = true
-        tracking = false
-        const r = prop.getBoundingClientRect()
-        propCx = r.left + r.width / 2
-        propCy = r.top + r.height / 2
-        const a = Math.atan2(e.touches[0].clientY - propCy, e.touches[0].clientX - propCx)
-        prevA = a
-        propCont = 0
-        propBase = propAngle
-        propVel = 0
-        lastPropT = performance.now()
-        return
-      }
       tracking = true
       springing = false
       lastWheel = 0
@@ -306,101 +286,98 @@ export default function DeckStage() {
       lastY = startY
       startRaw = raw
       vSamples = []
-      nestPanel = null
+      nestBody = null
       const el = e.target as Element | null
-      const panel = el?.closest?.('.chapter-panel') as HTMLElement | null
-      // the panel only takes over when the drawer is (almost) fully open —
+      const body = el?.closest?.('.deck-body') as HTMLElement | null
+      // the body only takes over when the drawer is (almost) fully open —
       // mid-reveal drags belong to the scrub
-      const cardPOK =
-        shown >= 0 &&
-        parseFloat(chapters[shown].style.getPropertyValue('--cardP') || '0') > 0.9
-      if (panel && panel.scrollHeight > panel.clientHeight + 4 && cardPOK) nestPanel = panel
+      if (body && d > 0.9 && body.scrollHeight > body.clientHeight + 4) nestBody = body
     }
 
     const onTouchMove = (e: TouchEvent) => {
-      if (released || !enabled) return
-      if (propDrag) {
-        e.preventDefault()
-        const t = e.touches[0]
-        const a = Math.atan2(t.clientY - propCy, t.clientX - propCx)
-        let da = a - prevA
-        if (da > Math.PI) da -= Math.PI * 2
-        else if (da < -Math.PI) da += Math.PI * 2
-        prevA += da
-        propCont += da
-        propAngle = propBase + (propCont * 180) / Math.PI
-        const now = performance.now()
-        const dt = (now - lastPropT) / 1000
-        if (dt > 0.008) {
-          const inst = (da / dt) * (180 / Math.PI)
-          propVel = propVel * 0.55 + inst * 0.45
-          lastPropT = now
-        }
-        propDirty = true
-        fleetBus.lastInput = now
-        return
-      }
+      if (!enabled) return
       if (!tracking) {
         e.preventDefault() // a stray second finger never scrolls the page
         return
       }
       fleetBus.lastInput = performance.now()
       const y = e.touches[0].clientY
-      const d = lastY - y // positive = swiping up = "scroll down"
+      const dy = lastY - y // positive = swiping up = "scroll down"
       lastY = y
-      if (nestPanel) {
-        const p = nestPanel
-        const canDown = p.scrollTop + p.clientHeight < p.scrollHeight - 2
-        const canUp = p.scrollTop > 2
-        if ((d > 0 && canDown) || (d < 0 && canUp)) return // the panel consumes it
-        nestPanel = null // panel at its edge — the stage takes over
+      if (nestBody) {
+        const b = nestBody
+        const canDown = b.scrollTop + b.clientHeight < b.scrollHeight - 2
+        const canUp = b.scrollTop > 2
+        if ((dy > 0 && canDown) || (dy < 0 && canUp)) return // the body consumes it
+        nestBody = null // body at its edge — the stage takes over, drawer closes
+        collapseDrawer()
       }
       e.preventDefault()
-      raw = startRaw + (startY - y) / TOUCH_PX_PER_BEAT
+      // any scrub collapses the drawer — scrubbing moves cards, never sheets
+      collapseDrawer()
+      raw = startRaw + (startY - y) / posPx
       vSamples.push({ t: performance.now(), p: raw })
       if (vSamples.length > 10) vSamples.shift()
     }
 
     const onTouchEnd = () => {
-      if (propDrag) {
-        propDrag = false // inertia decays in the frame loop
-        return
-      }
       if (!tracking) return
       tracking = false
-      nestPanel = null
-      if (released || !enabled) return
-      // fling: fold release velocity into the snap target, then spring
-      springTo(Math.round(raw + velocity() * FLING_LEAD), raw > 2 * N)
+      nestBody = null
+      if (!enabled) return
+      // fling: fold release velocity into the spring target
+      const fling = raw + velocity() * FLING_LEAD
+      // past the ends the rubber-band snaps home; inside, the fling rounds to
+      // the nearest stop first (a fast short swipe advances a card)
+      const goal = fling < 0 || fling > N ? clampPos(fling) : Math.round(fling)
+      springTo(goal)
     }
 
     const onWheel = (e: WheelEvent) => {
-      if (released || !enabled || propDrag || tracking) return
+      if (!enabled || tracking) return
       e.preventDefault()
       fleetBus.lastInput = performance.now()
+      collapseDrawer()
       springing = false
       const dy =
         e.deltaMode === 1 ? e.deltaY * 33 : e.deltaMode === 2 ? e.deltaY * window.innerHeight : e.deltaY
-      raw += dy / WHEEL_PX_PER_BEAT
+      raw += dy / WHEEL_PX_PER_POS
       lastWheel = performance.now()
     }
 
     const onKey = (e: KeyboardEvent) => {
-      if (released || !enabled) return
+      if (!enabled) return
       const down = e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' '
       const up = e.key === 'ArrowUp' || e.key === 'PageUp'
       if (!down && !up) return
       e.preventDefault()
-      if (down && Math.round(raw) >= 2 * N) {
-        release() // final portrait: the next step hands back the page
-        return
-      }
+      fleetBus.lastInput = performance.now()
+      collapseDrawer()
       springTo(Math.round(raw) + (down ? 1 : -1))
     }
 
+    const onToggleClick = (e: MouseEvent) => {
+      if (!enabled) return
+      const btn = (e.target as Element | null)?.closest?.('.deck-toggle')
+      if (!btn) return
+      e.preventDefault()
+      fleetBus.lastInput = performance.now()
+      setDrawer(dTarget === 0 ? 1 : 0)
+    }
+
     const onResize = () => {
-      if (!enabled || released) return
+      if (!enabled) return
       measure()
+    }
+
+    const onVis = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf)
+        lastT = 0
+      } else if (enabled && !dead) {
+        lastT = performance.now()
+        raf = requestAnimationFrame(frame)
+      }
     }
 
     const onMq = () => {
@@ -415,7 +392,9 @@ export default function DeckStage() {
     window.addEventListener('touchcancel', onTouchEnd, { passive: true })
     window.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('keydown', onKey)
+    window.addEventListener('click', onToggleClick)
     window.addEventListener('resize', onResize)
+    document.addEventListener('visibilitychange', onVis)
 
     return () => {
       dead = true
@@ -426,26 +405,12 @@ export default function DeckStage() {
       window.removeEventListener('touchcancel', onTouchEnd)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('keydown', onKey)
+      window.removeEventListener('click', onToggleClick)
       window.removeEventListener('resize', onResize)
-      disable(true)
+      document.removeEventListener('visibilitychange', onVis)
+      disable()
     }
   }, [])
 
-  return (
-    <div ref={hostRef} className="deck-affordance" aria-hidden="true">
-      <span ref={propRef} className="deck-prop">
-        <svg ref={svgRef} viewBox="0 0 40 40" width="30" height="30">
-          <g fill="var(--red)">
-            <ellipse cx="20" cy="10.5" rx="4.4" ry="9" />
-            <ellipse cx="20" cy="10.5" rx="4.4" ry="9" transform="rotate(120 20 20)" />
-            <ellipse cx="20" cy="10.5" rx="4.4" ry="9" transform="rotate(240 20 20)" />
-          </g>
-          <circle cx="20" cy="20" r="3.1" fill="var(--fg)" />
-        </svg>
-      </span>
-      <span ref={labelRef} className="deck-affordance-label">
-        scroll down
-      </span>
-    </div>
-  )
+  return null
 }

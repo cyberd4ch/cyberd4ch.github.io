@@ -27,6 +27,8 @@ export const fleetBus = {
   // timestamps gate the portrait's idle facial gestures.
   virtual: false,
   y: 0,
+  /** stage virtual travel: N stops × posPx (set by DeckStage.measure) */
+  spanPx: 0,
   formedTarget: 1,
   lastInput: 0,
 
@@ -42,6 +44,7 @@ export const fleetBus = {
   resetStage() {
     this.virtual = false
     this.y = 0
+    this.spanPx = 0
     this.formedTarget = 1
     this.lastInput = 0
   },
