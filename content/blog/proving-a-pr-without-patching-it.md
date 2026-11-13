@@ -103,8 +103,11 @@ on 10080):
 
 Same binary, same ruby, same call sites — the only variable is the
 method body. The before run never survives the check; the after run
-clears it and boots. That is the answer to "would this be fixed by
-#13842": yes, demonstrated, not argued.
+clears it and proceeds into boot. That is the answer to "would this be
+fixed by #13842": yes, demonstrated, not argued. (Full boot completion
+is a separate question on this particular host — its VMware vmnet
+devices aren't up, so no guest can get an address; the collision check
+under test is a userspace socket probe and needs none of that.)
 
 ## One caveat, stated to the author
 
