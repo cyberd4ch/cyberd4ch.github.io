@@ -1,3 +1,12 @@
+---
+title: "one binary, two interfaces: a web ui and a real window in 3 MB of rust"
+date: 2026-11-08
+category: technical
+ai-assist: 100
+tags: [rust, http, macos]
+topics: [development]
+excerpt: "a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window — and the favicon bug that explained why 204 is not an icon."
+---
 *shipping a torrent client's ui without electron: a hand-written http server, html
 compiled into the binary, cancel and pause moved into the engine, and the favicon bug
 that explained why 204 is not an icon.*

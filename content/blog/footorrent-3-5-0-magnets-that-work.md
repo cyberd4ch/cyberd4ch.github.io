@@ -1,3 +1,12 @@
+---
+title: "magnets that actually work: three wire bugs, a dead tracker list, and 917 KB that finally moved"
+date: 2026-11-09
+category: technical
+ai-assist: 100
+tags: [rust, bittorrent, debugging]
+topics: [development]
+excerpt: "footorrent 3.5.0 — metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix."
+---
 *footorrent 3.5.0 — metadata before disk, a bep 10 id read from the wrong mailbox,
 peers discarded at the start line, and the 917 KB in the first minute that proved the fix.*
 

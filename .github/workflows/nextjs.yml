@@ -70,6 +70,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # regenerate data/posts.json from content/blog frontmatter so a pushed
+      # .md is enough to publish — no hand-edited post list anywhere
+      - name: Build posts data
+        run: node scripts/build-posts.mjs
+
+      - name: Snapshot the home lab
+        run: node scripts/fetch-lab.mjs
+
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
 

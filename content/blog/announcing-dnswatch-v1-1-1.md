@@ -1,3 +1,12 @@
+---
+title: "dns-watch v1.1.1: the release where nothing changed (on purpose)"
+date: 2026-11-08
+category: technical
+ai-assist: 100
+tags: [dns, release, shell]
+topics: [bug-bounty, tooling]
+excerpt: "a packaging release: reproducible tarball, sha256-pinned homebrew tap that bumps itself, and the install path documented first."
+---
 *Release notes. The series: [part 1](/blog/one-curl-per-host/),
 [part 2](/blog/building-dns-watch/), [part 3](/blog/when-templates-find-zero/).*
 

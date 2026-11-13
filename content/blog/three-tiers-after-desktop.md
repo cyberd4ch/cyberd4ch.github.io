@@ -1,3 +1,12 @@
+---
+title: "after docker desktop: three tiers, colima, and the ghosts it left behind"
+date: 2026-11-07
+category: technical
+ai-assist: 100
+tags: [docker, colima, compose]
+topics: [cloud-native]
+excerpt: "rescuing lab 01 from a decommissioned docker desktop install — dead plugin symlinks, a credential store pointing at a corpse — and the compose lab that went green at the end."
+---
 *part 1 of a series from my new `cloud_prep/` practice workspace — home lab, cloud
 native, reverse engineering. this one is small on purpose: a three-tier compose
 lab, and what it cost to bring it up on a machine that had already divested from

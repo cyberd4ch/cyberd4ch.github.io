@@ -318,6 +318,68 @@ input:focus, textarea:focus {
   border-style: solid;
 }
 
+/* ---- blog: SELA archive rendering ------------------------------------------
+   chapters (topics) with counts, entries carrying the archive's brief
+   description, and the working metadata row (date · read time · AI ring ·
+   tag chips). Tag chips sort the archive; a solid chip = the active filter. */
+.chapter-head {
+  padding: 18px 0 10px;
+}
+.chapter-count {
+  color: var(--muted);
+  font-weight: 400;
+}
+.blog-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.blog-meta .meta-dot {
+  opacity: 0.6;
+}
+.ai-ring {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ai-ring-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.tag-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  padding: 2px 7px;
+  border: 1px solid var(--hairline);
+  border-radius: 99px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.tag-chip:hover {
+  color: var(--fg);
+  border-color: var(--border);
+}
+.tag-chip.static {
+  cursor: default;
+}
+.tag-chip.active {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+
 /* ---- links ------------------------------------------------------------------ */
 .underline-link {
   text-decoration: underline;
@@ -330,6 +392,69 @@ input:focus, textarea:focus {
   text-decoration-color: var(--navy);
   color: var(--navy);
 }
+
+/* ---- lab page: live snapshot, tracker, study meters ------------------------ */
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.lab-table .lab-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 4px 0;
+}
+.lab-table .lab-row + .lab-row {
+  border-top: 1px dotted var(--hairline);
+}
+.lab-meter {
+  height: 6px;
+  border: 1px solid var(--hairline);
+  border-radius: 99px;
+  overflow: hidden;
+  background: transparent;
+}
+.lab-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--navy);
+  border-radius: 99px;
+}
+.tracker-chip {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 99px;
+  flex: none;
+}
+.chip-done {
+  background: var(--chip-green);
+  color: #17171a;
+}
+.chip-active {
+  background: var(--chip-yellow);
+  color: #17171a;
+}
+.chip-planned {
+  background: transparent;
+  border: 1px dotted var(--border);
+  color: var(--muted);
+}
+.prof-step {
+  width: 9px;
+  height: 9px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: transparent;
+}
+.prof-step.on {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
 
 /* SELA pastel chips — the tag pills; color cycles by position */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -660,9 +785,13 @@ html[data-stage] .footer-col {
     opacity: var(--rev);
     transform: translateY(calc((1 - var(--rev)) * 12px));
   }
-  /* the collapsed bar: tile + label + index + the drawer button */
+  /* the collapsed bar: tile + label + index + the drawer button. flex:none —
+     when a card's open content is taller than the card, the sheet must be the
+     only thing that shrinks; a shrinkable bar got squeezed (54→40px on the
+     transmissions card) and stayed squashed even when collapsed */
   html[data-stage] .deck-bar {
     position: relative;
+    flex: none;
     align-items: center;
     gap: 10px;
     height: 54px;

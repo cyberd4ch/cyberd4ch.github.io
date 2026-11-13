@@ -1,3 +1,12 @@
+---
+title: "three tiers become a module: two stacks, one graph, no collisions"
+date: 2026-11-08
+category: technical
+ai-assist: 100
+tags: [terraform, docker, modules]
+topics: [infrastructure-as-code]
+excerpt: "lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083 — including the readiness wait that caught a green apply serving nothing."
+---
 *the fourth lab in the `cloud_prep/` series stops adding features and starts deleting
 duplication. same three tiers, one module, instanced twice on two ports — and a
 `destroy` that has to take both down without touching the other.*

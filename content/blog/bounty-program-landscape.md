@@ -1,3 +1,12 @@
+---
+title: "where the deeplink work can make money — and the reporting trap that kills it"
+date: 2026-11-10
+category: general
+ai-assist: 100
+tags: [bug-bounty, hackerone, methodology]
+topics: [bug-bounty]
+excerpt: "Desk research on which programs pay for nonce-laundering XSS: Basecamp/HEY on HackerOne ($100-$10,000, with a 2026 cross-account nonce-bypass chain already disclosed) is the closest fit; Intigriti only has Lightspark and Adobe paying publicly. The trap: \"CSP headers\" is out of scope, but \"XSS despite CSP\" is not."
+---
 *Where the deeplink/nonce work can actually make money, and the one reporting
 trap that gets this entire bug class closed as N/A. Desk research only — public
 scope pages and disclosed reports, no testing of any of these targets.*

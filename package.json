@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/build-posts.mjs",
     "build": "next build",
     "sync:github": "node scripts/fetch-github.mjs",
+    "sync:posts": "node scripts/build-posts.mjs",
+    "sync:lab": "node scripts/fetch-lab.mjs",
     "start": "next start",
     "lint": "next lint"
   },

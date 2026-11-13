@@ -10,6 +10,7 @@ import { nextMode, readMode, writeMode, type ThemeMode } from '@/lib/theme'
 const links = [
   { href: '/', label: 'home' },
   { href: '/projects', label: 'projects' },
+  { href: '/lab', label: 'lab' },
   { href: '/blog', label: 'blog' },
   { href: '/freelance', label: 'services' },
 ]

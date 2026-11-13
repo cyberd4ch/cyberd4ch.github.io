@@ -1,170 +1,43 @@
+import snapshot from '@/data/posts.json'
+
 export type BlogCategory = 'technical' | 'general'
 
 export interface Post {
   id: string
+  slug: string
   title: string
   date: string
   dateISO: string
   category: BlogCategory
   url: string
   excerpt?: string
-  /** present when the article is rendered by this site at /blog/<slug>/ */
-  slug?: string
+  /** 0-100: how much of the published text is the AI draft as written.
+      human share = 100 − aiAssist. null = hand-written / not assessed. */
+  aiAssist: number | null
+  tags: string[]
+  topics: string[]
+  /** derived at build time from the body word count (220 wpm) */
+  readMinutes: number
 }
 
-export const posts: Post[] = [
-  {
-    id: 'deeplink-gadget-trace',
-    slug: 'deeplink-gadget-trace',
-    title: 'Server-side trace of the deeplink gadget: positive and negative findings',
-    date: 'Nov 10, 2026',
-    dateISO: '2026-11-10',
-    category: 'technical',
-    url: '/blog/deeplink-gadget-trace/',
-    excerpt:
-      'The deeplink gadget in Mercado Libre\'s home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce\'d script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously — but a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution.',
-  },
-  {
-    id: 'deeplink-test-account-deadend',
-    slug: 'deeplink-test-account-deadend',
-    title: 'Dead end with test accounts and researching a workaround',
-    date: 'Nov 10, 2026',
-    dateISO: '2026-11-10',
-    category: 'general',
-    url: '/blog/deeplink-test-account-deadend/',
-    excerpt:
-      'The ATO 2FA challenge test account (userId 1252539217, CHALLENGE_ATO_USER_2, site MCO) returns 302 /login/identification/not-found, suggesting it is expired or removed. Later work showed the deeplink gadget mounts anonymously for mobile UA (and is sanitised), so the account blocker now applies to the seller / second-order path. Workaround paths: seller accounts, personal account (one only, no mass creation), or waiting for program test-user rollout.',
-  },
-  {
-    id: 'bounty-program-landscape',
-    slug: 'bounty-program-landscape',
-    title: 'where the deeplink work can make money — and the reporting trap that kills it',
-    date: 'Nov 10, 2026',
-    dateISO: '2026-11-10',
-    category: 'general',
-    url: '/blog/bounty-program-landscape/',
-    excerpt:
-      'Desk research on which programs pay for nonce-laundering XSS: Basecamp/HEY on HackerOne ($100-$10,000, with a 2026 cross-account nonce-bypass chain already disclosed) is the closest fit; Intigriti only has Lightspark and Adobe paying publicly. The trap: "CSP headers" is out of scope, but "XSS despite CSP" is not.',
-  },
-  {
-    id: 'footorrent-3-5-0-magnets-that-work',
-    slug: 'footorrent-3-5-0-magnets-that-work',
-    title: 'magnets that actually work: three wire bugs, a dead tracker list, and 917 KB that finally moved',
-    date: 'Nov 9, 2026',
-    dateISO: '2026-11-09',
-    category: 'technical',
-    url: '/blog/footorrent-3-5-0-magnets-that-work/',
-    excerpt:
-      'footorrent 3.5.0 — metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix.',
-  },
-  {
-    id: 'from-form-to-download-manager',
-    slug: 'from-form-to-download-manager',
-    title: 'from a form to a download manager: categories, drag-and-drop, and a window that lets go',
-    date: 'Nov 8, 2026',
-    dateISO: '2026-11-08',
-    category: 'technical',
-    url: '/blog/from-form-to-download-manager/',
-    excerpt:
-      'rebuilding the ftc page as a download manager — one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening.',
-  },
-  {
-    id: 'three-tiers-become-a-module',
-    slug: 'three-tiers-become-a-module',
-    title: 'three tiers become a module: two stacks, one graph, no collisions',
-    date: 'Nov 8, 2026',
-    dateISO: '2026-11-08',
-    category: 'technical',
-    url: '/blog/three-tiers-become-a-module/',
-    excerpt:
-      'lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083 — including the readiness wait that caught a green apply serving nothing.',
-  },
-  {
-    id: 'one-binary-two-interfaces',
-    slug: 'one-binary-two-interfaces',
-    title: 'one binary, two interfaces: a web ui and a real window in 3 MB of rust',
-    date: 'Nov 8, 2026',
-    dateISO: '2026-11-08',
-    category: 'technical',
-    url: '/blog/one-binary-two-interfaces/',
-    excerpt:
-      'a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window — and the favicon bug that explained why 204 is not an icon.',
-  },
-  {
-    id: 'announcing-dnswatch-v1-1-1',
-    slug: 'announcing-dnswatch-v1-1-1',
-    title: 'dns-watch v1.1.1: the release where nothing changed (on purpose)',
-    date: 'Nov 8, 2026',
-    dateISO: '2026-11-08',
-    category: 'technical',
-    url: '/blog/announcing-dnswatch-v1-1-1/',
-    excerpt:
-      'a packaging release: reproducible tarball, sha256-pinned homebrew tap that bumps itself, and the install path documented first.',
-  },
-  {
-    id: 'three-tiers-on-kind',
-    slug: 'three-tiers-on-kind',
-    title: 'same tiers, new vocabulary: kind, crashloops, and the one secret spelling',
-    date: 'Nov 7, 2026',
-    dateISO: '2026-11-07',
-    category: 'technical',
-    url: '/blog/three-tiers-on-kind/',
-    excerpt:
-      're-homing the lab 01 stack onto kind: a KeyError crashloop, the secret that is a bag of keys, boot-time retries, and a same-tag rebuild that never rolls.',
-  },
-  {
-    id: 'three-tiers-after-desktop',
-    slug: 'three-tiers-after-desktop',
-    title: 'after docker desktop: three tiers, colima, and the ghosts it left behind',
-    date: 'Nov 7, 2026',
-    dateISO: '2026-11-07',
-    category: 'technical',
-    url: '/blog/three-tiers-after-desktop/',
-    excerpt:
-      'rescuing lab 01 from a decommissioned docker desktop install — dead plugin symlinks, a credential store pointing at a corpse — and the compose lab that went green at the end.',
-  },
-  {
-    id: 'announcing-dnswatch-v1-1-0',
-    slug: 'announcing-dnswatch-v1-1-0',
-    title: "announcing dns-watch v1.1.0: your attack surface's DNS, diffed — for free",
-    date: 'Nov 7, 2026',
-    dateISO: '2026-11-07',
-    category: 'technical',
-    url: '/blog/announcing-dnswatch-v1-1-0/',
-    excerpt:
-      'release notes for a one-file DNS drift watcher: one cron line, a readable log, no dashboard, no API keys, no subscription.',
-  },
-  {
-    id: 'one-curl-per-host',
-    slug: 'one-curl-per-host',
-    title: 'one curl per host: mapping a hardened SSO estate without tripping the alarm',
-    date: 'Nov 7, 2026',
-    dateISO: '2026-11-07',
-    category: 'technical',
-    url: '/blog/one-curl-per-host/',
-    excerpt:
-      'nineteen hosts, one administrative suffix, one HTTPS request each — how redirect headers turned a "nothing here" estate into a map.',
-  },
-  {
-    id: 'building-dns-watch',
-    slug: 'building-dns-watch',
-    title: "when dig lies: building a DNS drift watcher that survives a NAT'd VM",
-    date: 'Nov 7, 2026',
-    dateISO: '2026-11-07',
-    category: 'technical',
-    url: '/blog/building-dns-watch/',
-    excerpt:
-      'five rebuilds, three false walls, and the two design decisions that make a diff trustworthy instead of merely present.',
-  },
-  {
-    id: 'when-templates-find-zero',
-    slug: 'when-templates-find-zero',
-    title: 'six thousand templates, zero findings — and other useful lies about hardened targets',
-    date: 'Nov 7, 2026',
-    dateISO: '2026-11-07',
-    category: 'technical',
-    url: '/blog/when-templates-find-zero/',
-    excerpt:
-      '6,665 templates across 16,055 requests matched nothing. that result is data, not a dead end.',
-  },
-]
+export const posts = snapshot as Post[]
+
+/** every tag in use, by frequency then alphabetically */
+export const allTags = Array.from(
+  posts.reduce((acc, post) => {
+    for (const tag of post.tags) acc.set(tag, (acc.get(tag) || 0) + 1)
+    return acc
+  }, new Map<string, number>()),
+)
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([tag]) => tag)
+
+/** every topic in use, by frequency then alphabetically — the blog "chapters" */
+export const allTopics = Array.from(
+  posts.reduce((acc, post) => {
+    for (const topic of post.topics) acc.set(topic, (acc.get(topic) || 0) + 1)
+    return acc
+  }, new Map<string, number>()),
+)
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([topic]) => topic)

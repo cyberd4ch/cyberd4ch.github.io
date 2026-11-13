@@ -1,3 +1,12 @@
+---
+title: "Server-side trace of the deeplink gadget: positive and negative findings"
+date: 2026-11-10
+category: technical
+ai-assist: 100
+tags: [xss, csp, deeplink, meli]
+topics: [bug-bounty]
+excerpt: "The deeplink gadget in Mercado Libre's home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce'd script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously — but a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution."
+---
 *Field notes from an authorized bug-bounty engagement. No user data was
 touched, no mass scanning was run, and nothing here is a submitted finding — it
 is a trace, with the parts that worked and the parts that hit a wall.*

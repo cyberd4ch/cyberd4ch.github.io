@@ -1,3 +1,12 @@
+---
+title: "one curl per host: mapping a hardened SSO estate without tripping the alarm"
+date: 2026-11-07
+category: technical
+ai-assist: 100
+tags: [recon, dns, methodology]
+topics: [bug-bounty]
+excerpt: "nineteen hosts, one administrative suffix, one HTTPS request each — how redirect headers turned a \"nothing here\" estate into a map."
+---
 *Part 1 of 3 from a bug-bounty engagement log. Part 2 covers [the DNS watcher
 I built to survive this hunt](/blog/building-dns-watch/); part 3 is the
 [honest math of 6,665 templates finding zero](/blog/when-templates-find-zero/).*

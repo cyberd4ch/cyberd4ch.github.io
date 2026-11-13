@@ -1,3 +1,12 @@
+---
+title: "from a form to a download manager: categories, drag-and-drop, and a window that lets go"
+date: 2026-11-08
+category: technical
+ai-assist: 100
+tags: [rust, http, macos]
+topics: [development]
+excerpt: "rebuilding the ftc page as a download manager — one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening."
+---
 *the page was a form and a stack of cards. now it is a download manager: categories,
 a sortable table, batch actions, drag-and-drop, a speed graph — still one binary, still
 no framework, still no build step.*

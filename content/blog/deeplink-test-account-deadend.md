@@ -1,3 +1,12 @@
+---
+title: "Dead end with test accounts and researching a workaround"
+date: 2026-11-10
+category: general
+ai-assist: 100
+tags: [bug-bounty, recon, meli]
+topics: [bug-bounty]
+excerpt: "The ATO 2FA challenge test account (userId 1252539217, CHALLENGE_ATO_USER_2, site MCO) returns 302 /login/identification/not-found, suggesting it is expired or removed. Later work showed the deeplink gadget mounts anonymously for mobile UA (and is sanitised), so the account blocker now applies to the seller / second-order path. Workaround paths: seller accounts, personal account (one only, no mass creation), or waiting for program test-user rollout."
+---
 *Part two of the deeplink trace. Part one is the
 [server-side trace and its confirmed sink](/blog/deeplink-gadget-trace/). This
 post is about the boring wall that stopped the repro: a test account that no

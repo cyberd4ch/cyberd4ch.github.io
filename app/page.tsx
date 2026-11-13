@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa'
 import { repos, activity, timeAgo, languageColor, github, syncLabel, isStale, totalStars } from '@/lib/github'
 import { posts } from '@/lib/posts'
+import AIRing from '@/components/blog/AIRing'
 import Hero from '@/components/hero/Hero'
 import PageCol from '@/components/PageCol'
 import Chapter from '@/components/deck/Chapter'
@@ -23,8 +24,10 @@ import DeckStage from '@/components/deck/DeckStage'
 import { Squiggle } from '@/components/Deco'
 
 // Home shows what actually moved recently — pinning only orders the projects page.
-const recentRepos = [...repos].sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)).slice(0, 3)
-const latestActivity = activity.slice(0, 6)
+// 6 repos / 12 activity items: enough that both cards' bodies overflow and
+// scroll inside the open sheet, like the transmissions card does.
+const recentRepos = [...repos].sort((a, b) => b.pushedAt.localeCompare(a.pushedAt)).slice(0, 6)
+const latestActivity = activity.slice(0, 12)
 const latestPosts = posts.slice(0, 4)
 
 function SectionHeading({ label, link, linkLabel }: { label: string; link?: string; linkLabel?: string }) {
@@ -215,8 +218,9 @@ export default function HomePage() {
                 return (
                   <Link key={post.id} href={post.url} className="blog-row block" target={external ? '_blank' : undefined}>
                     <h3 className="text-sm font-bold tracking-[-0.02em]">{post.title}</h3>
-                    <p className="text-[10px] uppercase tracking-widest text-[var(--muted)] mt-0.5 mb-1">
-                      {post.date} · {post.category}
+                    <p className="text-[10px] uppercase tracking-widest text-[var(--muted)] mt-0.5 mb-1 flex items-center gap-1.5">
+                      {post.date} · {post.category} · {post.readMinutes} min
+                      {post.aiAssist != null && <AIRing pct={post.aiAssist} size={12} />}
                     </p>
                     {post.excerpt && (
                       <p className="text-[13px] text-[var(--muted)] leading-relaxed">{post.excerpt}</p>

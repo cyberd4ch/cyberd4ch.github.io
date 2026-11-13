@@ -1,3 +1,12 @@
+---
+title: "announcing dns-watch v1.1.0: your attack surface's DNS, diffed — for free"
+date: 2026-11-07
+category: technical
+ai-assist: 100
+tags: [dns, release, shell]
+topics: [bug-bounty, tooling]
+excerpt: "release notes for a one-file DNS drift watcher: one cron line, a readable log, no dashboard, no API keys, no subscription."
+---
 *The parts of this series: [part 1](/blog/one-curl-per-host/),
 [part 2](/blog/building-dns-watch/) (why and how the tool got built),
 [part 3](/blog/when-templates-find-zero/). This post is the release

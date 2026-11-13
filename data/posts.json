@@ -1,0 +1,309 @@
+[
+  {
+    "id": "from-compose-to-certificates",
+    "slug": "from-compose-to-certificates",
+    "title": "from a compose file to a certificate chain",
+    "date": "Nov 12, 2026",
+    "dateISO": "2026-11-12",
+    "category": "technical",
+    "url": "/blog/from-compose-to-certificates/",
+    "excerpt": "the whole workspace arc in one post: three tiers in a compose file, the same tiers on kind, observability bolted on, terraform state moved to s3 — and a self-hosted forge in kubernetes publishing images from its own CI behind a TLS chain that actually verifies.",
+    "aiAssist": 100,
+    "tags": [
+      "docker",
+      "kubernetes",
+      "terraform",
+      "forgejo",
+      "tls",
+      "ci"
+    ],
+    "topics": [
+      "cloud-native",
+      "infrastructure-as-code"
+    ],
+    "readMinutes": 13
+  },
+  {
+    "id": "bounty-program-landscape",
+    "slug": "bounty-program-landscape",
+    "title": "where the deeplink work can make money — and the reporting trap that kills it",
+    "date": "Nov 10, 2026",
+    "dateISO": "2026-11-10",
+    "category": "general",
+    "url": "/blog/bounty-program-landscape/",
+    "excerpt": "Desk research on which programs pay for nonce-laundering XSS: Basecamp/HEY on HackerOne ($100-$10,000, with a 2026 cross-account nonce-bypass chain already disclosed) is the closest fit; Intigriti only has Lightspark and Adobe paying publicly. The trap: \"CSP headers\" is out of scope, but \"XSS despite CSP\" is not.",
+    "aiAssist": 100,
+    "tags": [
+      "bug-bounty",
+      "hackerone",
+      "methodology"
+    ],
+    "topics": [
+      "bug-bounty"
+    ],
+    "readMinutes": 3
+  },
+  {
+    "id": "deeplink-gadget-trace",
+    "slug": "deeplink-gadget-trace",
+    "title": "Server-side trace of the deeplink gadget: positive and negative findings",
+    "date": "Nov 10, 2026",
+    "dateISO": "2026-11-10",
+    "category": "technical",
+    "url": "/blog/deeplink-gadget-trace/",
+    "excerpt": "The deeplink gadget in Mercado Libre's home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce'd script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously — but a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution.",
+    "aiAssist": 100,
+    "tags": [
+      "xss",
+      "csp",
+      "deeplink",
+      "meli"
+    ],
+    "topics": [
+      "bug-bounty"
+    ],
+    "readMinutes": 5
+  },
+  {
+    "id": "deeplink-test-account-deadend",
+    "slug": "deeplink-test-account-deadend",
+    "title": "Dead end with test accounts and researching a workaround",
+    "date": "Nov 10, 2026",
+    "dateISO": "2026-11-10",
+    "category": "general",
+    "url": "/blog/deeplink-test-account-deadend/",
+    "excerpt": "The ATO 2FA challenge test account (userId 1252539217, CHALLENGE_ATO_USER_2, site MCO) returns 302 /login/identification/not-found, suggesting it is expired or removed. Later work showed the deeplink gadget mounts anonymously for mobile UA (and is sanitised), so the account blocker now applies to the seller / second-order path. Workaround paths: seller accounts, personal account (one only, no mass creation), or waiting for program test-user rollout.",
+    "aiAssist": 100,
+    "tags": [
+      "bug-bounty",
+      "recon",
+      "meli"
+    ],
+    "topics": [
+      "bug-bounty"
+    ],
+    "readMinutes": 4
+  },
+  {
+    "id": "footorrent-3-5-0-magnets-that-work",
+    "slug": "footorrent-3-5-0-magnets-that-work",
+    "title": "magnets that actually work: three wire bugs, a dead tracker list, and 917 KB that finally moved",
+    "date": "Nov 9, 2026",
+    "dateISO": "2026-11-09",
+    "category": "technical",
+    "url": "/blog/footorrent-3-5-0-magnets-that-work/",
+    "excerpt": "footorrent 3.5.0 — metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix.",
+    "aiAssist": 100,
+    "tags": [
+      "rust",
+      "bittorrent",
+      "debugging"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 3
+  },
+  {
+    "id": "announcing-dnswatch-v1-1-1",
+    "slug": "announcing-dnswatch-v1-1-1",
+    "title": "dns-watch v1.1.1: the release where nothing changed (on purpose)",
+    "date": "Nov 8, 2026",
+    "dateISO": "2026-11-08",
+    "category": "technical",
+    "url": "/blog/announcing-dnswatch-v1-1-1/",
+    "excerpt": "a packaging release: reproducible tarball, sha256-pinned homebrew tap that bumps itself, and the install path documented first.",
+    "aiAssist": 100,
+    "tags": [
+      "dns",
+      "release",
+      "shell"
+    ],
+    "topics": [
+      "bug-bounty",
+      "tooling"
+    ],
+    "readMinutes": 3
+  },
+  {
+    "id": "from-form-to-download-manager",
+    "slug": "from-form-to-download-manager",
+    "title": "from a form to a download manager: categories, drag-and-drop, and a window that lets go",
+    "date": "Nov 8, 2026",
+    "dateISO": "2026-11-08",
+    "category": "technical",
+    "url": "/blog/from-form-to-download-manager/",
+    "excerpt": "rebuilding the ftc page as a download manager — one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening.",
+    "aiAssist": 100,
+    "tags": [
+      "rust",
+      "http",
+      "macos"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 5
+  },
+  {
+    "id": "one-binary-two-interfaces",
+    "slug": "one-binary-two-interfaces",
+    "title": "one binary, two interfaces: a web ui and a real window in 3 MB of rust",
+    "date": "Nov 8, 2026",
+    "dateISO": "2026-11-08",
+    "category": "technical",
+    "url": "/blog/one-binary-two-interfaces/",
+    "excerpt": "a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window — and the favicon bug that explained why 204 is not an icon.",
+    "aiAssist": 100,
+    "tags": [
+      "rust",
+      "http",
+      "macos"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 3
+  },
+  {
+    "id": "three-tiers-become-a-module",
+    "slug": "three-tiers-become-a-module",
+    "title": "three tiers become a module: two stacks, one graph, no collisions",
+    "date": "Nov 8, 2026",
+    "dateISO": "2026-11-08",
+    "category": "technical",
+    "url": "/blog/three-tiers-become-a-module/",
+    "excerpt": "lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083 — including the readiness wait that caught a green apply serving nothing.",
+    "aiAssist": 100,
+    "tags": [
+      "terraform",
+      "docker",
+      "modules"
+    ],
+    "topics": [
+      "infrastructure-as-code"
+    ],
+    "readMinutes": 3
+  },
+  {
+    "id": "announcing-dnswatch-v1-1-0",
+    "slug": "announcing-dnswatch-v1-1-0",
+    "title": "announcing dns-watch v1.1.0: your attack surface's DNS, diffed — for free",
+    "date": "Nov 7, 2026",
+    "dateISO": "2026-11-07",
+    "category": "technical",
+    "url": "/blog/announcing-dnswatch-v1-1-0/",
+    "excerpt": "release notes for a one-file DNS drift watcher: one cron line, a readable log, no dashboard, no API keys, no subscription.",
+    "aiAssist": 100,
+    "tags": [
+      "dns",
+      "release",
+      "shell"
+    ],
+    "topics": [
+      "bug-bounty",
+      "tooling"
+    ],
+    "readMinutes": 2
+  },
+  {
+    "id": "building-dns-watch",
+    "slug": "building-dns-watch",
+    "title": "when dig lies: building a DNS drift watcher that survives a NAT'd VM",
+    "date": "Nov 7, 2026",
+    "dateISO": "2026-11-07",
+    "category": "technical",
+    "url": "/blog/building-dns-watch/",
+    "excerpt": "five rebuilds, three false walls, and the two design decisions that make a diff trustworthy instead of merely present.",
+    "aiAssist": 100,
+    "tags": [
+      "dns",
+      "shell",
+      "tooling"
+    ],
+    "topics": [
+      "bug-bounty"
+    ],
+    "readMinutes": 5
+  },
+  {
+    "id": "one-curl-per-host",
+    "slug": "one-curl-per-host",
+    "title": "one curl per host: mapping a hardened SSO estate without tripping the alarm",
+    "date": "Nov 7, 2026",
+    "dateISO": "2026-11-07",
+    "category": "technical",
+    "url": "/blog/one-curl-per-host/",
+    "excerpt": "nineteen hosts, one administrative suffix, one HTTPS request each — how redirect headers turned a \"nothing here\" estate into a map.",
+    "aiAssist": 100,
+    "tags": [
+      "recon",
+      "dns",
+      "methodology"
+    ],
+    "topics": [
+      "bug-bounty"
+    ],
+    "readMinutes": 4
+  },
+  {
+    "id": "three-tiers-after-desktop",
+    "slug": "three-tiers-after-desktop",
+    "title": "after docker desktop: three tiers, colima, and the ghosts it left behind",
+    "date": "Nov 7, 2026",
+    "dateISO": "2026-11-07",
+    "category": "technical",
+    "url": "/blog/three-tiers-after-desktop/",
+    "excerpt": "rescuing lab 01 from a decommissioned docker desktop install — dead plugin symlinks, a credential store pointing at a corpse — and the compose lab that went green at the end.",
+    "aiAssist": 100,
+    "tags": [
+      "docker",
+      "colima",
+      "compose"
+    ],
+    "topics": [
+      "cloud-native"
+    ],
+    "readMinutes": 4
+  },
+  {
+    "id": "three-tiers-on-kind",
+    "slug": "three-tiers-on-kind",
+    "title": "same tiers, new vocabulary: kind, crashloops, and the one secret spelling",
+    "date": "Nov 7, 2026",
+    "dateISO": "2026-11-07",
+    "category": "technical",
+    "url": "/blog/three-tiers-on-kind/",
+    "excerpt": "re-homing the lab 01 stack onto kind: a KeyError crashloop, the secret that is a bag of keys, boot-time retries, and a same-tag rebuild that never rolls.",
+    "aiAssist": 100,
+    "tags": [
+      "kubernetes",
+      "kind",
+      "docker"
+    ],
+    "topics": [
+      "cloud-native"
+    ],
+    "readMinutes": 3
+  },
+  {
+    "id": "when-templates-find-zero",
+    "slug": "when-templates-find-zero",
+    "title": "six thousand templates, zero findings — and other useful lies about hardened targets",
+    "date": "Nov 7, 2026",
+    "dateISO": "2026-11-07",
+    "category": "technical",
+    "url": "/blog/when-templates-find-zero/",
+    "excerpt": "6,665 templates across 16,055 requests matched nothing. that result is data, not a dead end.",
+    "aiAssist": 100,
+    "tags": [
+      "nuclei",
+      "recon",
+      "methodology"
+    ],
+    "topics": [
+      "bug-bounty"
+    ],
+    "readMinutes": 3
+  }
+]

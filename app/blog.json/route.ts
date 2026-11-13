@@ -14,6 +14,10 @@ export function GET() {
       category: post.category,
       excerpt: post.excerpt ?? '',
       external: post.url.startsWith('http'),
+      readMinutes: post.readMinutes,
+      aiAssist: post.aiAssist,
+      tags: post.tags,
+      topics: post.topics,
     })),
   })
 }

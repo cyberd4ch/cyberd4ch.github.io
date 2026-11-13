@@ -1,3 +1,12 @@
+---
+title: "when dig lies: building a DNS drift watcher that survives a NAT'd VM"
+date: 2026-11-07
+category: technical
+ai-assist: 100
+tags: [dns, shell, tooling]
+topics: [bug-bounty]
+excerpt: "five rebuilds, three false walls, and the two design decisions that make a diff trustworthy instead of merely present."
+---
 *Part 2 of 3. Part 1 is the
 [one-curl-per-host methodology](/blog/one-curl-per-host/); part 3 is the
 [zero-findings math](/blog/when-templates-find-zero/).*

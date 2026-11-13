@@ -1,3 +1,12 @@
+---
+title: "same tiers, new vocabulary: kind, crashloops, and the one secret spelling"
+date: 2026-11-07
+category: technical
+ai-assist: 100
+tags: [kubernetes, kind, docker]
+topics: [cloud-native]
+excerpt: "re-homing the lab 01 stack onto kind: a KeyError crashloop, the secret that is a bag of keys, boot-time retries, and a same-tag rebuild that never rolls."
+---
 *part 2 of the `cloud_prep/` lab log. part 1, [three tiers via colima and the
 docker desktop ghosts](/blog/three-tiers-after-desktop/), ended with a
 compose file going green. this one hands the same application to Kubernetes —

@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import PageCol from '@/components/PageCol'
+import AIRing from '@/components/blog/AIRing'
 import { posts } from '@/lib/posts'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -19,7 +20,10 @@ function getPost(slug: string) {
   if (!post) return null
   const file = path.join(process.cwd(), 'content', 'blog', `${slug}.md`)
   if (!fs.existsSync(file)) return null
-  return { post, body: fs.readFileSync(file, 'utf8') }
+  const raw = fs.readFileSync(file, 'utf8')
+  // strip the frontmatter block — metadata renders in the header, not the body
+  const body = raw.startsWith('---') ? raw.slice(raw.indexOf('\n---', 3) + 4).replace(/^\n/, '') : raw
+  return { post, body }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -46,12 +50,39 @@ export default async function BlogPostPage({ params }: Props) {
 
         <header className="mt-5 mb-8">
           <p className="text-xs text-[var(--muted)] mb-2">
-            {found.post.date} · <span className="text-[var(--label)]">{found.post.category}</span>
+            {found.post.date} · <span className="text-[var(--label)]">{found.post.category}</span> ·{' '}
+            {found.post.readMinutes} min read
           </p>
           <h1 className="text-2xl font-medium leading-snug">{found.post.title}</h1>
           {found.post.excerpt && (
             <p className="text-sm text-[var(--muted)] mt-3 leading-relaxed">{found.post.excerpt}</p>
           )}
+          {/* provenance + filing: the AI-assist ring (full = published as the
+              AI drafted it; the gap is the human share) and the archive
+              metadata the blog sorts by */}
+          <div className="blog-meta mt-4">
+            {found.post.aiAssist != null && <AIRing pct={found.post.aiAssist} size={15} label />}
+            {found.post.topics.length > 0 && (
+              <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">
+                topics:
+              </span>
+            )}
+            {found.post.topics.map(t => (
+              <span key={t} className="tag-chip static">
+                {t}
+              </span>
+            ))}
+            {found.post.tags.length > 0 && (
+              <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">
+                tags:
+              </span>
+            )}
+            {found.post.tags.map(t => (
+              <span key={t} className="tag-chip static">
+                {t}
+              </span>
+            ))}
+          </div>
         </header>
 
         <div className="post">

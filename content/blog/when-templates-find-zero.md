@@ -1,3 +1,12 @@
+---
+title: "six thousand templates, zero findings — and other useful lies about hardened targets"
+date: 2026-11-07
+category: technical
+ai-assist: 100
+tags: [nuclei, recon, methodology]
+topics: [bug-bounty]
+excerpt: "6,665 templates across 16,055 requests matched nothing. that result is data, not a dead end."
+---
 *Part 3 of 3. Part 1 is the
 [one-curl-per-host methodology](/blog/one-curl-per-host/); part 2 is the
 [DNS watcher](/blog/building-dns-watch/) that came out of the gaps the

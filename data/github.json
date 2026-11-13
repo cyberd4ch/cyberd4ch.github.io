@@ -1,31 +1,41 @@
 {
-  "generatedAt": "2026-11-07T01:31:12.936Z",
+  "generatedAt": "2026-11-13T02:03:51.059Z",
   "user": {
     "login": "cyberd4ch",
     "name": "DKA447~000",
-    "bio": "Building & tweaking stuff, toying with networking tools, finding bugs and tinkering greasy code.",
+    "bio": "Building & automating the boring and sometimes clunky stuff, toying with home labs, looking into bug hunting, cloud native and tinkering greasy code.",
     "avatarUrl": "https://avatars.githubusercontent.com/u/183819322?v=4",
     "url": "https://github.com/cyberd4ch",
-    "publicRepos": 22,
-    "followers": 80
+    "publicRepos": 25,
+    "followers": 107
   },
   "pinned": [
-    "free-torrent-cli",
+    "footorrent",
     "txn-agent",
     "dns-watch",
     "cportscan"
   ],
   "repos": [
     {
-      "name": "free-torrent-cli",
-      "description": "A simple torrent client build with Node.js for terminal",
-      "url": "https://github.com/cyberd4ch/free-torrent-cli",
-      "homepage": "",
-      "language": "JavaScript",
-      "topics": [],
+      "name": "footorrent",
+      "description": "A BitTorrent client in one ~3 MB Rust binary: full CLI, local web UI, prebuilt for macOS, Linux and Windows. Write-up: cyberd4ch.github.io/blog/footorrent-3-5-0-magnets-that-work/",
+      "url": "https://github.com/cyberd4ch/footorrent",
+      "homepage": "https://cyberd4ch.github.io/projects/",
+      "language": "Rust",
+      "topics": [
+        "bittorrent",
+        "cli",
+        "dht",
+        "magnet-link",
+        "p2p",
+        "rust",
+        "rust-cli",
+        "torrent-client",
+        "web-ui"
+      ],
       "stars": 2,
       "forks": 0,
-      "pushedAt": "2026-10-22T05:11:05Z",
+      "pushedAt": "2026-11-10T05:25:30Z",
       "createdAt": "2025-05-19T14:31:02Z",
       "pinned": true
     },
@@ -51,7 +61,7 @@
       ],
       "stars": 2,
       "forks": 0,
-      "pushedAt": "2026-10-29T14:46:31Z",
+      "pushedAt": "2026-11-10T04:54:22Z",
       "createdAt": "2026-10-05T02:33:54Z",
       "pinned": true
     },
@@ -59,27 +69,83 @@
       "name": "dns-watch",
       "description": "dnswatch — a small, dependency-free DNS drift watcher (cron + plain-text log). Free forever.",
       "url": "https://github.com/cyberd4ch/dns-watch",
-      "homepage": "",
+      "homepage": "https://github.com/cyberd4ch/homebrew-dnswatch#readme",
       "language": "Shell",
-      "topics": [],
+      "topics": [
+        "cron",
+        "devops",
+        "dns",
+        "monitoring",
+        "networking",
+        "security",
+        "shell"
+      ],
       "stars": 0,
       "forks": 0,
-      "pushedAt": "2026-11-03T21:27:12Z",
+      "pushedAt": "2026-11-07T01:42:22Z",
       "createdAt": "2026-11-03T20:17:36Z",
       "pinned": true
     },
     {
       "name": "cportscan",
-      "description": "A simple port scanner built with C",
+      "description": "A minimal TCP port scanner written in C — raw sockets, connect timeouts, clean CLI. Learning project.",
       "url": "https://github.com/cyberd4ch/cportscan",
       "homepage": "",
       "language": "HTML",
-      "topics": [],
+      "topics": [
+        "c",
+        "cli",
+        "networking",
+        "port-scanner",
+        "security",
+        "sockets"
+      ],
       "stars": 0,
       "forks": 0,
-      "pushedAt": "2026-04-07T15:19:08Z",
+      "pushedAt": "2026-11-07T01:42:31Z",
       "createdAt": "2025-05-08T22:00:41Z",
       "pinned": true
+    },
+    {
+      "name": "security-toolkit",
+      "description": "Dependency-free tools for finding nonce-laundering XSS: a bundle scanner and a safe, rate-limited recon fetcher.",
+      "url": "https://github.com/cyberd4ch/security-toolkit",
+      "homepage": "https://cyberd4ch.github.io/blog/deeplink-gadget-trace/",
+      "language": "Python",
+      "topics": [
+        "appsec",
+        "bugbounty",
+        "csp",
+        "python",
+        "security",
+        "security-tools",
+        "xss"
+      ],
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-11-10T04:01:32Z",
+      "createdAt": "2026-11-10T03:51:15Z",
+      "pinned": false
+    },
+    {
+      "name": "stride-tmr",
+      "description": "STRIDE threat modelling with pytm — worked examples that turn attack-surface lists into ranked, testable threats.",
+      "url": "https://github.com/cyberd4ch/stride-tmr",
+      "homepage": "",
+      "language": "Python",
+      "topics": [
+        "appsec",
+        "python",
+        "pytm",
+        "security",
+        "stride",
+        "threat-modeling"
+      ],
+      "stars": 0,
+      "forks": 0,
+      "pushedAt": "2026-11-07T01:42:34Z",
+      "createdAt": "2025-07-12T12:14:51Z",
+      "pinned": false
     },
     {
       "name": "homebrew-dnswatch",
@@ -87,99 +153,109 @@
       "url": "https://github.com/cyberd4ch/homebrew-dnswatch",
       "homepage": "",
       "language": "Ruby",
-      "topics": [],
+      "topics": [
+        "dns",
+        "homebrew",
+        "homebrew-tap",
+        "monitoring"
+      ],
       "stars": 0,
       "forks": 0,
-      "pushedAt": "2026-11-03T21:27:46Z",
+      "pushedAt": "2026-11-07T01:42:19Z",
       "createdAt": "2026-11-03T20:59:07Z",
-      "pinned": false
-    },
-    {
-      "name": "stride-tmr",
-      "description": "STRIDE threat modelling with pytm",
-      "url": "https://github.com/cyberd4ch/stride-tmr",
-      "homepage": "",
-      "language": "Python",
-      "topics": [],
-      "stars": 0,
-      "forks": 0,
-      "pushedAt": "2025-07-12T12:37:34Z",
-      "createdAt": "2025-07-12T12:14:51Z",
       "pinned": false
     }
   ],
   "activity": [
     {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/cyberd4ch",
+      "repoUrl": "https://github.com/cyberd4ch/cyberd4ch",
+      "at": "2026-11-11T02:44:01Z",
+      "title": "pushed to cyberd4ch/cyberd4ch",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/cyberd4ch/commits"
+    },
+    {
+      "type": "PushEvent",
+      "repo": "cyberd4ch/cyberd4ch.github.io",
+      "repoUrl": "https://github.com/cyberd4ch/cyberd4ch.github.io",
+      "at": "2026-11-11T02:04:27Z",
+      "title": "pushed to cyberd4ch/cyberd4ch.github.io",
+      "detail": "main",
+      "url": "https://github.com/cyberd4ch/cyberd4ch.github.io/commits"
+    },
+    {
       "type": "IssueCommentEvent",
-      "repo": "hashicorp/vagrant",
-      "repoUrl": "https://github.com/hashicorp/vagrant",
-      "at": "2026-11-07T00:47:29Z",
-      "title": "commented on #13845 in hashicorp/vagrant",
-      "detail": "Port Forwarding doesn't work on MacOS 26.7+",
-      "url": "https://github.com/hashicorp/vagrant/issues/13845#issuecomment-6699831865"
+      "repo": "canonical/cos-alerter",
+      "repoUrl": "https://github.com/canonical/cos-alerter",
+      "at": "2026-11-10T15:48:27Z",
+      "title": "commented on #114 in canonical/cos-alerter",
+      "detail": "Drop black in favour of ruff format",
+      "url": "https://github.com/canonical/cos-alerter/pull/114#issuecomment-6771948617"
+    },
+    {
+      "type": "IssueCommentEvent",
+      "repo": "canonical/cos-alerter",
+      "repoUrl": "https://github.com/canonical/cos-alerter",
+      "at": "2026-11-10T15:44:50Z",
+      "title": "commented on #111 in canonical/cos-alerter",
+      "detail": "Drop `black` from deps",
+      "url": "https://github.com/canonical/cos-alerter/pull/111#issuecomment-6771858572"
     },
     {
       "type": "IssuesEvent",
       "repo": "ppggff/vagrant-qemu",
       "repoUrl": "https://github.com/ppggff/vagrant-qemu",
-      "at": "2026-11-05T04:02:37Z",
-      "title": "opened issue #96 in ppggff/vagrant-qemu",
+      "at": "2026-11-10T15:32:50Z",
+      "title": "reopened issue #96 in ppggff/vagrant-qemu",
       "detail": "vagrant-qemu: provider reports \"stopped\" while the QEMU process is alive when the pidfile directory is lost",
       "url": "https://github.com/ppggff/vagrant-qemu/issues/96"
     },
     {
-      "type": "PushEvent",
-      "repo": "cyberd4ch/homebrew-dnswatch",
-      "repoUrl": "https://github.com/cyberd4ch/homebrew-dnswatch",
-      "at": "2026-11-03T21:27:47Z",
-      "title": "pushed to cyberd4ch/homebrew-dnswatch",
-      "detail": "main",
-      "url": "https://github.com/cyberd4ch/homebrew-dnswatch/commits"
-    },
-    {
-      "type": "ReleaseEvent",
-      "repo": "cyberd4ch/dns-watch",
-      "repoUrl": "https://github.com/cyberd4ch/dns-watch",
-      "at": "2026-11-03T20:58:42Z",
-      "title": "released v1.1.0 in cyberd4ch/dns-watch",
-      "detail": "dns-watch v1.1.0",
-      "url": "https://github.com/cyberd4ch/dns-watch/releases/tag/v1.1.0"
+      "type": "PullRequestEvent",
+      "repo": "canonical/cos-alerter",
+      "repoUrl": "https://github.com/canonical/cos-alerter",
+      "at": "2026-11-10T15:31:23Z",
+      "title": "closed pull request #114 in canonical/cos-alerter",
+      "detail": "",
+      "url": "https://github.com/canonical/cos-alerter"
     },
     {
       "type": "PushEvent",
-      "repo": "cyberd4ch/dns-watch",
-      "repoUrl": "https://github.com/cyberd4ch/dns-watch",
-      "at": "2026-11-03T20:25:12Z",
-      "title": "pushed to cyberd4ch/dns-watch",
-      "detail": "main",
-      "url": "https://github.com/cyberd4ch/dns-watch/commits"
+      "repo": "cyberd4ch/cos-alerter",
+      "repoUrl": "https://github.com/cyberd4ch/cos-alerter",
+      "at": "2026-11-10T15:31:22Z",
+      "title": "pushed to cyberd4ch/cos-alerter",
+      "detail": "drop-black-use-ruff",
+      "url": "https://github.com/cyberd4ch/cos-alerter/commits"
     },
     {
-      "type": "PushEvent",
+      "type": "CreateEvent",
+      "repo": "cyberd4ch/cos-alerter",
+      "repoUrl": "https://github.com/cyberd4ch/cos-alerter",
+      "at": "2026-11-10T05:10:10Z",
+      "title": "created branch drop-black-use-ruff in cyberd4ch/cos-alerter",
+      "detail": "",
+      "url": "https://github.com/cyberd4ch/cos-alerter"
+    },
+    {
+      "type": "CreateEvent",
       "repo": "cyberd4ch/txn-agent",
       "repoUrl": "https://github.com/cyberd4ch/txn-agent",
-      "at": "2026-10-29T14:46:04Z",
-      "title": "pushed to cyberd4ch/txn-agent",
-      "detail": "main",
-      "url": "https://github.com/cyberd4ch/txn-agent/commits"
+      "at": "2026-11-10T04:54:22Z",
+      "title": "created branch feat/otel-tracing in cyberd4ch/txn-agent",
+      "detail": "",
+      "url": "https://github.com/cyberd4ch/txn-agent"
     },
     {
       "type": "PushEvent",
-      "repo": "cyberd4ch/free-torrent-cli",
-      "repoUrl": "https://github.com/cyberd4ch/free-torrent-cli",
-      "at": "2026-10-22T04:52:00Z",
-      "title": "pushed to cyberd4ch/free-torrent-cli",
+      "repo": "cyberd4ch/footorrent",
+      "repoUrl": "https://github.com/cyberd4ch/footorrent",
+      "at": "2026-11-09T19:37:57Z",
+      "title": "pushed to cyberd4ch/footorrent",
       "detail": "main",
-      "url": "https://github.com/cyberd4ch/free-torrent-cli/commits"
-    },
-    {
-      "type": "PushEvent",
-      "repo": "cyberd4ch/cyberd4ch",
-      "repoUrl": "https://github.com/cyberd4ch/cyberd4ch",
-      "at": "2026-10-22T02:44:02Z",
-      "title": "pushed to cyberd4ch/cyberd4ch",
-      "detail": "main",
-      "url": "https://github.com/cyberd4ch/cyberd4ch/commits"
+      "url": "https://github.com/cyberd4ch/footorrent/commits"
     }
   ]
 }
