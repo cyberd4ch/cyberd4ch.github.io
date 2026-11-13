@@ -585,7 +585,10 @@ html[data-stage] .footer-col {
   html[data-stage] .chapter.chapter-on {
     display: block;
   }
-  html[data-stage] .chapter-mobile-only {
+  /* the landing peek bar: chapter 1's bar renders ONLY at pos 0 (the deck
+     driver mirrors the rounded position into data-pos) — mid-scrub the ghost
+     bar would just float at the bottom edge */
+  html[data-stage][data-pos='0'] .chapter-mobile-only {
     display: block;
   }
   html[data-stage] .chapter-card,
@@ -598,6 +601,10 @@ html[data-stage] .footer-col {
   }
   html[data-stage] .deck-head {
     display: flex !important;
+    /* short sheets anchor their head+body block to the bottom edge: the
+       bottom-up clip reveal then shows content first, matching the identity
+       card's full-screen posture */
+    margin-top: auto;
   }
   /* the card lives between the nav strip and the bottom margin, anchored to
      the bottom edge — watermelon bottom-sheet posture */
@@ -612,21 +619,22 @@ html[data-stage] .footer-col {
   html[data-stage] .deck-card {
     position: relative;
     width: 100%;
-    max-width: 560px;
+    max-width: none;
+    height: 100%;
     flex-direction: column;
     gap: 10px;
     pointer-events: auto;
-    /* the deck driver's scrub transform lands here */
-    will-change: transform;
+    /* will-change (layer promotion) is set inline by DeckStage only while a
+       card is mounted — a blanket rule promoted all 9 full-viewport layers
+       at once, tens of MB of graphics memory on phones */
   }
   /* the sheet: the SELA card body. DeckStage drives --cardP (0..1) per frame
      from the drawer spring; the top-inset clip rolls it open bottom-up from
      the bar line, and the stagger formula fades children in as it clears */
   html[data-stage] .deck-sheet {
     position: relative;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     min-height: 0;
-    max-height: calc(100dvh - 172px);
     overflow: hidden;
     flex-direction: column;
     background: var(--card);

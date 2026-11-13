@@ -79,6 +79,12 @@ export default function DeckStage() {
     let lastWheel = 0
     let raf = 0
     let lastT = 0
+    // peek-bar affordance: the landing renders chapter 1's bar before any
+    // card is mounted (pos 0 shows none). Clicking that bar's toggle springs
+    // the deck to the card's stop and opens its sheet on arrival.
+    let pendingStop = 0
+    let pendingOpen = false
+    let lastPosAttr = -1
 
     // touch gesture
     let tracking = false
@@ -105,7 +111,13 @@ export default function DeckStage() {
     const cardEl = (i: number) => chapterEl(i)?.querySelector<HTMLElement>('.deck-card') ?? null
 
     const showChapter = (i: number) => {
+      if (mounted.has(i)) return
       chapterEl(i)?.classList.add('chapter-on')
+      // layer promotion is granted per mounted card and revoked on hide —
+      // a CSS blanket will-change promoted all 9 full-viewport layers at
+      // once (tens of MB of graphics memory on phones)
+      const card = cardEl(i)
+      if (card) card.style.willChange = 'transform'
       mounted.add(i)
     }
     const hideChapter = (i: number) => {
@@ -116,6 +128,7 @@ export default function DeckStage() {
       if (card) {
         card.style.transform = ''
         card.style.zIndex = ''
+        card.style.willChange = ''
         card.removeAttribute('data-open')
         card.style.setProperty('--cardP', '0')
       }
@@ -194,6 +207,12 @@ export default function DeckStage() {
       const y = p * posPx
       if (Math.abs(y - fleetBus.y) > 0.01) fleetBus.y = y
       fleetBus.formedTarget = Math.max(0, Math.min(1, 1 - p))
+      // only the OPEN SHEET truly covers the art area (the collapsed card is
+      // just its bottom bar — the flight layer's story patch lives in the
+      // void above it). While the sheet is open both canvases skip their
+      // heavy paint loops; any other state keeps them live: mid-scrub the
+      // cards part and the patches play in the gap between them.
+      fleetBus.covered = d > 0.95
 
       // which card is current
       const idx = Math.max(0, Math.min(N, Math.round(p)))
@@ -204,6 +223,18 @@ export default function DeckStage() {
         dTarget = 0
         dVel = 0
         dSpringing = false
+      }
+      // the landing peek bar only exists at pos 0 (CSS keys off data-pos)
+      if (idx !== lastPosAttr) {
+        lastPosAttr = idx
+        root.dataset.pos = String(idx)
+      }
+
+      // a peek-bar click has arrived and settled at its stop: open the sheet
+      // now (the arrival reset above cleared the drawer first)
+      if (pendingOpen && shown === pendingStop && !springing) {
+        pendingOpen = false
+        setDrawer(1)
       }
 
       // mount window: |p − i| < 1 keeps at most the incoming + outgoing pair
@@ -245,6 +276,9 @@ export default function DeckStage() {
       for (const i of Array.from(mounted)) hideChapter(i) // reset card styles too
       mounted.clear()
       chapters.forEach(el => el.classList.remove('chapter-on'))
+      pendingStop = 0
+      pendingOpen = false
+      delete root.dataset.pos
       delete root.dataset.stage
       fleetBus.resetStage()
     }
@@ -268,6 +302,7 @@ export default function DeckStage() {
       dVel = 0
       dSpringing = false
       shown = 0
+      lastPosAttr = -1
       mounted.clear()
       window.scrollTo(0, 0)
       measure()
@@ -282,6 +317,7 @@ export default function DeckStage() {
       tracking = true
       springing = false
       lastWheel = 0
+      pendingOpen = false // any touch takes the gesture back from a peek click
       startY = e.touches[0].clientY
       lastY = startY
       startRaw = raw
@@ -337,6 +373,7 @@ export default function DeckStage() {
       if (!enabled || tracking) return
       e.preventDefault()
       fleetBus.lastInput = performance.now()
+      pendingOpen = false
       collapseDrawer()
       springing = false
       const dy =
@@ -352,6 +389,7 @@ export default function DeckStage() {
       if (!down && !up) return
       e.preventDefault()
       fleetBus.lastInput = performance.now()
+      pendingOpen = false
       collapseDrawer()
       springTo(Math.round(raw) + (down ? 1 : -1))
     }
@@ -362,6 +400,18 @@ export default function DeckStage() {
       if (!btn) return
       e.preventDefault()
       fleetBus.lastInput = performance.now()
+      // the landing peek bar's card is not mounted (no sheet exists yet at
+      // pos 0) — instead of toggling nothing, advance the deck to that stop
+      // and open the sheet on arrival. Gated to the landing: mid-scrub taps
+      // on the always-rendered ghost bar must not yank the deck around.
+      const chap = btn.closest('.chapter')
+      const stop = chap ? chapters.indexOf(chap as HTMLElement) + 1 : 0
+      if (shown === 0 && stop > 0 && chap && !chap.classList.contains('chapter-on')) {
+        pendingStop = stop
+        pendingOpen = true
+        springTo(stop)
+        return
+      }
       setDrawer(dTarget === 0 ? 1 : 0)
     }
 

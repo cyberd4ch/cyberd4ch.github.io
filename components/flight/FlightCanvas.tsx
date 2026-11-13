@@ -65,6 +65,46 @@ const PAL = {
 
 type Pt = { x: number; y: number }
 
+// ---- SELA story layer: mission patches for the void ---------------------------
+// The gaps where no card / no copy covers the canvas would read as dead
+// space. Each chapter gets a small mission patch — pastel chip fills, ink
+// linework, a mono uppercase label — drawn with paths + text only (no new
+// assets), in both theme palettes.
+type Story = {
+  /** 1..9 chapter key; 0 = free vignette (desktop void dressing) */
+  k: number
+  label: string
+  chip: string
+  kind:
+    | 'id'
+    | 'bullseye'
+    | 'orbit'
+    | 'plan'
+    | 'stack'
+    | 'downlink'
+    | 'log'
+    | 'dish'
+    | 'tower'
+    | 'planet'
+    | 'moon'
+  /** desktop: which gutter the patch lives in (-1 left / +1 right) */
+  side: -1 | 1
+}
+const CHIP = ['#93d3e5', '#ffdd7c', '#ffc5c8', '#b9e4aa', '#fffac3']
+const STORIES: Story[] = [
+  { k: 1, label: 'crew manifest', chip: CHIP[0], kind: 'id', side: -1 },
+  { k: 2, label: 'the target', chip: CHIP[1], kind: 'bullseye', side: 1 },
+  { k: 3, label: 'orbit plot', chip: CHIP[2], kind: 'orbit', side: -1 },
+  { k: 4, label: 'flight plan', chip: CHIP[3], kind: 'plan', side: 1 },
+  { k: 5, label: 'payload bay', chip: CHIP[4], kind: 'stack', side: -1 },
+  { k: 6, label: 'downlink', chip: CHIP[0], kind: 'downlink', side: 1 },
+  { k: 7, label: 'event log', chip: CHIP[1], kind: 'log', side: -1 },
+  { k: 8, label: 'deep space net', chip: CHIP[2], kind: 'dish', side: 1 },
+  { k: 9, label: 'tracking station', chip: CHIP[3], kind: 'tower', side: -1 },
+  { k: 0, label: 'planetfall', chip: CHIP[4], kind: 'planet', side: -1 },
+  { k: 0, label: 'the long dark', chip: CHIP[0], kind: 'moon', side: 1 },
+]
+
 /**
  * Stage parallax: on the presentation stage (lib/fleetBus.virtual) the
  * aircraft flies 2.2× the fleet's virtual travel — one card of scrub moves
@@ -104,6 +144,10 @@ export default function FlightCanvas() {
     let scaleS = 1
     let swayAmp = 10
     let narrow = false
+    // story-layer anchors (measured in buildPath)
+    let heroTopDoc = 0
+    let heroHDoc = 0
+    let storyN = 9 // chapters on the page (the stage's stop count)
 
     // ---- themed aircraft -------------------------------------------------------
     // Three vehicles share one flight plan; the theme MODE picks which one
@@ -118,6 +162,18 @@ export default function FlightCanvas() {
     }
     let spin = 0 // prop/rotor angle accumulator (rad)
     let spinV = 0 // current angular speed (rad/s)
+
+    // ---- theme -----------------------------------------------------------------
+    let dark = document.documentElement.classList.contains('dark')
+    vehicle = pickVehicle()
+    const themeObserver = new MutationObserver(() => {
+      dark = document.documentElement.classList.contains('dark')
+      vehicle = pickVehicle()
+    })
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-theme'],
+    })
 
     // ---- contrail: static fume dots laid along the route (doc space) ---------
     type TrailDot = { x: number; y: number; u: number; nx: number; ny: number; wob: number; rj: number }
@@ -163,6 +219,9 @@ export default function FlightCanvas() {
       const footEl = document.querySelector('footer') as HTMLElement | null
       const heroTop = heroEl ? heroEl.getBoundingClientRect().top + window.scrollY : 0
       const heroH = heroEl ? heroEl.offsetHeight : 0
+      heroTopDoc = heroTop
+      heroHDoc = heroH
+      storyN = document.querySelectorAll('.chapter').length || 9
       const footTop = footEl ? footEl.getBoundingClientRect().top + window.scrollY : docH
 
       const outer = w / 2 - 14
@@ -623,17 +682,427 @@ export default function FlightCanvas() {
       g.restore()
     }
 
-    // ---- theme -----------------------------------------------------------------
-    let dark = document.documentElement.classList.contains('dark')
-    vehicle = pickVehicle()
-    const themeObserver = new MutationObserver(() => {
-      dark = document.documentElement.classList.contains('dark')
-      vehicle = pickVehicle()
-    })
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class', 'data-theme'],
-    })
+    // ---- SELA story layer (mission patches) ------------------------------------
+    // One patch per chapter: chip-colored disc art, ink linework, a dotted
+    // rule and a mono uppercase label. Everything is paths + text on the
+    // live theme palette — reverses with scroll, costs no assets.
+    const MONO = '700 9px ui-monospace, SFMono-Regular, Menlo, monospace'
+    const KICKER = '700 8px ui-monospace, SFMono-Regular, Menlo, monospace'
+    const drawStory = (
+      s: Story,
+      x: number,
+      y: number,
+      rot: number,
+      sc: number,
+      pal: (typeof PAL)['light'],
+      outline: string,
+      alpha: number
+    ) => {
+      const g = ctx
+      g.save()
+      g.translate(x, y)
+      g.rotate(rot)
+      g.scale(sc, sc)
+      g.globalAlpha = alpha
+      g.lineJoin = 'round'
+      g.lineCap = 'round'
+      g.strokeStyle = outline
+      g.lineWidth = 1.6
+      g.textAlign = 'center'
+      // kicker over the patch
+      g.font = KICKER
+      g.fillStyle = pal.red
+      g.globalAlpha = alpha * 0.92
+      g.fillText(s.k > 0 ? `NO.${String(s.k).padStart(2, '0')}` : 'SELA ORBITAL', 0, -64)
+      g.globalAlpha = alpha
+
+      switch (s.kind) {
+        case 'id': {
+          // crew manifest: an ID badge with a porthole photo + typed lines
+          g.beginPath()
+          g.roundRect(-30, -44, 60, 84, 8)
+          g.fillStyle = s.chip
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(0, -20, 14, 0, Math.PI * 2)
+          g.fillStyle = pal.blue
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(-4, -22, 3, 0, Math.PI * 2)
+          g.fillStyle = pal.red
+          g.fill()
+          g.beginPath()
+          g.moveTo(-18, 8)
+          g.lineTo(18, 8)
+          g.moveTo(-18, 17)
+          g.lineTo(10, 17)
+          g.moveTo(-18, 26)
+          g.lineTo(15, 26)
+          g.stroke()
+          g.beginPath()
+          g.arc(0, -50, 2.4, 0, Math.PI * 2)
+          g.stroke()
+          break
+        }
+        case 'bullseye': {
+          // the target: range rings + compass ticks
+          g.beginPath()
+          g.arc(0, 0, 40, 0, Math.PI * 2)
+          g.fillStyle = s.chip
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(0, 0, 26, 0, Math.PI * 2)
+          g.stroke()
+          g.beginPath()
+          g.arc(0, 0, 12, 0, Math.PI * 2)
+          g.fillStyle = pal.blue
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(0, 0, 4, 0, Math.PI * 2)
+          g.fillStyle = pal.red
+          g.fill()
+          g.beginPath()
+          g.moveTo(0, -46)
+          g.lineTo(0, -34)
+          g.moveTo(0, 34)
+          g.lineTo(0, 46)
+          g.moveTo(-46, 0)
+          g.lineTo(-34, 0)
+          g.moveTo(34, 0)
+          g.lineTo(46, 0)
+          g.stroke()
+          break
+        }
+        case 'orbit': {
+          // orbit plot: dashed transfer ellipse + planet + moon
+          g.beginPath()
+          g.ellipse(0, 0, 44, 17, -0.42, 0, Math.PI * 2)
+          g.setLineDash([4, 4])
+          g.stroke()
+          g.setLineDash([])
+          g.beginPath()
+          g.arc(40, -18, 9, 0, Math.PI * 2)
+          g.fillStyle = s.chip
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(40, -18, 2.6, 0, Math.PI * 2)
+          g.fillStyle = pal.blue
+          g.fill()
+          g.beginPath()
+          g.arc(-24, 14, 3.4, 0, Math.PI * 2)
+          g.fillStyle = pal.red
+          g.fill()
+          break
+        }
+        case 'plan': {
+          // flight plan: dashed route, waypoints, destination fix
+          g.setLineDash([5, 5])
+          g.beginPath()
+          g.moveTo(-46, 24)
+          g.quadraticCurveTo(-20, 10, -6, -10)
+          g.quadraticCurveTo(10, -30, 40, -24)
+          g.stroke()
+          g.setLineDash([])
+          g.beginPath()
+          g.arc(-46, 24, 4, 0, Math.PI * 2)
+          g.fillStyle = s.chip
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(-6, -10, 4, 0, Math.PI * 2)
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(40, -24, 6, 0, Math.PI * 2)
+          g.fillStyle = pal.red
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.arc(40, -24, 2, 0, Math.PI * 2)
+          g.fillStyle = pal.flameCore
+          g.fill()
+          break
+        }
+        case 'stack': {
+          // payload bay: three crates, the top one open under a crane hook
+          g.beginPath()
+          g.roundRect(-26, 8, 52, 15, 4)
+          g.fillStyle = s.chip
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.roundRect(-26, -10, 52, 15, 4)
+          g.stroke()
+          g.beginPath()
+          g.roundRect(-26, -28, 52, 15, 4)
+          g.fillStyle = pal.blue
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.moveTo(0, -28)
+          g.lineTo(0, -42)
+          g.moveTo(-26, -28)
+          g.lineTo(-33, -39)
+          g.moveTo(26, -28)
+          g.lineTo(33, -39)
+          g.stroke()
+          g.beginPath()
+          g.arc(0, -45, 2.6, 0, Math.PI * 2)
+          g.fillStyle = pal.red
+          g.fill()
+          break
+        }
+        case 'downlink': {
+          // downlink: telemetry waveform over a baseline
+          g.globalAlpha = alpha * 0.5
+          g.beginPath()
+          g.moveTo(-44, 20)
+          g.lineTo(44, 20)
+          g.stroke()
+          g.globalAlpha = alpha
+          g.beginPath()
+          g.moveTo(-44, 14)
+          g.lineTo(-32, -12)
+          g.lineTo(-20, 6)
+          g.lineTo(-8, -22)
+          g.lineTo(6, 2)
+          g.lineTo(18, -14)
+          g.lineTo(32, 8)
+          g.lineTo(44, -6)
+          g.strokeStyle = pal.blue
+          g.lineWidth = 2.2
+          g.stroke()
+          g.strokeStyle = outline
+          g.lineWidth = 1.6
+          g.fillStyle = pal.red
+          g.beginPath()
+          g.arc(-8, -22, 2.6, 0, Math.PI * 2)
+          g.fill()
+          g.beginPath()
+          g.arc(18, -14, 2.2, 0, Math.PI * 2)
+          g.fill()
+          break
+        }
+        case 'log': {
+          // event log: a ledger of stamped rows
+          const w = [40, 30, 44, 22]
+          for (let i = 0; i < 4; i++) {
+            const ry = -30 + i * 18
+            g.beginPath()
+            g.roundRect(-40, ry - 5.5, 11, 11, 2.5)
+            g.fillStyle = i === 1 ? pal.red : s.chip
+            g.fill()
+            g.stroke()
+            g.beginPath()
+            g.moveTo(-22, ry)
+            g.lineTo(-22 + w[i], ry)
+            g.stroke()
+          }
+          break
+        }
+        case 'dish': {
+          // deep space net: dish on its mast, signal arcs up
+          g.beginPath()
+          g.moveTo(-26, 34)
+          g.lineTo(26, 34)
+          g.moveTo(0, 34)
+          g.lineTo(0, 26)
+          g.stroke()
+          g.beginPath()
+          g.arc(0, 6, 20, Math.PI * 0.18, Math.PI * 0.82)
+          g.closePath()
+          g.fillStyle = s.chip
+          g.fill()
+          g.stroke()
+          g.beginPath()
+          g.moveTo(0, 17)
+          g.lineTo(0, 8)
+          g.stroke()
+          g.strokeStyle = pal.red
+          for (const r of [8, 14, 20]) {
+            g.beginPath()
+            g.arc(0, 8, r, -Math.PI * 0.75, -Math.PI * 0.25)
+            g.stroke()
+          }
+          g.strokeStyle = outline
+          break
+        }
+        case 'tower': {
+          // tracking station: A-frame mast, radome, broadcast arcs
+          g.beginPath()
+          g.moveTo(-36, 32)
+          g.lineTo(36, 32)
+          g.moveTo(-14, 32)
+          g.lineTo(0, 2)
+          g.moveTo(14, 32)
+          g.lineTo(0, 2)
+          g.moveTo(-9, 22)
+          g.lineTo(9, 22)
+          g.stroke()
+          g.beginPath()
+          g.arc(0, 2, 8, Math.PI, 0)
+          g.closePath()
+          g.fillStyle = s.chip
+          g.fill()
+          g.stroke()
+          g.strokeStyle = pal.red
+          for (const r of [13, 20, 27]) {
+            g.beginPath()
+            g.arc(0, 2, r, Math.PI * 1.2, Math.PI * 1.8)
+            g.stroke()
+          }
+          g.strokeStyle = outline
+          break
+        }
+        case 'planet': {
+          // planetfall: banded planet + dashed ring
+          g.beginPath()
+          g.arc(0, 0, 26, 0, Math.PI * 2)
+          g.fillStyle = s.chip
+          g.fill()
+          g.save()
+          g.beginPath()
+          g.arc(0, 0, 26, 0, Math.PI * 2)
+          g.clip()
+          g.fillStyle = pal.blue
+          g.fillRect(-27, -8, 54, 9)
+          g.fillStyle = pal.red
+          g.beginPath()
+          g.arc(-9, -15, 3, 0, Math.PI * 2)
+          g.fill()
+          g.beginPath()
+          g.arc(10, 13, 2.2, 0, Math.PI * 2)
+          g.fill()
+          g.restore()
+          g.beginPath()
+          g.arc(0, 0, 26, 0, Math.PI * 2)
+          g.stroke()
+          g.save()
+          g.rotate(-0.5)
+          g.beginPath()
+          g.ellipse(0, 0, 44, 10, 0, 0, Math.PI * 2)
+          g.setLineDash([6, 5])
+          g.stroke()
+          g.setLineDash([])
+          g.restore()
+          break
+        }
+        case 'moon': {
+          // the long dark: a night-side disc, lit rim, distant sparks
+          g.beginPath()
+          g.arc(-4, 0, 24, 0, Math.PI * 2)
+          g.fillStyle = dark ? pal.cream : pal.ink
+          g.fill()
+          g.beginPath()
+          g.arc(-4, 0, 24, 0, Math.PI * 2)
+          g.strokeStyle = outline
+          g.stroke()
+          g.beginPath()
+          g.arc(-4, 0, 24, -Math.PI * 0.28, Math.PI * 0.34)
+          g.strokeStyle = s.chip
+          g.lineWidth = 5
+          g.stroke()
+          g.strokeStyle = outline
+          g.lineWidth = 1.6
+          g.beginPath()
+          g.moveTo(24, -24)
+          g.lineTo(24, -16)
+          g.moveTo(20, -20)
+          g.lineTo(28, -20)
+          g.moveTo(34, 10)
+          g.lineTo(34, 16)
+          g.moveTo(31, 13)
+          g.lineTo(37, 13)
+          g.stroke()
+          g.beginPath()
+          g.ellipse(10, 4, 34, 12, 0.5, 0, Math.PI * 2)
+          g.setLineDash([3, 5])
+          g.stroke()
+          g.setLineDash([])
+          break
+        }
+      }
+
+      // dotted rule + mono label under the patch
+      g.strokeStyle = outline
+      g.globalAlpha = alpha * 0.55
+      g.setLineDash([1, 4])
+      g.lineWidth = 1.4
+      g.beginPath()
+      g.moveTo(-34, 58)
+      g.lineTo(34, 58)
+      g.stroke()
+      g.setLineDash([])
+      g.globalAlpha = alpha
+      g.fillStyle = outline
+      g.font = MONO
+      g.fillText(s.label.toUpperCase(), 0, 72)
+      g.restore()
+    }
+
+    const drawStories = (pal: (typeof PAL)['light'], outline: string, sy: number) => {
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      if (fleetBus.virtual) {
+        // stage: each chapter's patch rides the same 2.2× parallax as the
+        // aircraft — it rises from below as the deck scrubs toward its card,
+        // settles centred in the void above the parked card's bar, and
+        // exits upward as the deck moves on. The void is never empty.
+        const n = Math.max(1, storyN)
+        const span = Math.max(1, fleetBus.spanPx)
+        const stagePos = (sy * n) / (span * PARALLAX)
+        const pxPerPos = (span * PARALLAX) / n
+        for (const s of STORIES) {
+          if (s.k === 0) continue // the vignettes dress the desktop void only
+          const phase = Math.max(0, 1 - Math.abs(stagePos - s.k) / 0.62)
+          if (phase < 0.04) continue
+          const y = ((s.k - 0.5) - stagePos) * pxPerPos + vh * 1.02
+          const x = vw * (s.k % 2 ? 0.36 : 0.64) + Math.sin(t * 0.4 + s.k * 1.7) * 8
+          const rot = (s.k % 2 ? -0.055 : 0.05) + Math.sin(t * 0.32 + s.k) * 0.03
+          drawStory(s, x, y, rot, 0.92 + 0.08 * phase, pal, outline, phase)
+        }
+        return
+      }
+      // desktop: patches sit in the gutters beside the opaque paper column,
+      // plus two free vignettes (planet in the hero's left whitespace, moon
+      // above the dock pad)
+      const docH = Math.max(document.documentElement.scrollHeight, vh)
+      const colL = Math.max(0, (vw - 680) / 2)
+      const colR = colL + 680
+      const gW = Math.min(colL, vw - colR)
+      const heroBottom = heroTopDoc + heroHDoc
+      const ySpan = Math.max(vh * 2, docH - heroBottom - vh * 0.9)
+      for (const s of STORIES) {
+        let docY: number
+        let x: number
+        let show: boolean
+        if (s.k === 0) {
+          show = vw >= 820
+          docY =
+            s.kind === 'planet'
+              ? heroTopDoc + heroHDoc * 0.6
+              : Math.max(heroBottom, dock.y - vh * 0.52)
+          x =
+            s.kind === 'planet'
+              ? Math.max(84, colL * 0.5)
+              : Math.min(vw - 92, colR + (vw - colR) * 0.5)
+        } else {
+          show = gW >= 92
+          docY = heroBottom + ((s.k - 0.5) / Math.max(1, storyN)) * ySpan
+          x = s.side < 0 ? Math.max(70, colL * 0.5) : Math.min(vw - 70, colR + (vw - colR) * 0.5)
+        }
+        if (!show) continue
+        const y = docY - sy + Math.sin(t * 0.5 + s.k * 2.1) * 6
+        if (y < -150 || y > vh + 150) continue // off-screen cull
+        const rot = (s.side < 0 ? -0.05 : 0.045) + Math.sin(t * 0.3 + s.k) * 0.025
+        drawStory(s, x, y, rot, s.k === 0 ? 1 : Math.min(1, gW / 150), pal, outline, 1)
+      }
+    }
 
     // ---- lifecycle ---------------------------------------------------------------
     let raf = 0
@@ -702,8 +1171,23 @@ export default function FlightCanvas() {
       const pal = PAL[dark ? 'dark' : 'light']
       const outline = dark ? pal.cream : pal.ink
 
+      // a full-screen card covers the art area (deck parked on a stop):
+      // skip every stroke — the canvas keeps its last painted frame behind
+      // the card, nothing redraws until the deck moves again
+      if (fleetBus.covered) {
+        pPrev = p
+        return
+      }
+
       ctx.clearRect(0, 0, vw, vh)
       if (totalLen <= 1) return
+
+      // the story layer first, so the aircraft and its trail fly in front.
+      // The story linework/labels use pal.ink — the palette's contrast color
+      // in BOTH themes (#17171a on paper, #ebe2d6 on the dark page). The
+      // frame's `outline` (dark ? cream : ink) is the vehicle's fill-blend
+      // stroke and would render dark-on-dark up here.
+      drawStories(pal, pal.ink, scrollY)
 
       // the path is document space; this canvas is the viewport — ride the scroll
       const sy = scrollY

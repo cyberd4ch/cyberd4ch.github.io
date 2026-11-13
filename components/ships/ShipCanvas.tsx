@@ -505,7 +505,9 @@ export default function ShipCanvas() {
           pitchY = pitch
           artW = pitch * grid.cols
           anchorX = vw - 26 - artW
-          anchorY = heroTop + 64
+          // center the bust vertically in the hero (the copy column is
+          // flex-centered; a top-anchored bust left the lower hero dead)
+          anchorY = heroTop + Math.round((heroH - pitchY * grid.rows) / 2)
         }
         if (!stageOn) computeZones()
         else zones = [] // stage scatters on an off-screen ring, zones unused
@@ -762,6 +764,7 @@ export default function ShipCanvas() {
 
       // ---- frame ---------------------------------------------------------------
       const clock = { last: 0, t: 0 }
+      let coveredBlank = false // true once the canvas was cleared while covered
       const frame = (now: number) => {
         raf = requestAnimationFrame(frame)
         if (dead) return
@@ -842,6 +845,19 @@ export default function ShipCanvas() {
         const rocketOn = rocket.attacking
         const rocketX = rocket.x
         const rocketY = rocket.y
+
+        // a card sheet covers the stage's art area: the portrait is fully
+        // hidden — clear once and skip the whole per-ship math + draw loop
+        // until the deck pulls back (kicks above were drained so the impact
+        // queue can't pile up while covered)
+        if (stageOn && fleetBus.covered) {
+          if (!coveredBlank) {
+            ctx.clearRect(0, 0, vw, vh)
+            coveredBlank = true
+          }
+          return
+        }
+        coveredBlank = false
 
         ctx.clearRect(0, 0, vw, vh)
         for (let si = 0; si < ships.length; si++) {

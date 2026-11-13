@@ -31,6 +31,11 @@ export const fleetBus = {
   spanPx: 0,
   formedTarget: 1,
   lastInput: 0,
+  /** true when the deck is parked on a card (a full-screen card covers the
+      stage's art area): both canvases skip their heavy paint loops. Motion
+      (scrub / drawer spring) keeps the canvases live — the card gap is where
+      FlightCanvas plays its story layer. */
+  covered: false,
 
   kick(x: number, y: number, r: number, hit: number) {
     if (this.kicks.length < 10) this.kicks.push({ x, y, r, hit })
@@ -47,5 +52,6 @@ export const fleetBus = {
     this.spanPx = 0
     this.formedTarget = 1
     this.lastInput = 0
+    this.covered = false
   },
 }
