@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { fleetBus } from '@/lib/fleetBus'
+import { saveDeckState, readDeckState, consumePoppedToHome } from '@/lib/deckState'
 
 /**
  * The presentation stage — phones only (html[data-stage] in globals.css).
@@ -85,6 +86,11 @@ export default function DeckStage() {
     let pendingStop = 0
     let pendingOpen = false
     let lastPosAttr = -1
+    // landing sheet: the mission brief opens IN PLACE over the portrait —
+    // the deck does not advance, the fleet stays formed, no patch plays in
+    // a gap because no gap exists. Closed → the card unmounts, landing again.
+    let landingSheet = false
+    let landingStop = 1 // the chapter whose sheet is open in place
 
     // touch gesture
     let tracking = false
@@ -200,6 +206,12 @@ export default function DeckStage() {
         }
       }
 
+      // the landing sheet closed fully: unmount the mission brief, landing again
+      if (landingSheet && shown === 0 && !dSpringing && d === 0 && dTarget === 0) {
+        landingSheet = false
+        hideChapter(landingStop)
+      }
+
       // render position (rubber-banded at both ends; no unlock, ever)
       const p = raw < 0 ? raw * RESIST : raw > N ? N + (raw - N) * RESIST : raw
 
@@ -218,11 +230,15 @@ export default function DeckStage() {
       const idx = Math.max(0, Math.min(N, Math.round(p)))
       if (idx !== shown) {
         shown = idx
+        // scrubbing away from the landing with the in-place sheet up ends
+        // the landing (the gesture already collapsed the drawer)
+        if (landingSheet && shown !== 0) landingSheet = false
         // arriving at a card: it starts collapsed (fresh sheet)
         d = 0
         dTarget = 0
         dVel = 0
         dSpringing = false
+        saveDeckState({ pos: shown, open: 0 })
       }
       // the landing peek bar only exists at pos 0 (CSS keys off data-pos)
       if (idx !== lastPosAttr) {
@@ -239,7 +255,7 @@ export default function DeckStage() {
 
       // mount window: |p − i| < 1 keeps at most the incoming + outgoing pair
       for (let i = 1; i <= N; i++) {
-        if (p > i - 1 && p < i + 1) showChapter(i)
+        if ((landingSheet && i === landingStop) || (p > i - 1 && p < i + 1)) showChapter(i)
         else hideChapter(i)
       }
 
@@ -249,6 +265,22 @@ export default function DeckStage() {
       for (const i of mounted) {
         const card = cardEl(i)
         if (!card) continue
+        if (landingSheet && shown === 0 && i === landingStop) {
+          // the in-place landing sheet holds its CSS bottom-sheet posture —
+          // no ride transform (the deck is parked at pos 0; the portrait
+          // stays formed behind it). The drawer spring drives the sheet.
+          card.style.zIndex = String(30 + i)
+          card.style.setProperty('--cardP', d.toFixed(4))
+          const open = d > 0.995 && dTarget === 1
+          if (open !== card.hasAttribute('data-open')) {
+            if (open) card.setAttribute('data-open', '')
+            else card.removeAttribute('data-open')
+            const btn = card.querySelector<HTMLButtonElement>('.deck-toggle')
+            if (btn) btn.setAttribute('aria-expanded', String(open))
+            saveDeckState({ pos: 0, open: open ? landingStop : 0 })
+          }
+          continue
+        }
         const e = Math.max(0, Math.min(1, p - (i - 1))) // enter 0..1
         const x = Math.max(0, Math.min(1, p - i)) // exit 0..1
         const ty = (1 - e) * ride - x * ride
@@ -263,6 +295,7 @@ export default function DeckStage() {
             else card.removeAttribute('data-open')
             const btn = card.querySelector<HTMLButtonElement>('.deck-toggle')
             if (btn) btn.setAttribute('aria-expanded', String(open))
+            saveDeckState({ pos: shown, open: open ? shown : 0 })
           }
         }
       }
@@ -278,6 +311,8 @@ export default function DeckStage() {
       chapters.forEach(el => el.classList.remove('chapter-on'))
       pendingStop = 0
       pendingOpen = false
+      landingSheet = false
+      landingStop = 1
       delete root.dataset.pos
       delete root.dataset.stage
       fleetBus.resetStage()
@@ -306,6 +341,25 @@ export default function DeckStage() {
       mounted.clear()
       window.scrollTo(0, 0)
       measure()
+      // a history pop landed back on home: restore the mirrored stage state —
+      // back from a post opened inside the transmissions card returns to that
+      // card, open; back from a post opened in the landing sheet returns to
+      // the landing with the mission brief open. Fresh pushes to home (nav
+      // links, typed URLs) never restore.
+      landingSheet = false
+      const saved = consumePoppedToHome() ? readDeckState() : null
+      if (saved && saved.pos === 0 && saved.open > 0) {
+        landingSheet = true
+        landingStop = saved.open
+        showChapter(landingStop)
+        setDrawer(1)
+      } else if (saved && saved.pos > 0) {
+        springTo(saved.pos)
+        if (saved.open === saved.pos) {
+          pendingStop = saved.pos
+          pendingOpen = true
+        }
+      }
       lastT = performance.now()
       raf = requestAnimationFrame(frame)
     }
@@ -401,15 +455,20 @@ export default function DeckStage() {
       e.preventDefault()
       fleetBus.lastInput = performance.now()
       // the landing peek bar's card is not mounted (no sheet exists yet at
-      // pos 0) — instead of toggling nothing, advance the deck to that stop
-      // and open the sheet on arrival. Gated to the landing: mid-scrub taps
-      // on the always-rendered ghost bar must not yank the deck around.
+      // pos 0) — the landing gate below opens it in place instead. Gated to
+      // the landing: mid-scrub taps on the always-rendered ghost bar must
+      // not yank the deck around.
       const chap = btn.closest('.chapter')
       const stop = chap ? chapters.indexOf(chap as HTMLElement) + 1 : 0
       if (shown === 0 && stop > 0 && chap && !chap.classList.contains('chapter-on')) {
-        pendingStop = stop
-        pendingOpen = true
-        springTo(stop)
+        // the landing peek bar: open that card's sheet IN PLACE — the deck
+        // stays at pos 0, the fleet stays formed behind the sheet, no story
+        // patch plays (no gap ever opens). Closing it unmounts the card and
+        // lands again (frame loop); scrubbing away ends the landing.
+        landingSheet = true
+        landingStop = stop
+        showChapter(stop)
+        setDrawer(1)
         return
       }
       setDrawer(dTarget === 0 ? 1 : 0)

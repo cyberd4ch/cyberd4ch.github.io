@@ -92,15 +92,15 @@ type Story = {
 }
 const CHIP = ['#93d3e5', '#ffdd7c', '#ffc5c8', '#b9e4aa', '#fffac3']
 const STORIES: Story[] = [
-  { k: 1, label: 'crew manifest', chip: CHIP[0], kind: 'id', side: -1 },
-  { k: 2, label: 'the target', chip: CHIP[1], kind: 'bullseye', side: 1 },
-  { k: 3, label: 'orbit plot', chip: CHIP[2], kind: 'orbit', side: -1 },
-  { k: 4, label: 'flight plan', chip: CHIP[3], kind: 'plan', side: 1 },
-  { k: 5, label: 'payload bay', chip: CHIP[4], kind: 'stack', side: -1 },
-  { k: 6, label: 'downlink', chip: CHIP[0], kind: 'downlink', side: 1 },
-  { k: 7, label: 'event log', chip: CHIP[1], kind: 'log', side: -1 },
-  { k: 8, label: 'deep space net', chip: CHIP[2], kind: 'dish', side: 1 },
-  { k: 9, label: 'tracking station', chip: CHIP[3], kind: 'tower', side: -1 },
+  // the six real chapters (app/page.tsx): each patch dresses the void the
+  // card rises out of, echoing that card's own icon and name
+  { k: 1, label: 'mission brief', chip: CHIP[0], kind: 'bullseye', side: -1 },
+  { k: 2, label: 'payload stack', chip: CHIP[1], kind: 'stack', side: 1 },
+  { k: 3, label: 'recent telemetry', chip: CHIP[2], kind: 'orbit', side: -1 },
+  { k: 4, label: 'activity log', chip: CHIP[3], kind: 'log', side: 1 },
+  { k: 5, label: 'transmissions', chip: CHIP[4], kind: 'downlink', side: -1 },
+  { k: 6, label: 'ground stations', chip: CHIP[0], kind: 'tower', side: 1 },
+  // free vignettes — desktop void dressing only
   { k: 0, label: 'planetfall', chip: CHIP[4], kind: 'planet', side: -1 },
   { k: 0, label: 'the long dark', chip: CHIP[0], kind: 'moon', side: 1 },
 ]

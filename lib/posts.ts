@@ -32,7 +32,7 @@ export const allTags = Array.from(
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .map(([tag]) => tag)
 
-/** every topic in use, by frequency then alphabetically — the blog "chapters" */
+/** every topic in use, by frequency then alphabetically — the blog's collections */
 export const allTopics = Array.from(
   posts.reduce((acc, post) => {
     for (const topic of post.topics) acc.set(topic, (acc.get(topic) || 0) + 1)
