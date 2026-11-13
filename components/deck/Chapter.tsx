@@ -22,6 +22,7 @@ const TILE_BG = [
 export default function Chapter({
   children,
   mobileOnly = false,
+  peek = false,
   index,
   total,
   label,
@@ -30,6 +31,8 @@ export default function Chapter({
   children: ReactNode
   /** chapter exists only on phones (identity card; desktop keeps the hero copy) */
   mobileOnly?: boolean
+  /** bar peeks over the landing at pos 0 before this card mounts */
+  peek?: boolean
   /** 1-based card index / deck size — renders the bar + header */
   index?: number
   total?: number
@@ -41,7 +44,11 @@ export default function Chapter({
   const n = index ?? 1
   const tileBg = TILE_BG[(n - 1) % TILE_BG.length]
   return (
-    <div className={mobileOnly ? 'chapter chapter-mobile-only' : 'chapter'}>
+    <div
+      className={
+        mobileOnly ? 'chapter chapter-mobile-only' : peek ? 'chapter chapter-peek' : 'chapter'
+      }
+    >
       <div className="chapter-card">
         <div className="deck-card">
           <div className="deck-sheet">

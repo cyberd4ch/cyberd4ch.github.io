@@ -21,7 +21,7 @@ export default function Hero() {
 
       {/* overlay copy — plain DOM, always readable. on phones the title block
           hides: the first screen is the portrait only, and the copy rides the
-          deck's identity card instead (components/deck) */}
+          mission brief card instead (components/deck) */}
       <div className="pointer-events-none relative z-10 mx-auto flex w-full max-w-[680px] flex-1 flex-col justify-center px-6">
         <div className="hero-copy flex flex-col justify-center py-8 max-md:hidden">
           <h1 className="text-[44px] leading-[1.02] tracking-[-0.035em] sm:text-6xl md:text-[76px]">

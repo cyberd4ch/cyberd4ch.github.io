@@ -13,11 +13,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@neon/config": "^1.14.0",
+    "@neon/functions": "^0.11.0",
     "@types/three": "^0.187.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.25.0",
     "next": "^16.2.11",
+    "pg": "^8.23.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-icons": "^5.7.0",
@@ -28,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",

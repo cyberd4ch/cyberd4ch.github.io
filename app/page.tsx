@@ -5,7 +5,6 @@ import {
   FaStar,
   FaCodeBranch,
   FaHeart,
-  FaUserAstronaut,
   FaBullseye,
   FaRocket,
   FaChartLine,
@@ -55,52 +54,72 @@ export default function HomePage() {
           opened by its button; on desktop the wrappers dissolve and this
           flows exactly as before. */}
       <PageCol>
-        {/* identity card: the hero copy as the deck's first card (phones only;
-            desktop keeps the hero copy up in the hero) */}
-        <Chapter mobileOnly index={1} total={9} label="identity card" icon={<FaUserAstronaut size={15} />}>
-          <IdentityCard />
-        </Chapter>
-
-        {/* Mission brief — one card per paragraph on phones */}
-        <Chapter index={2} total={9} label="mission brief" icon={<FaBullseye size={15} />}>
+        {/* mission brief — the deck's first card. the identity block rides
+            inside it (phones; desktop keeps the hero copy up in the hero):
+            the landing already shows the portrait, so scrolling down lands
+            on the brief itself — no separate identity card stop. one card,
+            scrollable in the open sheet like transmissions. */}
+        <Chapter index={1} total={6} label="mission brief" icon={<FaBullseye size={15} />} peek>
           <section className="reveal pt-4 max-md:pt-0">
-            <h2 className="sec-label mb-4">mission brief</h2>
-            <p className="text-[15px] leading-relaxed text-[var(--fg)]">
-              i&apos;m a <strong>telecom engineer</strong> &amp; <strong>cybersecurity expert</strong> with
-              experience in software engineering, building and managing large to small scale
-              networks and securing IT infrastructure.
-            </p>
-          </section>
-        </Chapter>
-        <Chapter index={3} total={9} label="mission brief" icon={<FaBullseye size={15} />}>
-          <section className="reveal mt-4 max-md:mt-0">
-            <p className="text-[15px] leading-relaxed text-[var(--fg)]">
-              i&apos;m also a builder — i write code across the stack and care about systems that are{' '}
-              <strong>resilient</strong>, <strong>efficient</strong>, and actually useful.
-              here, i document my learnings, projects, and occasional deep-dives.
-            </p>
-          </section>
-        </Chapter>
-        <Chapter index={4} total={9} label="mission brief" icon={<FaBullseye size={15} />}>
-          <section className="reveal mt-4 max-md:mt-0">
-            <p className="text-[15px] leading-relaxed text-[var(--fg)]">
-              everything on this site is pulled live from{' '}
-              <a
-                href={github.user.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline-link font-medium"
-              >
-                my github
-              </a>
-              {' '}— the projects below are the actual repositories, and the activity log is what i&apos;ve
-              been pushing, opening, and shipping.
-            </p>
+            <div className="md:hidden">
+              <IdentityCard />
+              <div className="mt-6 border-t border-[var(--hairline)] pt-5">
+                <p className="text-[15px] leading-relaxed text-[var(--fg)]">
+                  i&apos;m a <strong>telecom engineer</strong> &amp; <strong>cybersecurity expert</strong> with
+                  experience in software engineering, building and managing large to small scale
+                  networks and securing IT infrastructure.
+                </p>
+                <p className="mt-4 text-[15px] leading-relaxed text-[var(--fg)]">
+                  i&apos;m also a builder — i write code across the stack and care about systems that are{' '}
+                  <strong>resilient</strong>, <strong>efficient</strong>, and actually useful.
+                  here, i document my learnings, projects, and occasional deep-dives.
+                </p>
+                <p className="mt-4 text-[15px] leading-relaxed text-[var(--fg)]">
+                  everything on this site is pulled live from{' '}
+                  <a
+                    href={github.user.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline-link font-medium"
+                  >
+                    my github
+                  </a>
+                  {' '}— the projects below are the actual repositories, and the activity log is what i&apos;ve
+                  been pushing, opening, and shipping.
+                </p>
+              </div>
+            </div>
+            <div className="hidden md:block">
+              <h2 className="sec-label mb-4">mission brief</h2>
+              <p className="text-[15px] leading-relaxed text-[var(--fg)]">
+                i&apos;m a <strong>telecom engineer</strong> &amp; <strong>cybersecurity expert</strong> with
+                experience in software engineering, building and managing large to small scale
+                networks and securing IT infrastructure.
+              </p>
+              <p className="mt-4 text-[15px] leading-relaxed text-[var(--fg)]">
+                i&apos;m also a builder — i write code across the stack and care about systems that are{' '}
+                <strong>resilient</strong>, <strong>efficient</strong>, and actually useful.
+                here, i document my learnings, projects, and occasional deep-dives.
+              </p>
+              <p className="mt-4 text-[15px] leading-relaxed text-[var(--fg)]">
+                everything on this site is pulled live from{' '}
+                <a
+                  href={github.user.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline-link font-medium"
+                >
+                  my github
+                </a>
+                {' '}— the projects below are the actual repositories, and the activity log is what i&apos;ve
+                been pushing, opening, and shipping.
+              </p>
+            </div>
           </section>
         </Chapter>
 
         {/* Payload stack — derived from the languages in the account */}
-        <Chapter index={5} total={9} label="payload stack" icon={<FaRocket size={15} />}>
+        <Chapter index={2} total={6} label="payload stack" icon={<FaRocket size={15} />}>
           <section className="reveal pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">payload stack</h2>
             <div className="chips">
@@ -116,7 +135,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Recent telemetry — most recently pushed repos */}
-        <Chapter index={6} total={9} label="recent telemetry" icon={<FaChartLine size={15} />}>
+        <Chapter index={3} total={6} label="recent telemetry" icon={<FaChartLine size={15} />}>
           <section className="reveal d1 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="recent telemetry" link="/projects" linkLabel="all projects" />
             <div className="space-y-3">
@@ -168,7 +187,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Activity log — refreshed by the scheduled build */}
-        <Chapter index={7} total={9} label="activity log" icon={<FaBolt size={15} />}>
+        <Chapter index={4} total={6} label="activity log" icon={<FaBolt size={15} />}>
           <section className="reveal d1 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="sec-label">activity log</h2>
@@ -209,7 +228,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Transmissions — latest writing */}
-        <Chapter index={8} total={9} label="transmissions" icon={<FaSatelliteDish size={15} />}>
+        <Chapter index={5} total={6} label="transmissions" icon={<FaSatelliteDish size={15} />}>
           <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" />
             <div className="space-y-4">
@@ -239,7 +258,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Ground stations — where to find me */}
-        <Chapter index={9} total={9} label="ground stations" icon={<FaBroadcastTower size={15} />}>
+        <Chapter index={6} total={6} label="ground stations" icon={<FaBroadcastTower size={15} />}>
           <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 pb-2 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">ground stations</h2>
             <div className="flex items-center gap-2">
@@ -272,7 +291,7 @@ export default function HomePage() {
             </div>
             <p className="mt-4 text-[11px] text-[var(--muted)]">
               {totalStars > 0 && `${repos.length} public repos · ${totalStars} stars · `}
-              uplink synced every 6 hours.
+              uplink synced hourly.
             </p>
             <Squiggle className="mt-8" width={130} />
           </section>

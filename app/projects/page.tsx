@@ -98,12 +98,44 @@ export default function ProjectsPage() {
         </div>
       </section>
 
+      {/* the homelab lives here, not in the nav: live snapshot, expansion
+          tracker, and the study curriculum — sanitized, nothing sensitive */}
+      <section className="mb-8 reveal">
+        <h2 className="sec-label mb-3">home lab</h2>
+        <Link
+          href="/projects/lab/"
+          className="hud-panel block group border border-[var(--border)] rounded-sm p-3 hover:border-[var(--fg)] transition-colors"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <span className="font-semibold text-sm">the lab, live</span>
+            <span className="ml-auto text-[10px] uppercase tracking-widest text-[var(--label)]">
+              running
+            </span>
+          </div>
+          <p className="text-[13px] leading-relaxed">
+            a kind cluster, a self-hosted forge with CI over TLS, two vm, and the
+            cloud-study curriculum — probed at build time, tracked as it expands,
+            shown with dummy identifiers so the real topology stays private.
+          </p>
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {['kubernetes', 'forgejo', 'terraform', 'argocd', 'observability'].map(t => (
+              <span
+                key={t}
+                className="text-[10px] border border-[var(--border)] px-1.5 py-0.5 rounded-sm text-[var(--muted)]"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+        </Link>
+      </section>
+
       <div className="reveal d1">
         <RepoList repos={repos} languages={languages} />
       </div>
 
       <p className="text-xs text-[var(--muted)] mt-8">
-        refreshed every 6 hours by GitHub Actions —{' '}
+        refreshed hourly by GitHub Actions —{' '}
         <a
           href={`${github.user.url}?tab=repositories`}
           target="_blank"

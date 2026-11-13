@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-11-13T02:20:24.272Z",
+  "generatedAt": "2026-11-13T03:10:33.645Z",
   "cluster": {
-    "context": "kind-lab02",
+    "context": "kind-lab",
     "version": "v1.37.0",
+    "nodesDenied": false,
     "nodes": [
       {
-        "name": "lab02-control-plane",
+        "name": "control-plane",
         "role": "control-plane",
         "ready": true
       }
@@ -51,55 +52,55 @@
         "name": "argocd-repo-server-6dc78d95cf-vfgjl",
         "phase": "Running",
         "ready": false,
-        "restarts": 15
+        "restarts": 18
       },
       {
         "ns": "argocd",
         "name": "argocd-server-77656f776f-zt99w",
         "phase": "Running",
         "ready": false,
-        "restarts": 16
+        "restarts": 19
       },
       {
         "ns": "cert-manager",
         "name": "cert-manager-574945dccf-tmndc",
         "phase": "Running",
         "ready": true,
-        "restarts": 30
+        "restarts": 32
       },
       {
         "ns": "cert-manager",
         "name": "cert-manager-cainjector-74fc5d95c5-7vw9l",
         "phase": "Running",
         "ready": true,
-        "restarts": 31
+        "restarts": 34
       },
       {
         "ns": "cert-manager",
         "name": "cert-manager-webhook-75c8d8668d-4lzmt",
         "phase": "Running",
         "ready": true,
-        "restarts": 42
+        "restarts": 45
       },
       {
         "ns": "forgejo",
         "name": "forgejo-6ddcb5b4bf-jvhqx",
         "phase": "Running",
         "ready": true,
-        "restarts": 0
+        "restarts": 1
       },
       {
         "ns": "forgejo",
         "name": "forgejo-docs-ff58cdc6f-44wkg",
         "phase": "Running",
-        "ready": true,
+        "ready": false,
         "restarts": 0
       },
       {
         "ns": "forgejo",
         "name": "forgejo-registry-55768b5d58-87rbp",
         "phase": "Running",
-        "ready": true,
+        "ready": false,
         "restarts": 1
       },
       {
@@ -128,7 +129,7 @@
         "name": "ingress-nginx-controller-cf8df8876-hhxbq",
         "phase": "Running",
         "ready": false,
-        "restarts": 43
+        "restarts": 46
       },
       {
         "ns": "kube-system",
@@ -146,7 +147,7 @@
       },
       {
         "ns": "kube-system",
-        "name": "etcd-lab02-control-plane",
+        "name": "etcd-control-plane",
         "phase": "Running",
         "ready": true,
         "restarts": 3
@@ -160,17 +161,17 @@
       },
       {
         "ns": "kube-system",
-        "name": "kube-apiserver-lab02-control-plane",
+        "name": "kube-apiserver-control-plane",
         "phase": "Running",
         "ready": true,
-        "restarts": 29
+        "restarts": 31
       },
       {
         "ns": "kube-system",
-        "name": "kube-controller-manager-lab02-control-plane",
+        "name": "kube-controller-manager-control-plane",
         "phase": "Running",
-        "ready": false,
-        "restarts": 5
+        "ready": true,
+        "restarts": 8
       },
       {
         "ns": "kube-system",
@@ -181,17 +182,17 @@
       },
       {
         "ns": "kube-system",
-        "name": "kube-scheduler-lab02-control-plane",
+        "name": "kube-scheduler-control-plane",
         "phase": "Running",
-        "ready": true,
-        "restarts": 63
+        "ready": false,
+        "restarts": 66
       },
       {
         "ns": "kube-system",
         "name": "metrics-server-68c5c48876-v8q99",
         "phase": "Running",
         "ready": false,
-        "restarts": 69
+        "restarts": 76
       },
       {
         "ns": "local-path-storage",
@@ -211,7 +212,7 @@
         "ns": "observe",
         "name": "kube-state-metrics-7bf9586bc9-rxs9h",
         "phase": "Running",
-        "ready": true,
+        "ready": false,
         "restarts": 4
       },
       {
@@ -225,7 +226,7 @@
         "ns": "observe",
         "name": "prometheus-79957f689d-p7lkj",
         "phase": "Running",
-        "ready": true,
+        "ready": false,
         "restarts": 0
       },
       {
@@ -267,12 +268,12 @@
       {
         "ns": "argocd",
         "name": "argocd-repo-server",
-        "ready": "0/1"
+        "ready": "1/1"
       },
       {
         "ns": "argocd",
         "name": "argocd-server",
-        "ready": "0/1"
+        "ready": "1/1"
       },
       {
         "ns": "cert-manager",
@@ -307,7 +308,7 @@
       {
         "ns": "forgejo",
         "name": "forgejo-runner",
-        "ready": "0/1"
+        "ready": "1/1"
       },
       {
         "ns": "ingress-nginx",
@@ -332,7 +333,7 @@
       {
         "ns": "observe",
         "name": "grafana",
-        "ready": "0/1"
+        "ready": "1/1"
       },
       {
         "ns": "observe",
@@ -365,49 +366,49 @@
         "ready": "1/1"
       }
     ],
-    "restartsTotal": 376
+    "restartsTotal": 409
   },
   "docker": [
     {
       "name": "forgejo-tls-edge",
-      "status": "Up 8 hours",
-      "ports": "0.0.0.0:8443->8443/tcp, [::]:8443->8443/tcp"
+      "status": "Up 9 hours",
+      "ports": ""
     },
     {
-      "name": "lab02-control-plane",
-      "status": "Up 8 hours",
-      "ports": "127.0.0.1:55095->6443/tcp, 0.0.0.0:8080->30080/tcp"
+      "name": "control-plane",
+      "status": "Up 9 hours",
+      "ports": ""
     },
     {
-      "name": "lab04-nginx",
-      "status": "Up 8 hours",
-      "ports": "0.0.0.0:8081->80/tcp"
+      "name": "nginx",
+      "status": "Up 9 hours",
+      "ports": ""
     },
     {
-      "name": "lab04-api",
-      "status": "Up 8 hours",
-      "ports": "8000/tcp"
+      "name": "api",
+      "status": "Up 9 hours",
+      "ports": ""
     },
     {
-      "name": "lab04-postgres",
-      "status": "Up 8 hours (healthy)",
-      "ports": "5432/tcp"
+      "name": "postgres",
+      "status": "Up 9 hours (healthy)",
+      "ports": ""
     }
   ],
   "services": {
     "forgejo": {
       "up": true,
-      "url": "https://forgejo.lab02.local:8443/"
+      "url": "https://forge.lab.local/"
     }
   },
   "vms": {
     "ubuntu": {
       "up": false,
-      "forward": "127.0.0.1:50022"
+      "forward": "loopback"
     },
     "kali": {
       "up": true,
-      "forward": "127.0.0.1:50122"
+      "forward": "loopback"
     },
     "disks": [
       {

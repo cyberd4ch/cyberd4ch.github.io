@@ -117,6 +117,44 @@ async function fetchPinned() {
   return nodes.map(node => node?.name).filter(Boolean)
 }
 
+/**
+ * Push cross-check via the commits API. The public events feed has gaps —
+ * a same-day push can be missing for hours or simply never published —
+ * while the commits API is authoritative. The most recently pushed repos
+ * (plus this site's repo) are polled and their commits become activity
+ * items, deduped against the event items below.
+ */
+async function fetchCommitPushes(repos) {
+  const poll = [
+    { name: `${USER}.github.io`, url: `https://github.com/${USER}/${USER}.github.io` },
+    ...repos.slice(0, 4),
+  ]
+  const results = []
+  for (const repo of poll) {
+    try {
+      const commits = await api(
+        `https://api.github.com/repos/${USER}/${repo.name}/commits?author=${USER}&per_page=5`
+      )
+      for (const c of commits) {
+        const at = c.commit?.author?.date || c.commit?.committer?.date
+        if (!at) continue
+        results.push({
+          type: 'PushEvent',
+          repo: `${USER}/${repo.name}`,
+          repoUrl: repo.url,
+          at,
+          title: `pushed to ${USER}/${repo.name}`,
+          detail: (c.commit?.message || '').split('\n')[0],
+          url: `${repo.url}/commit/${c.sha}`,
+        })
+      }
+    } catch {
+      // per-repo best effort — the events feed still covers it
+    }
+  }
+  return results
+}
+
 async function main() {
   if (!token) {
     console.warn('[github] no GITHUB_TOKEN set — using anonymous rate limits (60/hr)')
@@ -159,18 +197,29 @@ async function main() {
   ]
 
   const seen = new Set()
-  const activity = rawEvents
-    .filter(e => !NOISE.has(e.type))
-    .map(describe)
-    .filter(Boolean)
+  const commitPushes = await fetchCommitPushes(publicRepos)
+  const activity = [
+    // events are described; the commits-API items already carry the shape
+    ...rawEvents.filter(e => !NOISE.has(e.type)).map(describe).filter(Boolean),
+    ...commitPushes,
+  ]
     .filter(e => {
-      const key = `${e.type}:${e.url}`
+      // exact duplicate (same target url)…
+      const key = `${e.type}:${e.url ?? ''}`
       if (seen.has(key)) return false
       seen.add(key)
       return true
     })
+    .filter(e => {
+      // …and the same push reported twice by events + commits (same repo
+      // within one hour collapses to the newest entry)
+      const hourKey = `${e.repo}:${e.at?.slice(0, 13) ?? ''}:${e.type}`
+      if (seen.has(hourKey)) return false
+      seen.add(hourKey)
+      return true
+    })
     // The public feed is not strictly chronological (pushes bubble), so sort it.
-    .sort((a, b) => b.at.localeCompare(a.at))
+    .sort((a, b) => (b.at || '').localeCompare(a.at || ''))
     .slice(0, 12)
 
   const snapshot = {

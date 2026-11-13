@@ -20,9 +20,21 @@ const OUT = path.join(process.cwd(), 'data', 'lab.json')
 const CTX = process.env.LAB_CONTEXT || 'kind-lab02'
 const VMS_DIR = process.env.HOME ? path.join(process.env.HOME, 'cloud_prep', 'vms') : null
 
-const run = (cmd, args, timeout = 8000) =>
+/**
+ * The published snapshot stays dummy: the site describes the lab's SHAPE
+ * (what runs, what's up/down) without advertising its real hostnames,
+ * context names, or forwarded ports — so going public later doesn't hand
+ * anyone a map of the private network.
+ */
+const dummyName = name =>
+  String(name || '')
+    .replace(/lab\d+-/g, '')
+    .replace(/kind-/, 'kind-') || 'node'
+const DUMMY_FORGE_URL = 'https://forge.lab.local/'
+
+const run = (cmd, args, timeout = 20000) =>
   new Promise(resolve => {
-    execFile(cmd, args, { timeout }, (err, stdout) =>
+    execFile(cmd, args, { timeout, maxBuffer: 16 * 1024 * 1024 }, (err, stdout) =>
       resolve(err ? null : stdout)
     )
   })
@@ -43,24 +55,43 @@ function probe(host, port, timeout = 1500) {
 }
 
 async function main() {
+  // previous snapshot, for carry-forward when the cluster API turns hostile
+  let previous = null
+  try {
+    previous = JSON.parse(await fs.readFile(OUT, 'utf8'))
+  } catch {
+    // first snapshot — nothing to carry forward
+  }
+
   // ---- kind cluster ----------------------------------------------------------
+  // probed resource by resource: a denied listing (rbac drift, api-server
+  // mood) degrades that section instead of wiping the whole snapshot
   let cluster = null
   const nodesRaw = await run('kubectl', ['--context', CTX, 'get', 'nodes', '-o', 'json'])
-  if (nodesRaw) {
+  const podsRaw = await run('kubectl', ['--context', CTX, 'get', 'pods', '-A', '-o', 'json'])
+  const deploysRaw = await run('kubectl', ['--context', CTX, 'get', 'deploy', '-A', '-o', 'json'])
+  if (nodesRaw || podsRaw || deploysRaw) {
     try {
-      const nodes = JSON.parse(nodesRaw)
-      const podsRaw = await run('kubectl', ['--context', CTX, 'get', 'pods', '-A', '-o', 'json'])
-      const deploysRaw = await run('kubectl', ['--context', CTX, 'get', 'deploy', '-A', '-o', 'json'])
+      const nodes = nodesRaw ? JSON.parse(nodesRaw) : { items: [] }
       const pods = podsRaw ? JSON.parse(podsRaw).items : []
       const deploys = deploysRaw ? JSON.parse(deploysRaw).items : []
+      let version = nodes.items[0]?.status?.nodeInfo?.kubeletVersion ?? ''
+      if (!version) {
+        const verRaw = await run('kubectl', ['--context', CTX, 'version', '-o', 'json'])
+        if (verRaw) {
+          try {
+            version = JSON.parse(verRaw).serverVersion?.gitVersion ?? ''
+          } catch {
+            // version probe is best-effort
+          }
+        }
+      }
       cluster = {
-        context: CTX,
-        version:
-          nodes.items[0]?.status?.nodeInfo?.kubeletVersion ??
-          nodes.items[0]?.status?.nodeInfo?.kubeProxyVersion ??
-          '',
+        context: 'kind-lab',
+        version,
+        nodesDenied: !nodesRaw,
         nodes: nodes.items.map(n => ({
-          name: n.metadata.name,
+          name: dummyName(n.metadata.name),
           role: Object.keys(n.metadata.labels || {}).some(l => l === 'node-role.kubernetes.io/control-plane')
             ? 'control-plane'
             : 'worker',
@@ -71,7 +102,7 @@ async function main() {
           const ready = statuses.length > 0 && statuses.every(s => s.ready)
           return {
             ns: p.metadata.namespace,
-            name: p.metadata.name,
+            name: dummyName(p.metadata.name),
             phase: p.status?.phase ?? '',
             ready,
             restarts: statuses.reduce((sum, s) => sum + (s.restartCount || 0), 0),
@@ -97,12 +128,19 @@ async function main() {
           .split('\n')
           .map(line => {
             const [name, cpu, , mem] = line.split(/\s+/)
-            return { name, cpu, mem }
+            return { name: dummyName(name), cpu, mem }
           })
       }
     } catch {
       cluster = null // parse hiccup → treat as unreachable
     }
+  }
+
+  // the cluster API answered nothing usable — carry the last known state
+  // forward, flagged stale, rather than publishing "unreachable" while the
+  // cluster may simply be rbac-grumpy
+  if (!cluster && previous?.cluster) {
+    cluster = { ...previous.cluster, stale: true }
   }
 
   // ---- docker (colima): the compose-era stacks --------------------------------
@@ -115,7 +153,8 @@ async function main() {
       .filter(Boolean)
       .map(line => {
         const [name, status, ports] = line.split('\t')
-        return { name, status: status || '', ports: ports || '' }
+        // published host ports stay out of the public snapshot too
+        return { name: dummyName(name), status: status || '', ports: '' }
       })
   }
 
@@ -160,9 +199,16 @@ async function main() {
     cluster,
     docker,
     services: {
-      forgejo: { up: forgejo, url: 'https://forgejo.lab02.local:8443/' },
+      forgejo: { up: forgejo, url: DUMMY_FORGE_URL },
     },
-    vms,
+    vms: vms
+      ? {
+          ...vms,
+          // loopback forwards exist, but their ports stay private
+          ubuntu: { up: vms.ubuntu.up, forward: 'loopback' },
+          kali: { up: vms.kali.up, forward: 'loopback' },
+        }
+      : null,
   }
   await fs.mkdir(path.dirname(OUT), { recursive: true })
   await fs.writeFile(OUT, `${JSON.stringify(snapshot, null, 2)}\n`)

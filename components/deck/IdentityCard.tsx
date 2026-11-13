@@ -3,10 +3,10 @@ import { github, totalStars } from '@/lib/github'
 import { FaGithub, FaStar, FaUsers } from 'react-icons/fa'
 
 /**
- * Mobile identity card — the hero copy reimagined as the deck's first card,
- * SELA style: pastel role chips, compact data rows for the live GitHub
- * stats, and the nav items as black/outline buttons next to sponsor. "home"
- * stays off the card (the logo in the bar is home).
+ * Mobile identity header — the hero copy reimagined as the top block of the
+ * deck's mission-brief card, SELA style: pastel role chips, compact data rows
+ * for the live GitHub stats, and the nav items as black/outline buttons next
+ * to sponsor. "home" stays off the card (the logo in the bar is home).
  */
 export default function IdentityCard() {
   const rows = [

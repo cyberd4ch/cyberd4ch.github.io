@@ -10,7 +10,6 @@ import { nextMode, readMode, writeMode, type ThemeMode } from '@/lib/theme'
 const links = [
   { href: '/', label: 'home' },
   { href: '/projects', label: 'projects' },
-  { href: '/lab', label: 'lab' },
   { href: '/blog', label: 'blog' },
   { href: '/freelance', label: 'services' },
 ]
@@ -48,7 +47,15 @@ export default function Nav() {
 
       <nav className="nav-links" aria-label="primary">
         {links.map(l => (
-          <Link key={l.href} href={l.href} className={path === l.href ? 'nav-active' : undefined}>
+          <Link
+            key={l.href}
+            href={l.href}
+            className={
+              path === l.href || (l.href !== '/' && path.startsWith(`${l.href}/`))
+                ? 'nav-active'
+                : undefined
+            }
+          >
             {l.label}
           </Link>
         ))}

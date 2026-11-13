@@ -122,7 +122,7 @@ export const STUDY: StudyTopic[] = [
     name: 'aws',
     progress: 1,
     proficiency: 'learning',
-    evidence: 'scoped iam user (s3 on ftc-labs-* only, root has no keys), remote state in s3, a real bucket created/drifting/destroyed.',
+    evidence: 'scoped iam user limited to the terraform state bucket, root locked behind mfa with no keys, remote state in s3 with versioning and locking, a real bucket created/drifting/destroyed.',
   },
   {
     name: 'networking fundamentals',
@@ -135,6 +135,10 @@ export const STUDY: StudyTopic[] = [
 export interface LabCluster {
   context: string
   version: string
+  /** the nodes listing was denied at probe time (rbac drift) — everything else still read */
+  nodesDenied?: boolean
+  /** carried forward from the previous snapshot after a failed probe */
+  stale?: boolean
   nodes: { name: string; role: string; ready: boolean }[]
   pods: { ns: string; name: string; phase: string; ready: boolean; restarts: number }[]
   deployments: { ns: string; name: string; ready: string }[]

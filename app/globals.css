@@ -379,6 +379,39 @@ input:focus, textarea:focus {
   border-color: var(--fg);
   color: var(--bg);
 }
+/* like button — rides the blog-meta row: hairline pill like a tag chip,
+   but a real button; the heart fills and the pill inverts once liked */
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+  background: 0 0;
+  border-radius: 99px;
+  padding: 2px 7px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.like-btn:hover:not(:disabled) {
+  color: var(--red);
+  border-color: var(--red);
+}
+.like-btn:disabled {
+  cursor: default;
+}
+.like-btn.liked {
+  color: var(--on-red);
+  background: var(--red);
+  border-color: var(--red);
+}
+.like-btn-verb {
+  text-transform: uppercase;
+}
+
 
 /* ---- links ------------------------------------------------------------------ */
 .underline-link {
@@ -710,10 +743,13 @@ html[data-stage] .footer-col {
   html[data-stage] .chapter.chapter-on {
     display: block;
   }
-  /* the landing peek bar: chapter 1's bar renders ONLY at pos 0 (the deck
-     driver mirrors the rounded position into data-pos) — mid-scrub the ghost
-     bar would just float at the bottom edge */
-  html[data-stage][data-pos='0'] .chapter-mobile-only {
+  /* the landing peek bar: the first card's bar renders ONLY at pos 0 (the
+     deck driver mirrors the rounded position into data-pos) — mid-scrub the
+     ghost bar would just float at the bottom edge. The sheet is clipped to
+     nothing at --cardP 0, so the card shows its bar alone; tapping it
+     springs the deck to the stop and opens the sheet (DeckStage). */
+  html[data-stage][data-pos='0'] .chapter-mobile-only,
+  html[data-stage][data-pos='0'] .chapter-peek {
     display: block;
   }
   html[data-stage] .chapter-card,
