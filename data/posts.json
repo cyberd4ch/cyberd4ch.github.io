@@ -1,5 +1,46 @@
 [
   {
+    "id": "proving-a-pr-without-patching-it",
+    "slug": "proving-a-pr-without-patching-it",
+    "title": "proving a PR without patching the file it fixes",
+    "date": "Nov 13, 2026",
+    "dateISO": "2026-11-13",
+    "category": "technical",
+    "url": "/blog/proving-a-pr-without-patching-it/",
+    "excerpt": "hashicorp/vagrant#13842 under macOS 27: a faithful A/B with no sudo, a launcher that eats RUBYOPT, load-order nondeterminism, and one honest caveat for the author.",
+    "aiAssist": 100,
+    "tags": [
+      "vagrant",
+      "macos",
+      "debugging",
+      "ruby"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 4
+  },
+  {
+    "id": "triage-without-a-reproduce-step",
+    "slug": "triage-without-a-reproduce-step",
+    "title": "triage without a reproduce step — what's left for an outside contributor",
+    "date": "Nov 13, 2026",
+    "dateISO": "2026-11-13",
+    "category": "technical",
+    "url": "/blog/triage-without-a-reproduce-step/",
+    "excerpt": "six bugs, zero reproduce steps: the DeepTutor issue queue reporters root-cause their own bugs, so outside triage becomes verification, code-location, and shape agreement.",
+    "aiAssist": 100,
+    "tags": [
+      "triage",
+      "debugging",
+      "python"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 4
+  },
+  {
     "id": "from-compose-to-certificates",
     "slug": "from-compose-to-certificates",
     "title": "from a compose file to a certificate chain",
