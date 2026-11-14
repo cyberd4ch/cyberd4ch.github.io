@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T03:10:33.645Z",
+  "generatedAt": "2026-11-14T01:18:57.764Z",
   "cluster": {
     "context": "kind-lab",
     "version": "v1.37.0",
@@ -16,106 +16,113 @@
         "ns": "argocd",
         "name": "argocd-application-controller-0",
         "phase": "Running",
-        "ready": false,
-        "restarts": 0
+        "ready": true,
+        "restarts": 2
       },
       {
         "ns": "argocd",
         "name": "argocd-applicationset-controller-5c67dffc46-5bhw4",
         "phase": "Running",
         "ready": true,
-        "restarts": 0
+        "restarts": 1
       },
       {
         "ns": "argocd",
         "name": "argocd-dex-server-69d9d889c4-57lxg",
         "phase": "Running",
         "ready": true,
-        "restarts": 0
+        "restarts": 1
       },
       {
         "ns": "argocd",
         "name": "argocd-notifications-controller-59d5bf7ddd-sf69f",
         "phase": "Running",
         "ready": true,
-        "restarts": 0
+        "restarts": 1
       },
       {
         "ns": "argocd",
         "name": "argocd-redis-8589554fdd-nvpnp",
         "phase": "Running",
         "ready": true,
-        "restarts": 0
+        "restarts": 1
       },
       {
         "ns": "argocd",
         "name": "argocd-repo-server-6dc78d95cf-vfgjl",
         "phase": "Running",
-        "ready": false,
-        "restarts": 18
+        "ready": true,
+        "restarts": 33
       },
       {
         "ns": "argocd",
         "name": "argocd-server-77656f776f-zt99w",
         "phase": "Running",
-        "ready": false,
-        "restarts": 19
+        "ready": true,
+        "restarts": 35
       },
       {
         "ns": "cert-manager",
         "name": "cert-manager-574945dccf-tmndc",
         "phase": "Running",
         "ready": true,
-        "restarts": 32
+        "restarts": 61
       },
       {
         "ns": "cert-manager",
         "name": "cert-manager-cainjector-74fc5d95c5-7vw9l",
         "phase": "Running",
         "ready": true,
-        "restarts": 34
+        "restarts": 57
       },
       {
         "ns": "cert-manager",
         "name": "cert-manager-webhook-75c8d8668d-4lzmt",
         "phase": "Running",
         "ready": true,
-        "restarts": 45
+        "restarts": 67
       },
       {
         "ns": "forgejo",
         "name": "forgejo-6ddcb5b4bf-jvhqx",
         "phase": "Running",
         "ready": true,
-        "restarts": 1
+        "restarts": 6
       },
       {
         "ns": "forgejo",
-        "name": "forgejo-docs-ff58cdc6f-44wkg",
+        "name": "forgejo-docs-bd9dc74cc-xg6xm",
         "phase": "Running",
-        "ready": false,
-        "restarts": 0
+        "ready": true,
+        "restarts": 1
       },
       {
         "ns": "forgejo",
         "name": "forgejo-registry-55768b5d58-87rbp",
         "phase": "Running",
-        "ready": false,
-        "restarts": 1
+        "ready": true,
+        "restarts": 2
       },
       {
         "ns": "forgejo",
         "name": "forgejo-runner-f96756758-82hw2",
         "phase": "Running",
-        "ready": false,
-        "restarts": 3
+        "ready": true,
+        "restarts": 8
       },
       {
         "ns": "forgejo",
-        "name": "truthguard-manual-1-qqf48",
+        "name": "forgejo-truthguard-29908995-k9nqg",
         "phase": "Succeeded",
         "ready": false,
         "restarts": 0
+      },
+      {
+        "ns": "forgejo",
+        "name": "forgejo-truthguard-metrics-6cbf749f46-d42ck",
+        "phase": "Running",
+        "ready": true,
+        "restarts": 1
       },
       {
         "ns": "forgejo",
@@ -126,122 +133,122 @@
       },
       {
         "ns": "ingress-nginx",
-        "name": "ingress-nginx-controller-cf8df8876-hhxbq",
+        "name": "ingress-nginx-controller-64d7c9bc75-vn4hf",
         "phase": "Running",
-        "ready": false,
-        "restarts": 46
+        "ready": true,
+        "restarts": 9
       },
       {
         "ns": "kube-system",
         "name": "coredns-559f6c778d-hlc99",
         "phase": "Running",
         "ready": true,
-        "restarts": 2
+        "restarts": 5
       },
       {
         "ns": "kube-system",
         "name": "coredns-559f6c778d-psvtp",
         "phase": "Running",
         "ready": true,
-        "restarts": 2
+        "restarts": 5
       },
       {
         "ns": "kube-system",
         "name": "etcd-control-plane",
         "phase": "Running",
         "ready": true,
-        "restarts": 3
+        "restarts": 7
       },
       {
         "ns": "kube-system",
         "name": "kindnet-zhklw",
         "phase": "Running",
         "ready": true,
-        "restarts": 2
+        "restarts": 3
       },
       {
         "ns": "kube-system",
         "name": "kube-apiserver-control-plane",
         "phase": "Running",
         "ready": true,
-        "restarts": 31
+        "restarts": 45
       },
       {
         "ns": "kube-system",
         "name": "kube-controller-manager-control-plane",
         "phase": "Running",
         "ready": true,
-        "restarts": 8
+        "restarts": 26
       },
       {
         "ns": "kube-system",
         "name": "kube-proxy-qm8dg",
         "phase": "Running",
         "ready": true,
-        "restarts": 2
+        "restarts": 3
       },
       {
         "ns": "kube-system",
         "name": "kube-scheduler-control-plane",
         "phase": "Running",
-        "ready": false,
-        "restarts": 66
+        "ready": true,
+        "restarts": 103
       },
       {
         "ns": "kube-system",
         "name": "metrics-server-68c5c48876-v8q99",
         "phase": "Running",
-        "ready": false,
-        "restarts": 76
+        "ready": true,
+        "restarts": 103
       },
       {
         "ns": "local-path-storage",
         "name": "local-path-provisioner-75f7fc7dc5-cg64s",
         "phase": "Running",
         "ready": true,
-        "restarts": 4
+        "restarts": 6
       },
       {
         "ns": "observe",
-        "name": "grafana-8d758b87b-ghngz",
+        "name": "grafana-755ccd5568-pm8qd",
         "phase": "Running",
         "ready": true,
-        "restarts": 0
+        "restarts": 1
       },
       {
         "ns": "observe",
         "name": "kube-state-metrics-7bf9586bc9-rxs9h",
         "phase": "Running",
-        "ready": false,
-        "restarts": 4
+        "ready": true,
+        "restarts": 6
       },
       {
         "ns": "observe",
         "name": "postgres-exporter-645fdf675b-hd2p9",
         "phase": "Running",
         "ready": true,
-        "restarts": 2
+        "restarts": 3
       },
       {
         "ns": "observe",
-        "name": "prometheus-79957f689d-p7lkj",
+        "name": "prometheus-977d59fcf-n7dwg",
         "phase": "Running",
-        "ready": false,
-        "restarts": 0
+        "ready": true,
+        "restarts": 1
       },
       {
         "ns": "three-tiers",
         "name": "pg-648795b-cxfdv",
         "phase": "Running",
         "ready": true,
-        "restarts": 2
+        "restarts": 3
       },
       {
         "ns": "three-tiers",
         "name": "web-677598dfcb-444v2",
         "phase": "Running",
         "ready": true,
-        "restarts": 6
+        "restarts": 10
       }
     ],
     "deployments": [
@@ -311,6 +318,11 @@
         "ready": "1/1"
       },
       {
+        "ns": "forgejo",
+        "name": "forgejo-truthguard-metrics",
+        "ready": "1/1"
+      },
+      {
         "ns": "ingress-nginx",
         "name": "ingress-nginx-controller",
         "ready": "1/1"
@@ -366,32 +378,39 @@
         "ready": "1/1"
       }
     ],
-    "restartsTotal": 409
+    "restartsTotal": 616,
+    "metrics": [
+      {
+        "name": "control-plane",
+        "cpu": "357m",
+        "mem": "2368Mi"
+      }
+    ]
   },
   "docker": [
     {
       "name": "forgejo-tls-edge",
-      "status": "Up 9 hours",
+      "status": "Up 34 minutes",
       "ports": ""
     },
     {
       "name": "control-plane",
-      "status": "Up 9 hours",
+      "status": "Up 34 minutes",
       "ports": ""
     },
     {
       "name": "nginx",
-      "status": "Up 9 hours",
+      "status": "Up 34 minutes",
       "ports": ""
     },
     {
       "name": "api",
-      "status": "Up 9 hours",
+      "status": "Up 34 minutes",
       "ports": ""
     },
     {
       "name": "postgres",
-      "status": "Up 9 hours (healthy)",
+      "status": "Up 34 minutes (healthy)",
       "ports": ""
     }
   ],
@@ -407,7 +426,7 @@
       "forward": "loopback"
     },
     "kali": {
-      "up": true,
+      "up": false,
       "forward": "loopback"
     },
     "disks": [

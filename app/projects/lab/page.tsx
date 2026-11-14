@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import PageCol from '@/components/PageCol'
+import LabPatch from '@/components/lab/LabPatch'
 import labSnapshot from '@/data/lab.json'
 import { TRACKER, STUDY, PROFICIENCY_STEPS, TrackerStatus, LabSnapshot } from '@/lib/lab'
 
@@ -56,6 +57,24 @@ export default function LabPage() {
             fresher one. run <code>npm run sync:lab</code> where the lab lives.
           </p>
         )}
+
+        {/* the snapshot drawn as an animated mission patch — pods ride the
+            orbit, restarts tick around the core, the forge pulses its
+            downlink; reduced-motion visitors get one honest static frame */}
+        <LabPatch
+          context={cluster?.context ?? null}
+          version={cluster?.version ?? null}
+          podsUp={podsUp}
+          podsTotal={cluster?.pods.length ?? 0}
+          podsReady={cluster ? cluster.pods.map(p => p.ready) : []}
+          restartsTotal={cluster?.restartsTotal ?? 0}
+          forgeUp={snap.services.forgejo.up}
+          vms={[
+            { name: 'ubuntu', up: snap.vms?.ubuntu.up ?? false },
+            { name: 'kali', up: snap.vms?.kali.up ?? false },
+          ]}
+          nodeReady={cluster ? cluster.nodes.every(n => n.ready) : false}
+        />
 
         <div className="lab-grid mb-3">
           <div className="hud-panel p-3">

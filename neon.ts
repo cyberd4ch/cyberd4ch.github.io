@@ -12,5 +12,9 @@ export default defineConfig({
       name: 'blog likes api',
       source: 'neon/likes/index.ts',
     },
+    views: {
+      name: 'blog views api',
+      source: 'neon/views/index.ts',
+    },
   },
 })

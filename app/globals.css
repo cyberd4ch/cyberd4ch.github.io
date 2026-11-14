@@ -411,6 +411,21 @@ input:focus, textarea:focus {
 .like-btn-verb {
   text-transform: uppercase;
 }
+/* the view counter rides the same meta row as the like button — a passive
+   pill (no border), eye + count, so interactive and read-only stay distinct */
+.view-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  padding: 2px 7px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+}
+.view-count-verb {
+  text-transform: uppercase;
+}
 
 
 /* ---- links ------------------------------------------------------------------ */

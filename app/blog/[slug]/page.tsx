@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm'
 import PageCol from '@/components/PageCol'
 import AIRing from '@/components/blog/AIRing'
 import LikeButton from '@/components/blog/LikeButton'
+import ViewCounter from '@/components/blog/ViewCounter'
 import { posts } from '@/lib/posts'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -63,6 +64,7 @@ export default async function BlogPostPage({ params }: Props) {
               metadata the blog sorts by */}
           <div className="blog-meta mt-4">
             {found.post.aiAssist != null && <AIRing pct={found.post.aiAssist} size={15} label />}
+            <ViewCounter slug={found.post.slug} />
             <LikeButton slug={found.post.slug} />
             {found.post.topics.length > 0 && (
               <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">

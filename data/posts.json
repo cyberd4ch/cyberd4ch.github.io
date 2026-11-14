@@ -227,6 +227,28 @@
     "readMinutes": 3
   },
   {
+    "id": "what-the-root-key-was-for",
+    "slug": "what-the-root-key-was-for",
+    "title": "what the root key was for",
+    "date": "Nov 8, 2026",
+    "dateISO": "2026-11-08",
+    "category": "technical",
+    "url": "/blog/what-the-root-key-was-for/",
+    "excerpt": "scoping AWS credentials to a lab user, then using them to move Terraform state off a laptop — including the IAM action name that does not exist.",
+    "aiAssist": 100,
+    "tags": [
+      "aws",
+      "terraform",
+      "iam",
+      "s3"
+    ],
+    "topics": [
+      "cloud-native",
+      "infrastructure-as-code"
+    ],
+    "readMinutes": 3
+  },
+  {
     "id": "announcing-dnswatch-v1-1-0",
     "slug": "announcing-dnswatch-v1-1-0",
     "title": "announcing dns-watch v1.1.0: your attack surface's DNS, diffed — for free",
