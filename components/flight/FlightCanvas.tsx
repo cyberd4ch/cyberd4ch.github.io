@@ -76,7 +76,6 @@ type Story = {
   label: string
   chip: string
   kind:
-    | 'id'
     | 'bullseye'
     | 'orbit'
     | 'plan'
@@ -92,14 +91,15 @@ type Story = {
 }
 const CHIP = ['#93d3e5', '#ffdd7c', '#ffc5c8', '#b9e4aa', '#fffac3']
 const STORIES: Story[] = [
-  // the six real chapters (app/page.tsx): each patch dresses the void the
-  // card rises out of, echoing that card's own icon and name
-  { k: 1, label: 'mission brief', chip: CHIP[0], kind: 'bullseye', side: -1 },
-  { k: 2, label: 'payload stack', chip: CHIP[1], kind: 'stack', side: 1 },
-  { k: 3, label: 'recent telemetry', chip: CHIP[2], kind: 'orbit', side: -1 },
-  { k: 4, label: 'activity log', chip: CHIP[3], kind: 'log', side: 1 },
-  { k: 5, label: 'transmissions', chip: CHIP[4], kind: 'downlink', side: -1 },
-  { k: 6, label: 'ground stations', chip: CHIP[0], kind: 'tower', side: 1 },
+  // the five real story stops (app/page.tsx): each patch dresses the void
+  // the card rises out of, echoing that card's own icon and name. The
+  // mission brief is the landing overlay — the portrait owns that void, so
+  // the patch numbering starts at payload stack.
+  { k: 1, label: 'payload stack', chip: CHIP[1], kind: 'stack', side: 1 },
+  { k: 2, label: 'recent telemetry', chip: CHIP[2], kind: 'orbit', side: -1 },
+  { k: 3, label: 'activity log', chip: CHIP[3], kind: 'log', side: 1 },
+  { k: 4, label: 'transmissions', chip: CHIP[4], kind: 'downlink', side: -1 },
+  { k: 5, label: 'ground stations', chip: CHIP[0], kind: 'tower', side: 1 },
   // free vignettes — desktop void dressing only
   { k: 0, label: 'planetfall', chip: CHIP[4], kind: 'planet', side: -1 },
   { k: 0, label: 'the long dark', chip: CHIP[0], kind: 'moon', side: 1 },
@@ -147,7 +147,9 @@ export default function FlightCanvas() {
     // story-layer anchors (measured in buildPath)
     let heroTopDoc = 0
     let heroHDoc = 0
-    let storyN = 9 // chapters on the page (the stage's stop count)
+    // chapters on the page (the stage's stop count — the landing overlay is
+    // not a stop, it rides nothing)
+    let storyN = 9
 
     // ---- themed aircraft -------------------------------------------------------
     // Three vehicles share one flight plan; the theme MODE picks which one
@@ -221,7 +223,8 @@ export default function FlightCanvas() {
       const heroH = heroEl ? heroEl.offsetHeight : 0
       heroTopDoc = heroTop
       heroHDoc = heroH
-      storyN = document.querySelectorAll('.chapter').length || 9
+      storyN =
+        document.querySelectorAll('.chapter:not(.chapter-peek)').length || 9
       const footTop = footEl ? footEl.getBoundingClientRect().top + window.scrollY : docH
 
       const outer = w / 2 - 14
@@ -717,35 +720,6 @@ export default function FlightCanvas() {
       g.globalAlpha = alpha
 
       switch (s.kind) {
-        case 'id': {
-          // crew manifest: an ID badge with a porthole photo + typed lines
-          g.beginPath()
-          g.roundRect(-30, -44, 60, 84, 8)
-          g.fillStyle = s.chip
-          g.fill()
-          g.stroke()
-          g.beginPath()
-          g.arc(0, -20, 14, 0, Math.PI * 2)
-          g.fillStyle = pal.blue
-          g.fill()
-          g.stroke()
-          g.beginPath()
-          g.arc(-4, -22, 3, 0, Math.PI * 2)
-          g.fillStyle = pal.red
-          g.fill()
-          g.beginPath()
-          g.moveTo(-18, 8)
-          g.lineTo(18, 8)
-          g.moveTo(-18, 17)
-          g.lineTo(10, 17)
-          g.moveTo(-18, 26)
-          g.lineTo(15, 26)
-          g.stroke()
-          g.beginPath()
-          g.arc(0, -50, 2.4, 0, Math.PI * 2)
-          g.stroke()
-          break
-        }
         case 'bullseye': {
           // the target: range rings + compass ticks
           g.beginPath()

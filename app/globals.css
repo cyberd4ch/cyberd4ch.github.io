@@ -743,14 +743,22 @@ html[data-stage] .footer-col {
   html[data-stage] .chapter.chapter-on {
     display: block;
   }
-  /* the landing peek bar: the first card's bar renders ONLY at pos 0 (the
-     deck driver mirrors the rounded position into data-pos) — mid-scrub the
-     ghost bar would just float at the bottom edge. The sheet is clipped to
-     nothing at --cardP 0, so the card shows its bar alone; tapping it
-     springs the deck to the stop and opens the sheet (DeckStage). */
+  /* the landing peek bar: the mission brief's bar parks at the bottom edge
+     at pos 0 only (the deck driver mirrors the rounded position into
+     data-pos). The sheet is clipped to nothing at --cardP 0, so the bar
+     shows alone; tapping it opens the sheet IN PLACE over the formed
+     portrait (DeckStage). The mission brief is not a deck stop. */
   html[data-stage][data-pos='0'] .chapter-mobile-only,
   html[data-stage][data-pos='0'] .chapter-peek {
     display: block;
+    transition: opacity 180ms ease-out, transform 180ms ease-out;
+  }
+  /* past a hair of scrub the bar hands the bottom edge to the first story
+     card: fades down, untappable — no ghost bar floats mid-gesture */
+  html[data-stage][data-peek-gone] .chapter-peek {
+    opacity: 0;
+    transform: translateY(26px);
+    pointer-events: none;
   }
   html[data-stage] .chapter-card,
   html[data-stage] .deck-card,
@@ -868,6 +876,10 @@ html[data-stage] .footer-col {
     letter-spacing: 0.02em;
     color: var(--muted);
     font-variant-numeric: tabular-nums;
+  }
+  /* the landing overlay's bar carries no index — the toggle anchors right */
+  .deck-bar-entry .deck-toggle {
+    margin-left: auto;
   }
   .deck-toggle {
     flex: none;

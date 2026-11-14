@@ -31,7 +31,8 @@ export default function Chapter({
   children: ReactNode
   /** chapter exists only on phones (identity card; desktop keeps the hero copy) */
   mobileOnly?: boolean
-  /** bar peeks over the landing at pos 0 before this card mounts */
+  /** the landing overlay: its bar parks at the bottom edge at pos 0 — it is
+      not a deck stop, and the sheet opens in place over the portrait */
   peek?: boolean
   /** 1-based card index / deck size — renders the bar + header */
   index?: number
@@ -43,6 +44,7 @@ export default function Chapter({
 }) {
   const n = index ?? 1
   const tileBg = TILE_BG[(n - 1) % TILE_BG.length]
+  const showToggle = index != null || peek
   return (
     <div
       className={
@@ -66,7 +68,7 @@ export default function Chapter({
               ))}
             </div>
           </div>
-          <div className="deck-bar">
+          <div className={`deck-bar${index == null ? ' deck-bar-entry' : ''}`}>
             {icon && (
               <span className="deck-tile" style={{ background: tileBg } as CSSProperties}>
                 {icon}
@@ -78,7 +80,7 @@ export default function Chapter({
                 {String(index).padStart(2, '0')} / {String(total).padStart(2, '0')}
               </span>
             )}
-            {index != null && (
+            {showToggle && (
               <button
                 type="button"
                 className="deck-toggle"

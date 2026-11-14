@@ -22,11 +22,19 @@ import { saveDeckState, readDeckState, consumePoppedToHome } from '@/lib/deckSta
  * Both ends rubber-band and there is NO release/unlock: the user can always
  * pull back to the landing area. Pulling past the last card springs home.
  *
+ * The mission brief is NOT a stop: it is the landing's overlay. Its bar is
+ * parked at the bottom edge at pos 0 (the peek bar); tapping it opens the
+ * sheet IN PLACE over the formed portrait — the deck does not advance, the
+ * fleet stays formed, no patch plays in a gap because no gap exists.
+ * Closing it unmounts the sheet and lands again. Scrubbing away fades the
+ * bar down and hands the bottom edge to the first story card, which rises
+ * from below exactly like every other stop.
+ *
  * Rendering (per frame, from the eased position):
  *
  *   portrait  — disperses continuously: formedTarget = 1 − distance from 0,
- *               so the face melts apart as the first card approaches and
- *               stays dispersed while any card is up
+ *               so the face melts apart as the first story card approaches
+ *               and stays dispersed while any card is up
  *   cards     — each mounted card rides a translate/scale mapped from pos:
  *               it rises from below as pos crosses into it, slides up out
  *               as pos crosses past it, and the outgoing card eases back
@@ -61,8 +69,9 @@ export default function DeckStage() {
     const mq = window.matchMedia('(max-width: 767.98px)')
     let enabled = false
     let dead = false
-    let chapters: HTMLElement[] = []
-    let mounted = new Set<number>() // chapter indices currently displayed
+    let chapters: HTMLElement[] = [] // story stops only — the landing overlay excluded
+    let peekEl: HTMLElement | null = null // the landing bar/sheet (mission brief)
+    let mounted = new Set<HTMLElement>() // chapter elements currently displayed
     let N = 0
     let posPx = 300 // px of drag per pos unit (1:1 scrub gearing)
 
@@ -90,7 +99,6 @@ export default function DeckStage() {
     // the deck does not advance, the fleet stays formed, no patch plays in
     // a gap because no gap exists. Closed → the card unmounts, landing again.
     let landingSheet = false
-    let landingStop = 1 // the chapter whose sheet is open in place
 
     // touch gesture
     let tracking = false
@@ -111,26 +119,25 @@ export default function DeckStage() {
     }
 
     // ---- chapter mounting -----------------------------------------------------
-    // chapters are logical stops 1..N (the hero is not a chapter), but the
-    // NodeList is 0-based — every accessor maps stop i → array slot i−1
+    // story stops are logical stops 1..N (the landing overlay is not a stop),
+    // but the NodeList is 0-based — every accessor maps stop i → slot i−1
     const chapterEl = (i: number) => chapters[i - 1] ?? null
-    const cardEl = (i: number) => chapterEl(i)?.querySelector<HTMLElement>('.deck-card') ?? null
+    const cardOf = (el: HTMLElement | null) => el?.querySelector<HTMLElement>('.deck-card') ?? null
 
-    const showChapter = (i: number) => {
-      if (mounted.has(i)) return
-      chapterEl(i)?.classList.add('chapter-on')
+    const showEl = (el: HTMLElement | null) => {
+      if (!el || mounted.has(el)) return
+      el.classList.add('chapter-on')
       // layer promotion is granted per mounted card and revoked on hide —
       // a CSS blanket will-change promoted all 9 full-viewport layers at
       // once (tens of MB of graphics memory on phones)
-      const card = cardEl(i)
+      const card = cardOf(el)
       if (card) card.style.willChange = 'transform'
-      mounted.add(i)
+      mounted.add(el)
     }
-    const hideChapter = (i: number) => {
-      if (!mounted.has(i)) return
-      const el = chapterEl(i)
+    const hideEl = (el: HTMLElement | null) => {
+      if (!el || !mounted.has(el)) return
       el.classList.remove('chapter-on')
-      const card = cardEl(i)
+      const card = cardOf(el)
       if (card) {
         card.style.transform = ''
         card.style.zIndex = ''
@@ -138,7 +145,7 @@ export default function DeckStage() {
         card.removeAttribute('data-open')
         card.style.setProperty('--cardP', '0')
       }
-      mounted.delete(i)
+      mounted.delete(el)
     }
 
     const setDrawer = (v: number) => {
@@ -209,7 +216,7 @@ export default function DeckStage() {
       // the landing sheet closed fully: unmount the mission brief, landing again
       if (landingSheet && shown === 0 && !dSpringing && d === 0 && dTarget === 0) {
         landingSheet = false
-        hideChapter(landingStop)
+        hideEl(peekEl)
       }
 
       // render position (rubber-banded at both ends; no unlock, ever)
@@ -246,6 +253,15 @@ export default function DeckStage() {
         root.dataset.pos = String(idx)
       }
 
+      // the landing peek bar only exists at pos 0 (CSS keys off data-pos);
+      // past a hair of scrub it hands the bottom edge to the first story
+      // card — faded down via a short CSS transition, untappable
+      const peekGone = p > 0.04
+      if (peekGone !== (root.dataset.peekGone != null)) {
+        if (peekGone) root.dataset.peekGone = 'on'
+        else delete root.dataset.peekGone
+      }
+
       // a peek-bar click has arrived and settled at its stop: open the sheet
       // now (the arrival reset above cleared the drawer first)
       if (pendingOpen && shown === pendingStop && !springing) {
@@ -255,21 +271,21 @@ export default function DeckStage() {
 
       // mount window: |p − i| < 1 keeps at most the incoming + outgoing pair
       for (let i = 1; i <= N; i++) {
-        if ((landingSheet && i === landingStop) || (p > i - 1 && p < i + 1)) showChapter(i)
-        else hideChapter(i)
+        if (p > i - 1 && p < i + 1) showEl(chapterEl(i))
+        else hideEl(chapterEl(i))
       }
+      // the landing overlay mounts only while its sheet is open — it never
+      // rides the deck, so it must never show mid-scrub either
+      if (landingSheet && shown === 0) showEl(peekEl)
+      else hideEl(peekEl)
 
-      // card transforms: rise from below on enter, slide up out on exit
-      const vh = window.innerHeight
-      const ride = vh * 1.04
-      for (const i of mounted) {
-        const card = cardEl(i)
-        if (!card) continue
-        if (landingSheet && shown === 0 && i === landingStop) {
-          // the in-place landing sheet holds its CSS bottom-sheet posture —
-          // no ride transform (the deck is parked at pos 0; the portrait
-          // stays formed behind it). The drawer spring drives the sheet.
-          card.style.zIndex = String(30 + i)
+      // the in-place landing sheet holds its CSS bottom-sheet posture — no
+      // ride transform (the deck is parked at pos 0; the portrait stays
+      // formed behind it). The drawer spring drives the sheet.
+      if (landingSheet && shown === 0 && peekEl) {
+        const card = cardOf(peekEl)
+        if (card) {
+          card.style.zIndex = '31'
           card.style.setProperty('--cardP', d.toFixed(4))
           const open = d > 0.995 && dTarget === 1
           if (open !== card.hasAttribute('data-open')) {
@@ -277,17 +293,26 @@ export default function DeckStage() {
             else card.removeAttribute('data-open')
             const btn = card.querySelector<HTMLButtonElement>('.deck-toggle')
             if (btn) btn.setAttribute('aria-expanded', String(open))
-            saveDeckState({ pos: 0, open: open ? landingStop : 0 })
+            saveDeckState({ pos: 0, open: open ? 1 : 0 })
           }
-          continue
         }
-        const e = Math.max(0, Math.min(1, p - (i - 1))) // enter 0..1
-        const x = Math.max(0, Math.min(1, p - i)) // exit 0..1
+      }
+
+      // card transforms: rise from below on enter, slide up out on exit
+      const vh = window.innerHeight
+      const ride = vh * 1.04
+      for (const el of mounted) {
+        if (el === peekEl) continue // the landing sheet never rides
+        const card = cardOf(el)
+        if (!card) continue
+        const stop = chapters.indexOf(el) + 1
+        const e = Math.max(0, Math.min(1, p - (stop - 1))) // enter 0..1
+        const x = Math.max(0, Math.min(1, p - stop)) // exit 0..1
         const ty = (1 - e) * ride - x * ride
         const s = 1 - 0.05 * x
         card.style.transform = `translate3d(0, ${ty.toFixed(1)}px, 0) scale(${s.toFixed(3)})`
-        card.style.zIndex = String(30 + i)
-        if (i === shown) {
+        card.style.zIndex = String(30 + stop)
+        if (stop === shown) {
           card.style.setProperty('--cardP', d.toFixed(4))
           const open = d > 0.995 && dTarget === 1
           if (open !== card.hasAttribute('data-open')) {
@@ -306,20 +331,36 @@ export default function DeckStage() {
       if (!enabled) return
       enabled = false
       cancelAnimationFrame(raf)
-      for (const i of Array.from(mounted)) hideChapter(i) // reset card styles too
+      for (const el of Array.from(mounted)) hideEl(el) // reset card styles too
       mounted.clear()
       chapters.forEach(el => el.classList.remove('chapter-on'))
+      if (peekEl) {
+        peekEl.classList.remove('chapter-on')
+        const card = cardOf(peekEl)
+        if (card) {
+          card.style.transform = ''
+          card.style.zIndex = ''
+          card.style.willChange = ''
+          card.removeAttribute('data-open')
+          card.style.setProperty('--cardP', '0')
+        }
+      }
       pendingStop = 0
       pendingOpen = false
       landingSheet = false
-      landingStop = 1
       delete root.dataset.pos
+      delete root.dataset.peekGone
       delete root.dataset.stage
       fleetBus.resetStage()
     }
 
     const enable = () => {
-      chapters = Array.from(document.querySelectorAll<HTMLElement>('.chapter'))
+      // the mission brief chapter is the landing overlay, not a stop — the
+      // deck counts only the story cards behind it
+      peekEl = document.querySelector<HTMLElement>('.chapter-peek') ?? null
+      chapters = Array.from(document.querySelectorAll<HTMLElement>('.chapter')).filter(
+        el => !el.classList.contains('chapter-peek'),
+      )
       if (chapters.length < 1 || enabled) return
       N = chapters.length
       enabled = true
@@ -350,8 +391,7 @@ export default function DeckStage() {
       const saved = consumePoppedToHome() ? readDeckState() : null
       if (saved && saved.pos === 0 && saved.open > 0) {
         landingSheet = true
-        landingStop = saved.open
-        showChapter(landingStop)
+        showEl(peekEl)
         setDrawer(1)
       } else if (saved && saved.pos > 0) {
         springTo(saved.pos)
@@ -454,21 +494,20 @@ export default function DeckStage() {
       if (!btn) return
       e.preventDefault()
       fleetBus.lastInput = performance.now()
-      // the landing peek bar's card is not mounted (no sheet exists yet at
-      // pos 0) — the landing gate below opens it in place instead. Gated to
-      // the landing: mid-scrub taps on the always-rendered ghost bar must
-      // not yank the deck around.
-      const chap = btn.closest('.chapter')
-      const stop = chap ? chapters.indexOf(chap as HTMLElement) + 1 : 0
-      if (shown === 0 && stop > 0 && chap && !chap.classList.contains('chapter-on')) {
-        // the landing peek bar: open that card's sheet IN PLACE — the deck
-        // stays at pos 0, the fleet stays formed behind the sheet, no story
-        // patch plays (no gap ever opens). Closing it unmounts the card and
-        // lands again (frame loop); scrubbing away ends the landing.
-        landingSheet = true
-        landingStop = stop
-        showChapter(stop)
-        setDrawer(1)
+      // the landing bar (mission brief) is not a deck stop: its toggle opens
+      // the sheet IN PLACE — the deck stays at pos 0, the fleet stays formed
+      // behind the sheet, no story patch plays (no gap ever opens). Closing
+      // it unmounts the sheet and lands again (frame loop); scrubbing away
+      // ends the landing. Mid-scrub the bar is untappable (data-peek-gone).
+      const peekChap = btn.closest('.chapter-peek')
+      if (peekChap) {
+        if (!peekChap.classList.contains('chapter-on')) {
+          landingSheet = true
+          showEl(peekEl)
+          setDrawer(1)
+        } else {
+          setDrawer(dTarget === 0 ? 1 : 0)
+        }
         return
       }
       setDrawer(dTarget === 0 ? 1 : 0)

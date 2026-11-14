@@ -54,12 +54,13 @@ export default function HomePage() {
           opened by its button; on desktop the wrappers dissolve and this
           flows exactly as before. */}
       <PageCol>
-        {/* mission brief — the deck's first card. the identity block rides
-            inside it (phones; desktop keeps the hero copy up in the hero):
-            the landing already shows the portrait, so scrolling down lands
-            on the brief itself — no separate identity card stop. one card,
+        {/* mission brief — the landing's overlay, not a deck stop. the
+            identity block rides inside it (phones; desktop keeps the hero
+            copy up in the hero). its bar parks at the bottom edge of the
+            landing and opens the sheet IN PLACE over the portrait; scrubbing
+            from the landing goes straight to payload stack. one card,
             scrollable in the open sheet like transmissions. */}
-        <Chapter index={1} total={6} label="mission brief" icon={<FaBullseye size={15} />} peek>
+        <Chapter peek label="mission brief" icon={<FaBullseye size={15} />}>
           <section className="reveal pt-4 max-md:pt-0">
             <div className="md:hidden">
               <IdentityCard />
@@ -119,7 +120,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Payload stack — derived from the languages in the account */}
-        <Chapter index={2} total={6} label="payload stack" icon={<FaRocket size={15} />}>
+        <Chapter index={1} total={5} label="payload stack" icon={<FaRocket size={15} />}>
           <section className="reveal pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">payload stack</h2>
             <div className="chips">
@@ -135,7 +136,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Recent telemetry — most recently pushed repos */}
-        <Chapter index={3} total={6} label="recent telemetry" icon={<FaChartLine size={15} />}>
+        <Chapter index={2} total={5} label="recent telemetry" icon={<FaChartLine size={15} />}>
           <section className="reveal d1 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="recent telemetry" link="/projects" linkLabel="all projects" />
             <div className="space-y-3">
@@ -187,7 +188,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Activity log — refreshed by the scheduled build */}
-        <Chapter index={4} total={6} label="activity log" icon={<FaBolt size={15} />}>
+        <Chapter index={3} total={5} label="activity log" icon={<FaBolt size={15} />}>
           <section className="reveal d1 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <div className="flex items-baseline justify-between mb-3">
               <h2 className="sec-label">activity log</h2>
@@ -228,7 +229,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Transmissions — latest writing */}
-        <Chapter index={5} total={6} label="transmissions" icon={<FaSatelliteDish size={15} />}>
+        <Chapter index={4} total={5} label="transmissions" icon={<FaSatelliteDish size={15} />}>
           <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" />
             <div className="space-y-4">
@@ -258,7 +259,7 @@ export default function HomePage() {
         </Chapter>
 
         {/* Ground stations — where to find me */}
-        <Chapter index={6} total={6} label="ground stations" icon={<FaBroadcastTower size={15} />}>
+        <Chapter index={5} total={5} label="ground stations" icon={<FaBroadcastTower size={15} />}>
           <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 pb-2 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
             <h2 className="sec-label mb-3">ground stations</h2>
             <div className="flex items-center gap-2">
