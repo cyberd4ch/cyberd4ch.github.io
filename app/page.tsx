@@ -29,9 +29,9 @@ const recentRepos = [...repos].sort((a, b) => b.pushedAt.localeCompare(a.pushedA
 const latestActivity = activity.slice(0, 12)
 const latestPosts = posts.slice(0, 4)
 
-function SectionHeading({ label, link, linkLabel }: { label: string; link?: string; linkLabel?: string }) {
+function SectionHeading({ label, link, linkLabel, className }: { label: string; link?: string; linkLabel?: string; className?: string }) {
   return (
-    <div className="flex items-baseline justify-between mb-3">
+    <div className={`flex items-baseline justify-between mb-3${className ? ` ${className}` : ''}`}>
       <h2 className="sec-label">{label}</h2>
       {link && (
         <Link href={link} className="text-xs underline-link text-[var(--muted)]">
@@ -122,7 +122,7 @@ export default function HomePage() {
         {/* Payload stack — derived from the languages in the account */}
         <Chapter index={1} total={5} label="payload stack" icon={<FaRocket size={15} />}>
           <section className="reveal pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
-            <h2 className="sec-label mb-3">payload stack</h2>
+            <h2 className="sec-label deck-echo mb-3">payload stack</h2>
             <div className="chips">
               {repos
                 .flatMap(repo => [repo.language, ...repo.topics])
@@ -190,7 +190,7 @@ export default function HomePage() {
         {/* Activity log — refreshed by the scheduled build */}
         <Chapter index={3} total={5} label="activity log" icon={<FaBolt size={15} />}>
           <section className="reveal d1 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
-            <div className="flex items-baseline justify-between mb-3">
+            <div className="flex items-baseline justify-between mb-3 deck-echo">
               <h2 className="sec-label">activity log</h2>
               <span className="text-[10px] text-[var(--muted)]">
                 {isStale && <span aria-hidden>⚠ </span>}
@@ -231,7 +231,7 @@ export default function HomePage() {
         {/* Transmissions — latest writing */}
         <Chapter index={4} total={5} label="transmissions" icon={<FaSatelliteDish size={15} />}>
           <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
-            <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" />
+            <SectionHeading label="transmissions" link="/blog" linkLabel="all posts" className="deck-echo" />
             <div className="space-y-4">
               {latestPosts.map(post => {
                 const external = post.url.startsWith('http')
@@ -261,7 +261,7 @@ export default function HomePage() {
         {/* Ground stations — where to find me */}
         <Chapter index={5} total={5} label="ground stations" icon={<FaBroadcastTower size={15} />}>
           <section className="reveal d2 pt-10 border-t border-[var(--hairline)] mt-10 pb-2 max-md:pt-0 max-md:mt-0 max-md:border-t-0">
-            <h2 className="sec-label mb-3">ground stations</h2>
+            <h2 className="sec-label deck-echo mb-3">ground stations</h2>
             <div className="flex items-center gap-2">
               <a
                 href={github.user.url}

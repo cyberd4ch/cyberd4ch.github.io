@@ -775,6 +775,19 @@ html[data-stage] .footer-col {
        card's full-screen posture */
     margin-top: auto;
   }
+  /* the open card names itself once: the deck head carries the title, so the
+     bar fades its own copy (no double title on screen) and body headings that
+     echo the card name are dropped on the stage — the desktop flow keeps them */
+  html[data-stage] .deck-bar-label,
+  html[data-stage] .deck-bar-idx {
+    transition: opacity 160ms ease-out;
+  }
+  html[data-stage] .deck-card[data-open] .deck-bar-label {
+    opacity: 0;
+  }
+  html[data-stage] .deck-echo {
+    display: none;
+  }
   /* the card lives between the nav strip and the bottom margin, anchored to
      the bottom edge — watermelon bottom-sheet posture */
   html[data-stage] .chapter-card {
