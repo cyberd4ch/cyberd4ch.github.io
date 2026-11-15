@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 560" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrow5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f3e81"/>
+    </marker>
+  </defs>
+  <style>
+    .ink { fill: #1a1a1e; }
+    .dim { fill: #6b6a70; }
+    .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+    .box { fill: #ffffff; stroke: #242326; stroke-width: 1.5; }
+    .flow { stroke: #2f3e81; stroke-width: 2; fill: none; marker-end: url(#arrow5); }
+  </style>
+  <rect x="0" y="0" width="1100" height="560" rx="16" fill="#fafafa" stroke="#d9d8dc"/>
+  <text x="40" y="52" font-size="24" font-weight="700" class="ink">The plot twist: DNS-01 issues certificates for a cluster that isn't online</text>
+  <text x="40" y="78" font-size="15" class="dim">Let's Encrypt never contacts your machine. It reads a TXT record from your DNS provider instead.</text>
+
+  <!-- DNS provider -->
+  <rect x="60" y="130" width="280" height="140" rx="10" class="box" stroke="#5b463e" stroke-width="2"/>
+  <text x="200" y="162" font-size="16" font-weight="700" class="ink" text-anchor="middle">your DNS provider</text>
+  <text x="200" y="190" font-size="13.5" class="mono" text-anchor="middle">_acme-challenge.lab  TXT</text>
+  <text x="200" y="214" font-size="13.5" class="mono" text-anchor="middle">"hX9…token…2Wq"</text>
+  <text x="200" y="244" font-size="13" class="dim" text-anchor="middle" font-style="italic">written by cert-manager via API token</text>
+
+  <!-- Let's Encrypt -->
+  <rect x="430" y="130" width="240" height="140" rx="10" class="box" stroke="#5b463e" stroke-width="2"/>
+  <text x="550" y="162" font-size="16" font-weight="700" class="ink" text-anchor="middle">Let's Encrypt</text>
+  <text x="550" y="192" font-size="13" class="ink" text-anchor="middle">looks up the TXT record</text>
+  <text x="550" y="216" font-size="13" class="ink" text-anchor="middle">sees the token</text>
+  <text x="550" y="246" font-size="13" class="dim" text-anchor="middle" font-style="italic">no connection to you needed</text>
+
+  <!-- cert-manager -->
+  <rect x="760" y="130" width="280" height="140" rx="10" class="box" stroke="#2f3e81" stroke-width="2"/>
+  <text x="900" y="162" font-size="16" font-weight="700" class="ink" text-anchor="middle">cert-manager (in-cluster)</text>
+  <text x="900" y="192" font-size="13" text-anchor="middle" class="ink mono">dns01.cloudflare solver</text>
+  <text x="900" y="216" font-size="13" class="ink" text-anchor="middle">writes the TXT record</text>
+  <text x="900" y="246" font-size="13" class="dim" text-anchor="middle" font-style="italic">narrow API token, DNS-edit only</text>
+
+  <!-- arrows -->
+  <line x1="760" y1="180" x2="674" y2="180" class="flow"/>
+  <line x1="430" y1="180" x2="344" y2="180" class="flow"/>
+
+  <!-- laptop -->
+  <rect x="330" y="350" width="440" height="110" rx="10" class="box"/>
+  <text x="550" y="382" font-size="16" font-weight="700" class="ink" text-anchor="middle">your laptop cluster (offline, NAT'd, whatever)</text>
+  <text x="550" y="410" font-size="13.5" class="mono" text-anchor="middle">*.lab.yourdomain.com  A → 127.0.0.1</text>
+  <text x="550" y="436" font-size="13.5" class="ink" text-anchor="middle">serves the wildcard cert every browser already trusts</text>
+
+  <!-- cert flows down to laptop -->
+  <path d="M 550 270 C 550 300, 550 320, 550 346" class="flow"/>
+  <text x="566" y="315" font-size="13" class="dim">certificate issued → secret → Gateway</text>
+
+  <!-- caveats -->
+  <rect x="60" y="480" width="980" height="60" rx="10" fill="#efeef3" stroke="#242326"/>
+  <text x="80" y="506" font-size="13.5" class="dim">Caveats: some resolvers block answers pointing at private addresses (rebinding defense) · the hostname is public record in CT logs ·</text>
+  <text x="80" y="528" font-size="13.5" class="dim">a wildcard cert for a public suffix says nothing about who may use it — the private CA from Part I is still the right tool for service-to-service trust.</text>
+</svg>

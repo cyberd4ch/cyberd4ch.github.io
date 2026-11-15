@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrowB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f3e81"/>
+    </marker>
+  </defs>
+  <style>
+    .ink { fill: #1a1a1e; }
+    .dim { fill: #6b6a70; }
+    .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+    .box { fill: #ffffff; stroke: #242326; stroke-width: 1.5; }
+    .flow { stroke: #2f3e81; stroke-width: 2; fill: none; marker-end: url(#arrowB); }
+  </style>
+  <rect x="0" y="0" width="1100" height="520" rx="16" fill="#fafafa" stroke="#d9d8dc"/>
+  <text x="40" y="50" font-size="24" font-weight="700" class="ink">What happens after kubectl apply -f app.yaml</text>
+  <text x="40" y="76" font-size="15" class="dim">You write one annotation. The rest is cert-manager and Envoy talking through the API server.</text>
+
+  <!-- code box -->
+  <rect x="40" y="110" width="470" height="180" rx="10" fill="#1e1e22"/>
+  <text x="62" y="140" font-size="13.5" class="mono"><tspan fill="#93d3e5">kind: Gateway</tspan></text>
+  <text x="62" y="165" font-size="13.5" class="mono" fill="#d9d8dc">metadata:</text>
+  <text x="84" y="190" font-size="13.5" class="mono" fill="#d9d8dc">annotations:</text>
+  <text x="106" y="215" font-size="13.5" class="mono" fill="#b9e4aa">cert-manager.io/cluster-issuer: lab-ca</text>
+  <text x="62" y="245" font-size="13.5" class="mono" fill="#d9d8dc">listeners[.https].tls:</text>
+  <text x="84" y="270" font-size="13.5" class="mono" fill="#d9d8dc">certificateRefs: [ app-lab-tls ]</text>
+
+  <text x="40" y="330" font-size="14" class="dim">No openssl, no config file, no temp key on disk.</text>
+  <text x="40" y="352" font-size="14" class="dim">The same machinery keeps it renewed.</text>
+
+  <!-- steps column -->
+  <rect x="620" y="100" width="440" height="64" rx="10" class="box"/>
+  <text x="640" y="126" font-size="15" font-weight="700" class="ink">1 · cert-manager notices the Gateway</text>
+  <text x="640" y="148" font-size="13" class="dim">reads hostname + certificateRef from the listener</text>
+
+  <rect x="620" y="196" width="440" height="64" rx="10" class="box"/>
+  <text x="640" y="222" font-size="15" font-weight="700" class="ink">2 · a Certificate object appears</text>
+  <text x="640" y="244" font-size="13" class="dim mono">dnsName: app.lab.localhost · secretName: app-lab-tls</text>
+
+  <rect x="620" y="292" width="440" height="64" rx="10" class="box"/>
+  <text x="640" y="318" font-size="15" font-weight="700" class="ink">3 · lab-ca signs it, key generated in-cluster</text>
+  <text x="640" y="340" font-size="13" class="dim">the signed cert + key land in Secret app-lab-tls</text>
+
+  <rect x="620" y="388" width="440" height="64" rx="10" class="box"/>
+  <text x="640" y="414" font-size="15" font-weight="700" class="ink">4 · Envoy picks up the secret and serves HTTPS</text>
+  <text x="640" y="436" font-size="13" class="dim">renewals swap the secret and Envoy reloads — no restart</text>
+
+  <!-- arrows -->
+  <line x1="510" y1="150" x2="616" y2="132" class="flow"/>
+  <line x1="840" y1="164" x2="840" y2="192" class="flow"/>
+  <line x1="840" y1="260" x2="840" y2="288" class="flow"/>
+  <line x1="840" y1="356" x2="840" y2="384" class="flow"/>
+
+  <!-- renewal loop -->
+  <path d="M 620 430 C 560 470, 560 200, 616 228" class="flow" stroke-dasharray="6 4"/>
+  <text x="540" y="500" font-size="13.5" class="dim" font-style="italic">renewal re-runs steps 2–3 before expiry, forever</text>
+
+  <text x="40" y="470" font-size="14" class="dim">The annotation is the only thing you maintain. Everything below it is reconciliation, not ceremony.</text>
+</svg>

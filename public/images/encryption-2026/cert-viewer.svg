@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <style>
+    .ink { fill: #1a1a1e; }
+    .dim { fill: #6b6a70; }
+    .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+    .row { fill: #ffffff; stroke: #e4e4e6; stroke-width: 1; }
+  </style>
+  <rect x="0" y="0" width="1100" height="560" rx="16" fill="#fafafa" stroke="#d9d8dc"/>
+  <text x="40" y="50" font-size="24" font-weight="700" class="ink">The browser agrees with curl</text>
+  <text x="40" y="76" font-size="15" class="dim">The certificate viewer on https://app.lab.localhost:8443 — captured on 2026-11-15, hashes verified against the exported .pem.</text>
+
+  <!-- URL bar -->
+  <rect x="40" y="104" width="1020" height="52" rx="12" fill="#ffffff" stroke="#242326" stroke-width="1.5"/>
+  <path d="M 74 130 v -6 a 10 10 0 0 1 20 0 v 6 z" fill="none" stroke="#1a1a1e" stroke-width="2.5"/>
+  <rect x="74" y="130" width="20" height="16" rx="3" fill="#1a1a1e"/>
+  <circle cx="84" cy="137" r="2.5" fill="#fafafa"/>
+  <text x="112" y="136" font-size="16" class="ink mono">app.lab.localhost:8443</text>
+  <rect x="952" y="116" width="86" height="28" rx="14" fill="#b9e4aa" stroke="#4a7a3a"/>
+  <text x="995" y="135" font-size="13" font-weight="700" class="ink" text-anchor="middle">VALID</text>
+
+  <!-- subject rows -->
+  <g>
+    <rect x="40" y="180" width="1020" height="44" class="row"/>
+    <text x="62" y="208" font-size="14" class="dim">Subject</text>
+    <text x="220" y="208" font-size="14.5" class="ink mono">CN &lt;not part of certificate&gt; — identity lives in the SAN instead</text>
+
+    <rect x="40" y="224" width="1020" height="44" class="row"/>
+    <text x="62" y="252" font-size="14" class="dim">Subject Alt. Name</text>
+    <text x="220" y="252" font-size="14.5" class="ink mono">DNS:app.lab.localhost</text>
+
+    <rect x="40" y="268" width="1020" height="44" class="row"/>
+    <text x="62" y="296" font-size="14" class="dim">Issuer</text>
+    <text x="220" y="296" font-size="14.5" class="ink mono">CN = Lab Root CA</text>
+
+    <rect x="40" y="312" width="500" height="44" class="row"/>
+    <text x="62" y="340" font-size="14" class="dim">Issued On</text>
+    <text x="220" y="340" font-size="14" class="ink">Sunday, 15 November 2026 at 01:15:07</text>
+
+    <rect x="540" y="312" width="520" height="44" class="row"/>
+    <text x="562" y="340" font-size="14" class="dim">Expires On</text>
+    <text x="720" y="340" font-size="14" class="ink">Saturday, 13 February 2027 at 01:15:07</text>
+
+    <rect x="40" y="356" width="1020" height="44" class="row"/>
+    <text x="62" y="384" font-size="14" class="dim">Certificate (SHA-256)</text>
+    <text x="220" y="384" font-size="14" class="ink mono">56e9c8ed880675f29ef6ad0dc87606d42ba29cf03b774eae271eaad469733de7</text>
+
+    <rect x="40" y="400" width="1020" height="44" class="row" rx="0"/>
+    <text x="62" y="428" font-size="14" class="dim">Public key (SHA-256)</text>
+    <text x="220" y="428" font-size="14" class="ink mono">d4ed69b27bbea4568ababebf6842b3f910ffcc1d34380fa8b98fe341f5e6badb</text>
+  </g>
+
+  <text x="40" y="490" font-size="15" class="dim">No warnings: the viewer trusts this chain because the root was imported into the keychain in the previous step.</text>
+  <text x="40" y="514" font-size="15" class="dim">The 90-day lifetime is the shim's default — one renewal later, this panel shows the same issuer with new dates and hashes.</text>
+  <text x="40" y="544" font-size="13" class="dim mono">exported as app.lab.localhost.pem · openssl confirms subject, issuer, dates, SAN and both SHA-256 digests</text>
+</svg>

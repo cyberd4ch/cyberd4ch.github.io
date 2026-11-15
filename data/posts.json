@@ -1,5 +1,51 @@
 [
   {
+    "id": "adventures-in-encryption-2026",
+    "slug": "adventures-in-encryption-2026",
+    "title": "adventures in encryption: securing your laptop kubernetes cluster (2026 update)",
+    "date": "Nov 15, 2026",
+    "dateISO": "2026-11-15",
+    "category": "technical",
+    "url": "/blog/adventures-in-encryption-2026/",
+    "excerpt": "the 2021 'adventures in encryption' guide rebuilt on gateway api — every command in part i re-run end to end on kind before publishing: a CA minted in-cluster, keychain trust, port-forwarded HTTPS, and the two findings the docs leave out.",
+    "aiAssist": 100,
+    "tags": [
+      "kubernetes",
+      "tls",
+      "cert-manager",
+      "gateway-api",
+      "kind"
+    ],
+    "topics": [
+      "cloud-native",
+      "development"
+    ],
+    "readMinutes": 16
+  },
+  {
+    "id": "the-tablet-lab",
+    "slug": "the-tablet-lab",
+    "title": "the tablet lab: root first, then everything else",
+    "date": "Nov 14, 2026",
+    "dateISO": "2026-11-14",
+    "category": "technical",
+    "url": "/blog/the-tablet-lab/",
+    "excerpt": "root first, then everything else: a double-read BROM backup script, the magisk cmdline flag k3s needs, a device-owner agent with documented denials, and what 2 GB of RAM decides.",
+    "aiAssist": 100,
+    "tags": [
+      "android",
+      "mtk",
+      "magisk",
+      "k3s",
+      "forensics",
+      "radare2"
+    ],
+    "topics": [
+      "bug-bounty"
+    ],
+    "readMinutes": 9
+  },
+  {
     "id": "proving-a-pr-without-patching-it",
     "slug": "proving-a-pr-without-patching-it",
     "title": "proving a PR without patching the file it fixes",

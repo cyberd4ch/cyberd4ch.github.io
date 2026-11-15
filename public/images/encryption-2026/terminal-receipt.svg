@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" font-family="'SF Mono', Menlo, Consolas, monospace">
+  <style>
+    .t { font-size: 15px; }
+    .cmd { fill: #b9e4aa; }
+    .out { fill: #d9d8dc; }
+    .hi { fill: #93d3e5; }
+    .dim { fill: #6b6a70; }
+  </style>
+  <rect x="0" y="0" width="1100" height="620" rx="14" fill="#1e1e22"/>
+  <rect x="0" y="0" width="1100" height="44" rx="14" fill="#2a2a2e"/>
+  <circle cx="28" cy="22" r="7" fill="#ff5f57"/><circle cx="52" cy="22" r="7" fill="#febc2e"/><circle cx="76" cy="22" r="7" fill="#28c840"/>
+  <text x="550" y="28" font-size="13" fill="#9b9893" text-anchor="middle" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">the whole thing, verified on 2026-11-15</text>
+
+  <text x="28" y="80" class="t cmd">$ kubectl get certificate app-lab-tls</text>
+  <text x="28" y="104" class="t out">NAME          READY   SECRET        AGE</text>
+  <text x="28" y="128" class="t out">app-lab-tls   <tspan class="hi">True</tspan>    app-lab-tls   2m9s</text>
+
+  <text x="28" y="176" class="t cmd">$ SVC=$(kubectl -n envoy-gateway-system get svc \</text>
+  <text x="28" y="200" class="t cmd">    --selector=gateway.envoyproxy.io/owning-gateway-name=lab-gateway,… \</text>
+  <text x="28" y="224" class="t cmd">    -o jsonpath='{.items[0].metadata.name}')</text>
+  <text x="28" y="248" class="t cmd">$ kubectl -n envoy-gateway-system port-forward svc/$SVC 8443:443</text>
+  <text x="28" y="272" class="t dim">Forwarding from 127.0.0.1:8443 -> 10443</text>
+
+  <text x="28" y="320" class="t cmd">$ curl -v --cacert lab-root-ca.crt https://app.lab.localhost:8443/</text>
+  <text x="28" y="344" class="t out">* Connected to app.lab.localhost (::1) port 8443</text>
+  <text x="28" y="368" class="t out">* SSL connection using TLSv1.3 / AEAD-CHACHA20-POLY1305-SHA256</text>
+  <text x="28" y="392" class="t out">*  issuer: <tspan class="hi">CN=Lab Root CA</tspan></text>
+  <text x="28" y="416" class="t out">*  SSL certificate verify <tspan class="hi">ok</tspan></text>
+  <text x="28" y="440" class="t out">* using HTTP/2</text>
+  <text x="28" y="464" class="t out">&lt; HTTP/2 200</text>
+
+  <text x="28" y="512" class="t cmd">$ openssl s_client -connect app.lab.localhost:8443 \</text>
+  <text x="28" y="536" class="t cmd">    -CAfile lab-root-ca.crt -servername app.lab.localhost</text>
+  <text x="28" y="560" class="t out">Verify return code: <tspan class="hi">0 (ok)</tspan></text>
+
+  <text x="28" y="600" class="t dim" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif" font-size="13">no -k flag anywhere: the trust comes from the CA the cluster minted</text>
+</svg>

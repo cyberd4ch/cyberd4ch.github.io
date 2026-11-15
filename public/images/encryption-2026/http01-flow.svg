@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrow4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f3e81"/>
+    </marker>
+  </defs>
+  <style>
+    .ink { fill: #1a1a1e; }
+    .dim { fill: #6b6a70; }
+    .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+    .box { fill: #ffffff; stroke: #242326; stroke-width: 1.5; }
+    .flow { stroke: #2f3e81; stroke-width: 2; fill: none; marker-end: url(#arrow4); }
+  </style>
+  <rect x="0" y="0" width="1100" height="540" rx="16" fill="#fafafa" stroke="#d9d8dc"/>
+  <text x="40" y="52" font-size="24" font-weight="700" class="ink">HTTP-01: Let's Encrypt has to reach your front door</text>
+  <text x="40" y="78" font-size="15" class="dim">The one requirement of the HTTP challenge: port 80 on shop.yourdomain.com must answer from the public internet.</text>
+
+  <!-- LE -->
+  <rect x="40" y="140" width="240" height="120" rx="10" class="box" stroke="#5b463e" stroke-width="2"/>
+  <text x="160" y="172" font-size="16" font-weight="700" class="ink" text-anchor="middle">Let's Encrypt</text>
+  <text x="160" y="200" font-size="12.5" class="dim" text-anchor="middle">"GET /.well-known/acme-challenge/</text>
+  <text x="160" y="220" font-size="12.5" class="dim" text-anchor="middle">hX9…token…2Wq"</text>
+  <text x="160" y="246" font-size="12.5" class="dim" text-anchor="middle" font-style="italic">ACME order · challenge pending</text>
+
+  <!-- cert-manager -->
+  <rect x="410" y="140" width="300" height="120" rx="10" class="box" stroke="#2f3e81" stroke-width="2"/>
+  <text x="560" y="172" font-size="16" font-weight="700" class="ink" text-anchor="middle">cert-manager</text>
+  <text x="560" y="200" font-size="13" class="ink" text-anchor="middle">creates a temporary HTTPRoute</text>
+  <text x="560" y="222" font-size="13" class="mono" text-anchor="middle">/.well-known/acme-challenge/</text>
+  <text x="560" y="244" font-size="12.5" class="dim" text-anchor="middle" font-style="italic">attached to the same Gateway, port 80</text>
+
+  <!-- Gateway -->
+  <rect x="820" y="140" width="240" height="120" rx="10" class="box"/>
+  <text x="940" y="172" font-size="16" font-weight="700" class="ink" text-anchor="middle">your Gateway</text>
+  <text x="940" y="200" font-size="13" text-anchor="middle" class="ink mono">http :80 → challenge</text>
+  <text x="940" y="222" font-size="13" text-anchor="middle" class="ink mono">https :443 → your app</text>
+  <text x="940" y="246" font-size="12.5" class="dim" text-anchor="middle" font-style="italic">public LoadBalancer address</text>
+
+  <!-- arrows: LE -> cert-manager (request), cert-manager -> gateway (route), gateway -> LE (answer) -->
+  <path d="M 280 170 C 340 150, 370 150, 406 170" class="flow"/>
+  <line x1="710" y1="200" x2="816" y2="200" class="flow"/>
+  <text x="764" y="188" font-size="12.5" class="dim" text-anchor="middle">wire it</text>
+  <path d="M 940 260 C 940 320, 160 320, 160 268" class="flow"/>
+  <text x="500" y="345" font-size="13.5" class="dim">"200 ok, here's the token" → certificate issued</text>
+
+  <!-- catch / requirement panel -->
+  <rect x="40" y="380" width="1020" height="120" rx="10" fill="#efeef3" stroke="#242326"/>
+  <text x="62" y="410" font-size="15" font-weight="700" class="ink">Why this fails on a laptop cluster</text>
+  <text x="62" y="436" font-size="13.5" class="dim">Let's Encrypt connects to <tspan class="mono">shop.yourdomain.com:80</tspan> from the internet. Behind home NAT with no port forwarding, the</text>
+  <text x="62" y="458" font-size="13.5" class="dim">challenge can never be answered — the order pends, then fails. If the port-80 listener or the DNS record is wrong,</text>
+  <text x="62" y="480" font-size="13.5" class="dim">the same pendency. DNS-01 (next) removes the inbound requirement entirely.</text>
+</svg>

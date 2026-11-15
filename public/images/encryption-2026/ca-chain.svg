@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="470" viewBox="0 0 1100 470" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrowA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f3e81"/>
+    </marker>
+  </defs>
+  <style>
+    .ink { fill: #1a1a1e; }
+    .dim { fill: #6b6a70; }
+    .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+    .box { fill: #ffffff; stroke: #242326; stroke-width: 1.5; }
+    .accent { stroke: #2f3e81; }
+    .flow { stroke: #2f3e81; stroke-width: 2; fill: none; marker-end: url(#arrowA); }
+  </style>
+  <rect x="0" y="0" width="1100" height="470" rx="16" fill="#fafafa" stroke="#d9d8dc"/>
+  <text x="40" y="50" font-size="24" font-weight="700" class="ink">Bootstrapping the CA inside the cluster</text>
+  <text x="40" y="76" font-size="15" class="dim">Three objects. The private key is generated in the cluster and never touches your disk.</text>
+
+  <!-- top row -->
+  <rect x="40" y="110" width="240" height="104" rx="10" class="box"/>
+  <text x="58" y="138" font-size="13" class="dim">ClusterIssuer</text>
+  <text x="58" y="163" font-size="18" font-weight="700" class="ink mono">selfsigned</text>
+  <text x="58" y="190" font-size="13.5" class="dim">signs exactly one thing</text>
+
+  <rect x="344" y="110" width="280" height="104" rx="10" class="box" stroke="#2f3e81"/>
+  <text x="362" y="138" font-size="13" class="dim">Certificate (isCA: true)</text>
+  <text x="362" y="163" font-size="18" font-weight="700" class="ink mono">lab-root-ca</text>
+  <text x="362" y="190" font-size="13.5" class="dim">ECDSA P-256 · 2 years · the root</text>
+
+  <rect x="688" y="110" width="240" height="104" rx="10" class="box"/>
+  <text x="706" y="138" font-size="13" class="dim">Secret</text>
+  <text x="706" y="163" font-size="18" font-weight="700" class="ink mono">lab-root-ca</text>
+  <text x="706" y="190" font-size="13.5" class="dim">cert + key, in-cluster</text>
+
+  <!-- bottom row -->
+  <rect x="40" y="280" width="240" height="104" rx="10" class="box" stroke="#2f3e81"/>
+  <text x="58" y="308" font-size="13" class="dim">ClusterIssuer</text>
+  <text x="58" y="333" font-size="18" font-weight="700" class="ink mono">lab-ca</text>
+  <text x="58" y="360" font-size="13.5" class="dim">ca.secretName: lab-root-ca</text>
+
+  <rect x="344" y="280" width="280" height="104" rx="10" class="box"/>
+  <text x="362" y="308" font-size="13" class="dim">Certificate (leaf)</text>
+  <text x="362" y="333" font-size="18" font-weight="700" class="ink mono">app-lab-tls</text>
+  <text x="362" y="360" font-size="13.5" class="dim">dnsName: app.lab.localhost</text>
+
+  <!-- arrows -->
+  <line x1="280" y1="162" x2="338" y2="162" class="flow"/>
+  <text x="312" y="152" font-size="13" class="dim" text-anchor="middle">signs</text>
+  <line x1="624" y1="162" x2="682" y2="162" class="flow"/>
+  <text x="654" y="152" font-size="13" class="dim" text-anchor="middle">stored in</text>
+
+  <path d="M 808 214 C 808 262, 560 240, 294 278" class="flow" stroke-dasharray="6 4"/>
+  <text x="575" y="262" font-size="13.5" class="dim" font-style="italic">lab-ca uses this root for everything else</text>
+
+  <line x1="280" y1="332" x2="338" y2="332" class="flow"/>
+  <text x="312" y="322" font-size="13" class="dim" text-anchor="middle">signs</text>
+
+  <text x="40" y="428" font-size="14" class="dim">Only the public certificate ever leaves the cluster. Whoever can read that Secret can impersonate any site</text>
+  <text x="40" y="450" font-size="14" class="dim">on any machine that trusts this root — protect it like the master key it is.</text>
+</svg>

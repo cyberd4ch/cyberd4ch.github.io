@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <style>
+    .ink { fill: #1a1a1e; }
+    .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+  </style>
+  <rect x="0" y="0" width="1100" height="480" rx="16" fill="#2f3e81"/>
+
+  <!-- cluster hexagons at top -->
+  <g stroke="#8ea2e8" stroke-width="2.5" fill="none">
+    <path d="M 440 52 l 30 -18 l 30 18 l 0 36 l -30 18 l -30 -18 z"/>
+    <path d="M 520 30 l 30 -18 l 30 18 l 0 36 l -30 18 l -30 -18 z"/>
+    <path d="M 600 52 l 30 -18 l 30 18 l 0 36 l -30 18 l -30 -18 z"/>
+    <line x1="500" y1="70" x2="520" y2="66"/>
+    <line x1="580" y1="66" x2="600" y2="70"/>
+  </g>
+  <g fill="#b9e4aa">
+    <circle cx="470" cy="70" r="7"/>
+    <circle cx="550" cy="48" r="7"/>
+    <circle cx="630" cy="70" r="7"/>
+  </g>
+  <line x1="550" y1="90" x2="550" y2="128" stroke="#8ea2e8" stroke-width="2.5"/>
+
+  <!-- cert chain cards -->
+  <g>
+    <rect x="465" y="128" width="170" height="44" rx="8" fill="#b9e4aa" stroke="#1a1a1e" stroke-width="2"/>
+    <circle cx="489" cy="150" r="9" fill="none" stroke="#1a1a1e" stroke-width="2"/>
+    <text x="512" y="156" font-size="14.5" class="ink" font-weight="600">root CA</text>
+
+    <line x1="550" y1="172" x2="550" y2="188" stroke="#8ea2e8" stroke-width="2.5"/>
+    <rect x="465" y="188" width="170" height="44" rx="8" fill="#8ea2e8" stroke="#1a1a1e" stroke-width="2"/>
+    <circle cx="489" cy="210" r="9" fill="none" stroke="#1a1a1e" stroke-width="2"/>
+    <text x="512" y="216" font-size="14.5" class="ink" font-weight="600">issuer</text>
+
+    <line x1="550" y1="232" x2="550" y2="248" stroke="#8ea2e8" stroke-width="2.5"/>
+    <rect x="465" y="248" width="170" height="44" rx="8" fill="#fafafa" stroke="#1a1a1e" stroke-width="2"/>
+    <circle cx="489" cy="270" r="9" fill="none" stroke="#1a1a1e" stroke-width="2"/>
+    <text x="512" y="276" font-size="14.5" class="ink" font-weight="600">server</text>
+  </g>
+
+  <!-- laptop -->
+  <g>
+    <line x1="550" y1="292" x2="550" y2="320" stroke="#8ea2e8" stroke-width="2.5"/>
+    <rect x="380" y="320" width="340" height="112" rx="10" fill="#1e1e22" stroke="#1a1a1e" stroke-width="2"/>
+    <text x="550" y="352" font-size="15" class="mono" fill="#93d3e5" text-anchor="middle">https://app.lab.localhost</text>
+    <rect x="524" y="376" width="52" height="40" rx="7" fill="#b9e4aa" stroke="#1a1a1e" stroke-width="2"/>
+    <path d="M 535 376 v -9 a 15 15 0 0 1 30 0 v 9" fill="none" stroke="#b9e4aa" stroke-width="6"/>
+    <circle cx="550" cy="394" r="5" fill="#1e1e22"/>
+    <rect x="330" y="432" width="440" height="22" rx="11" fill="#b9e4aa" stroke="#1a1a1e" stroke-width="2"/>
+  </g>
+
+  <!-- browser left -->
+  <g>
+    <rect x="80" y="300" width="160" height="120" rx="10" fill="#fafafa" stroke="#1a1a1e" stroke-width="2"/>
+    <circle cx="102" cy="322" r="5" fill="#febc2e"/>
+    <circle cx="120" cy="322" r="5" fill="#28c840"/>
+    <rect x="94" y="336" width="132" height="24" rx="12" fill="#e9e9ec"/>
+    <circle cx="108" cy="348" r="4" fill="none" stroke="#1a1a1e" stroke-width="2"/>
+    <rect x="96" y="380" width="34" height="14" rx="3" fill="#2f3e81"/>
+    <line x1="134" y1="387" x2="222" y2="387" stroke="#6b6a70" stroke-width="2"/>
+    <line x1="96" y1="368" x2="226" y2="368" stroke="#d9d8dc" stroke-width="2"/>
+  </g>
+
+  <!-- gateway door right: padlock -->
+  <g>
+    <rect x="860" y="300" width="160" height="120" rx="10" fill="#fafafa" stroke="#1a1a1e" stroke-width="2"/>
+    <path d="M 900 396 v -36 a 40 40 0 0 1 80 0 v 36 z" fill="none" stroke="#1a1a1e" stroke-width="3"/>
+    <line x1="900" y1="360" x2="980" y2="360" stroke="#1a1a1e" stroke-width="3"/>
+    <rect x="922" y="360" width="36" height="36" rx="6" fill="#2f3e81"/>
+    <circle cx="940" cy="376" r="4" fill="#fafafa"/>
+  </g>
+
+  <!-- flows -->
+  <path d="M 240 360 C 290 360, 320 356, 374 356" fill="none" stroke="#8ea2e8" stroke-width="3" stroke-dasharray="8 6"/>
+  <path d="M 724 356 C 780 356, 800 360, 854 360" fill="none" stroke="#8ea2e8" stroke-width="3" stroke-dasharray="8 6"/>
+
+  <text x="550" y="468" font-size="16" fill="#8ea2e8" text-anchor="middle" font-style="italic">one certificate authority, minted in the cluster, trusted by the laptop</text>
+</svg>
