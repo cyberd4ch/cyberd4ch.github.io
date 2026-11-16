@@ -1,5 +1,5 @@
 ---
-title: "where the deeplink work can make money — and the reporting trap that kills it"
+title: "where the deeplink work can make money, and the reporting trap that kills it"
 date: 2026-11-10
 category: general
 ai-assist: 100
@@ -8,7 +8,7 @@ topics: [bug-bounty]
 excerpt: "Desk research on which programs pay for nonce-laundering XSS: Basecamp/HEY on HackerOne ($100-$10,000, with a 2026 cross-account nonce-bypass chain already disclosed) is the closest fit; Intigriti only has Lightspark and Adobe paying publicly. The trap: \"CSP headers\" is out of scope, but \"XSS despite CSP\" is not."
 ---
 *Where the deeplink/nonce work can actually make money, and the one reporting
-trap that gets this entire bug class closed as N/A. Desk research only — public
+trap that gets this entire bug class closed as N/A. Desk research only: public
 scope pages and disclosed reports, no testing of any of these targets.*
 
 ## The pattern worth carrying forward
@@ -16,11 +16,11 @@ scope pages and disclosed reports, no testing of any of these targets.*
 The [deeplink trace](/blog/deeplink-gadget-trace/) left me with one reusable
 idea: a server-rendered value interpolated raw into a single-quoted string
 inside a **nonce'd** inline `<script>`. The CSP doesn't stop it, because the
-script was already trusted. The bug isn't "weak CSP" — it's a trusted script
+script was already trusted. The bug isn't "weak CSP": it's a trusted script
 doing the injection for you.
 
-That shape is portable. The question is which programs pay for it, and — more
-importantly — which programs pay for it *without* rejecting it as a header
+That shape is portable. The question is which programs pay for it, and, more
+importantly, which programs pay for it *without* rejecting it as a header
 complaint.
 
 ## Basecamp / HEY is the closest fit
@@ -32,15 +32,15 @@ invitation to the chain-style work this class needs.
 
 Their disclosed history proves they mean it:
 
-- **2020, `app.hey.com` search box** — a DOM XSS where CSP blocked execution;
+- **2020, `app.hey.com` search box**: a DOM XSS where CSP blocked execution;
   the report's whole point was *if the CSP can be bypassed, it fires*. Triaged,
   paid, bumped to high. Staff wrote: *"We are interested in dealing with root
   causes for potential XSS issues, even when intercepted by our CSP."*
-- **2020, stored XSS in hey.com** — a sanitizer bypass mitigated by CSP. They
+- **2020, stored XSS in hey.com**: a sanitizer bypass mitigated by CSP. They
   reversed policy to treat sanitizer bypasses as eligible **separately** from CSP
   bypasses, because the two defenses are graded on their own.
 - **2026, cross-account XSS on `app.basecamp.com`** (CVSS 8.7, disclosed
-  2026-10-28) — an oEmbed option injected unescaped, then an **allowlisted**
+  2026-10-28): an oEmbed option injected unescaped, then an **allowlisted**
   Basecamp script read the page's `meta[name=csp-nonce]` and stamped it onto the
   attacker's script. The nonce was never guessed. As the write-up put it, a
   nonce is only as secret as the DOM that carries it.
@@ -53,11 +53,11 @@ would be squarely in their wheelhouse.
 
 Checking the live program list on 2026-11-10, the paying options are thin:
 
-- **Lightspark** — up to **$5,000**, payments infrastructure.
-- **Adobe** — **$75–$15,000**, 2FA required to participate.
+- **Lightspark**: up to **$5,000**, payments infrastructure.
+- **Adobe**: **$75–$15,000**, 2FA required to participate.
 
-Everything else public — Coke One North America, Rivian, BorgWarner, NxtPort,
-Intel, ADAC, Dutch Lottery, Mateco — is a **VDP with no bounty**. Good for
+Everything else public (Coke One North America, Rivian, BorgWarner, NxtPort,
+Intel, ADAC, Dutch Lottery, Mateco) is a **VDP with no bounty**. Good for
 reputation and write-ups, zero payout. Worth knowing before you spend a session.
 
 Intigriti's real value for this class is its monthly challenges and Bug Bytes

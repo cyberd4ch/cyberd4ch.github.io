@@ -5,7 +5,7 @@ category: technical
 ai-assist: 100
 tags: [rust, http, macos]
 topics: [development]
-excerpt: "a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window — and the favicon bug that explained why 204 is not an icon."
+excerpt: "a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window, and the favicon bug that explained why 204 is not an icon."
 ---
 *shipping a torrent client's ui without electron: a hand-written http server, html
 compiled into the binary, cancel and pause moved into the engine, and the favicon bug
@@ -31,7 +31,7 @@ keep-alive, no chunked encoding, no TLS, and it binds loopback unless `--bind` s
 otherwise.
 
 The UI is one `ui.html` embedded with `include_str!`, so the shipped binary and the
-shipped page cannot disagree — that class of bug does not exist here. The JSON API is
+shipped page cannot disagree; that class of bug does not exist here. The JSON API is
 five endpoints, and every number in the page comes from the same `Arc<Progress>`
 atomics the terminal progress bar reads.
 
@@ -44,7 +44,7 @@ The fix moved control into the session: `stop_handle()` returns a flag checked a
 checkpoint, and `pause_handle()` parks the workers between blocks. A paused job stops
 touching the network within one block and keeps every verified piece. The test starts a
 run paused, resumes it 400 ms later, and asserts the download only finished after the
-gate opened — the timing *is* the assertion.
+gate opened: the timing *is* the assertion.
 
 ## two bugs worth writing down
 
@@ -54,7 +54,7 @@ failure. The fix serves a real SVG at `/favicon.ico` *and* declares a `data:` ic
 the request never happens.
 
 **A path that did not exist.** Typing a new directory into the output box failed the
-job; it is created now. The larger point: a torrent client downloads torrents — a
+job; it is created now. The larger point: a torrent client downloads torrents, a
 magnet or a `.torrent`. An `https://…/file.pdf` URL is not a target, and saying so
 plainly beats a cryptic failure.
 
@@ -82,7 +82,7 @@ hash before installing anything.
 
 The binary is 3.1 MB with six dependencies, unchanged: `sha1`, `hex`, `rand`, `ureq`,
 `base32`, `percent-encoding`. 51 tests. The macOS window adds no Rust dependency at
-all — it is compiled by the installer and by CI, not linked into the engine.
+all: it is compiled by the installer and by CI, not linked into the engine.
 
 The flaky test that kept failing once in four runs turned out to be a real discovery
 bug: the DHT hunt stopped reading replies as soon as one peer answered, so in-flight

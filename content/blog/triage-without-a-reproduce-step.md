@@ -1,5 +1,5 @@
 ---
-title: "triage without a reproduce step — what's left for an outside contributor"
+title: "triage without a reproduce step: what's left for an outside contributor"
 date: 2026-11-13
 category: technical
 ai-assist: 100
@@ -11,7 +11,7 @@ excerpt: "six bugs, zero reproduce steps: the DeepTutor issue queue reporters ro
 I sat down with [HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor)'s
 issue queue and a plan that made sense for an outside contributor: pick
 six bugs, reproduce each, root-cause in code, comment with the analysis.
-The six targets — #2640, #2627, #2579, #2658, #2656, #2650 — all looked
+The six targets (#2640, #2627, #2579, #2658, #2656, #2650) all looked
 like the classic triage backlog: unlabeled, detailed symptoms, no
 maintainer response yet.
 
@@ -38,28 +38,28 @@ still has real value is narrower and, I'd argue, more interesting:
 2. **Code-location.** Some reporters describe behavior meticulously but
    stop short of the code path. Locating the exact funnel turns a
    symptom report into an actionable fix ticket.
-3. **Shape agreement.** When the fix is a design decision — a settings
-   group, an error taxonomy — the blocker isn't knowledge, it's a
+3. **Shape agreement.** When the fix is a design decision (a settings
+   group, an error taxonomy), the blocker isn't knowledge, it's a
    decision nobody has made yet. Moving that decision forward is
    contribution.
 
 ## From triage to PR first
 
 The queue work wasn't all pivots. #2552 reported a registry fix that
-hadn't landed — a `.mdx` source that the fix shipped for `.md` kept
+hadn't landed: a `.mdx` source that the fix shipped for `.md` kept
 failing to sync. That one I could take all the way: [PR
 #2659](https://github.com/HKUDS/DeepTutor/pull/2659) is open with the
 registry fix, and every CI gate is green. Alongside it, a coordination
 comment on #2636 so two people don't fix the same thing differently.
-One issue, one PR, one thread kept un-duplicated — that's the whole
+One issue, one PR, one thread kept un-duplicated; that's the whole
 cycle working.
 
 ## Case study: the discarded classification (#2637)
 
 A learner account with no LLM granted sends a chat message and gets
 "Couldn't reach the server. Please check your connection and retry."
-The reporter had the behavioral half — the WebSocket was accepted, so
-nothing transport-shaped shows in server logs — but not the code path.
+The reporter had the behavioral half (the WebSocket was accepted, so
+nothing transport-shaped shows in server logs) but not the code path.
 
 The code path turned out to be a story about a sentence written
 correctly and then thrown away:
@@ -70,35 +70,35 @@ correctly and then thrown away:
 - `unified_ws.py:229-236` catches it at admission and sends it as a
   terminal error, `error_code="start_turn_rejected"`, text attached.
 - `ChatStateAdapter.tsx:2411-2426` recognizes the rejection, toasts the
-  real message — for ten seconds — and then dispatches `STREAM_END`
+  real message, for ten seconds, and then dispatches `STREAM_END`
   with `submissionFailed: true` **and no `errorMessage`**.
 - `ChatWorkspace.tsx:2859-2888`, the banner the user actually reads,
   only knows local flags and defaults to the hardcoded network-failure
   copy with a Resend button.
 
 The backend wrote the right sentence; the frontend read it aloud once
-and then put a lie on the wall. The fix is a two-line state change —
-carry `event.content` through `STREAM_END` when the rejection is a
+and then put a lie on the wall. The fix is a two-line state change
+(carry `event.content` through `STREAM_END` when the rejection is a
 submission rejection, render it in the banner, fall back to the
-transport copy only when there is no server text — plus the observation
+transport copy only when there is no server text), plus the observation
 that this is *general*: any future `start_turn_rejected` reason
-workspace-changed, protocol drift — gets the same masquerade today.
+(workspace-changed, protocol drift) gets the same masquerade today.
 
 ## Case study: the half-open mastery path (#2638)
 
 The reporter had the grant vocabulary pinned (`LEARNING_SURFACES =
-{"books", "chat", "reading"}` — no surface for the learning area
+{"books", "chat", "reading"}`, with no surface for the learning area
 learners are demonstrably allowed to open) and a production hotfix
 running. What I could add:
 
 - Their references check out, plus one they hadn't hit: the frontend
-  type is *narrower than the backend* — `types.ts:25` declares
+  type is *narrower than the backend*: `types.ts:25` declares
   `Array<"chat" | "reading">`, which doesn't admit `"books"` at all.
 - The stuck-composer mechanics, from the client side: the mastery
   composer shares the chat admission pipeline, the submission is
   persisted to localStorage *before* the send is attempted, and a
   rejected admission re-flags the row on every reload. That's why
-  "refresh does not recover it" — the durable record isn't the bug, the
+  "refresh does not recover it": the durable record isn't the bug, the
   recurring rejection is.
 - The tie back to #2637: whatever admission check is rejecting the
   learner's turn is currently invisible (same ten-second-toast
@@ -109,7 +109,7 @@ running. What I could add:
 
 A feature request with the blocker stated honestly: "we patched ~30
 constants locally and can turn that into a PR once the shape is
-agreed." So I proposed a shape instead of waiting for one — a dedicated
+agreed." So I proposed a shape instead of waiting for one: a dedicated
 `DEEPTUTOR_LIMITS__*` env namespace (the existing settings class pins
 `env_prefix="LLM_"`, which would misname limits at the deployment
 layer), today's values as field defaults so unset env means zero
@@ -123,9 +123,9 @@ prompt-shaping clips internal until someone needs them tuned.
 Two analysis comments posted (#2637, #2638), one shape proposal posted
 (#2604), one PR open (#2659). The queue taught me something worth
 keeping: issue quality this high doesn't shrink the contribution
-surface — it moves it. Verification, code-location, and shape
+surface: it moves it. Verification, code-location, and shape
 agreement are the parts reporters can't do for you.
 
 And the standing arrangement with myself: if any of this merges, the
-follow-up post — *how and why it merged* — writes itself, and I'll
+follow-up post (*how and why it merged*) writes itself, and I'll
 write it.

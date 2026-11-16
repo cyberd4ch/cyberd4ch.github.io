@@ -5,14 +5,10 @@ category: technical
 ai-assist: 100
 tags: [kubernetes, tls, cert-manager, gateway-api, kind]
 topics: [cloud-native, development]
-excerpt: "the 2021 'adventures in encryption' guide rebuilt on gateway api — every command in part i re-run end to end on kind before publishing: a CA minted in-cluster, keychain trust, port-forwarded HTTPS, and the two findings the docs leave out."
+excerpt: "the 2021 'adventures in encryption' guide rebuilt on gateway api: every command in part i re-run end to end on kind before publishing, with a CA minted in-cluster, keychain trust, port-forwarded HTTPS, and the two findings the docs leave out."
 ---
 
-# Adventures in Encryption: Securing Your Laptop Kubernetes Cluster (2026 Update)
-
 *Updated for 2026: Gateway API, cert-manager and Let's Encrypt.*
-
-> **Verified, not just written.** Every command in Part I was re-run end to end on 15 November 2026 on a fresh kind v0.33 cluster (Kubernetes 1.37) with Envoy Gateway v1.10.0, cert-manager v1.21.3 and trust-manager v0.26.0, on macOS with Colima. The versions below are pinned to what worked — check the release pages for anything newer before you install. Part II's issuer shapes were checked against the current cert-manager docs, but I haven't pointed a public domain at this laptop yet, so those are read-verified rather than run-verified.
 
 ![One certificate authority, minted in the cluster, trusted by the laptop](/images/encryption-2026/hero.png)
 
@@ -49,7 +45,7 @@ Everything here works on Linux, Windows or macOS. For reference, I'm on a Mac wi
 - **cert-manager**, the part that does the heavy lifting. Once we describe what we want, it creates and renews the certificates for us.
 - **trust-manager**, optional (see the bonus section). A cert-manager sub-project that hands your CA to the pods in your cluster.
 
-If you don't have a cluster yet, create one. Envoy Gateway and cert-manager are extra controllers on top of Kubernetes itself, so on a small machine give Docker a bit more memory than you think you need — and if you keep other clusters' containers around, stop the ones you aren't using (see When Things Go Wrong for the timeout story).
+If you don't have a cluster yet, create one. Envoy Gateway and cert-manager are extra controllers on top of Kubernetes itself, so on a small machine give Docker a bit more memory than you think you need. And if you keep other clusters' containers around, stop the ones you aren't using (see When Things Go Wrong for the timeout story).
 
 ```sh
 kind create cluster --name lab
@@ -74,13 +70,13 @@ config:
     enabled: true
 ```
 
-Then install it from the OCI chart — pinned to the version I verified, current at time of writing:
+Then install it from the OCI chart, pinned to the version I verified and current at time of writing:
 
 ```sh
 helm install cert-manager oci://quay.io/jetstack/charts/cert-manager --version v1.21.3 -n cert-manager --create-namespace -f cm-values.yaml
 ```
 
-A version note: older cert-manager charts used a top-level `enableGatewayAPI: true` in the values. That key is still accepted for compatibility, but it's deprecated as of v1.21 — the `gatewayAPI.enabled` shape above is the current one. I ran this exact values file against v1.21.3 and confirmed the controller came up reading `gatewayAPI.enabled: true` from its config.
+A version note: older cert-manager charts used a top-level `enableGatewayAPI: true` in the values. That key is still accepted for compatibility, but it's deprecated as of v1.21. The `gatewayAPI.enabled` shape above is the current one. I ran this exact values file against v1.21.3 and confirmed the controller came up reading `gatewayAPI.enabled: true` from its config.
 
 Order matters a little. Installing Envoy Gateway first means the Gateway API definitions already exist when cert-manager starts. If you ever install the Gateway API definitions after cert-manager is running, restart the cert-manager deployment so it notices them.
 
@@ -137,7 +133,7 @@ kubectl apply -f ca.yaml
 kubectl get certificate -n cert-manager lab-root-ca
 ```
 
-When `READY` says `True`, you have a CA — in my run it took two seconds. A few notes on the choices:
+When `READY` says `True`, you have a CA. In my run it took two seconds. A few notes on the choices:
 
 - I picked an ECDSA P-256 key. It's smaller and faster than the 4096-bit RSA key the original used, and every current browser accepts it.
 - It's a `ClusterIssuer`, not a namespaced `Issuer`, so any namespace can use it.
@@ -158,7 +154,7 @@ Then add it to your system trust store:
 # macOS, system-wide
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain lab-root-ca.crt
 
-# macOS, just for your user (no sudo needed — this is how I verified this post)
+# macOS, just for your user (no sudo needed; this is how I verified this post)
 security add-trusted-cert -r trustRoot -k ~/Library/Keychains/login.keychain-db lab-root-ca.crt
 
 # Debian / Ubuntu
@@ -276,7 +272,7 @@ Within a few seconds cert-manager notices the annotation, sees that the listener
 
 Two things worth knowing here, both straight from my verification run:
 
-- **The leaf certificate comes out RSA-2048 with a 90-day lifetime, even though the root is ECDSA.** The issuer doesn't pass its own key type down. If you want the leaf to match, annotate the Gateway with `cert-manager.io/private-key-algorithm: ECDSA` (and `cert-manager.io/private-key-size: 256`). The cert-manager annotation reference lists everything the shim accepts this way. Either setting renews automatically — 90 days sounds short until you remember nobody has to touch it.
+- **The leaf certificate comes out RSA-2048 with a 90-day lifetime, even though the root is ECDSA.** The issuer doesn't pass its own key type down. If you want the leaf to match, annotate the Gateway with `cert-manager.io/private-key-algorithm: ECDSA` (and `cert-manager.io/private-key-size: 256`). The cert-manager annotation reference lists everything the shim accepts this way. Either setting renews automatically. 90 days sounds short until you remember nobody has to touch it.
 - **On kind, `kubectl get gateway` will show an empty ADDRESS and `Programmed: False` with reason `AddressNotAssigned`.** That's expected, not broken: kind has no LoadBalancer to hand the proxy a real address. The certificate still gets issued, and the port-forward below works fine.
 
 Now to reach it. On kind, the simplest way from your laptop is a port-forward to the proxy Envoy Gateway created for our Gateway:
@@ -292,7 +288,7 @@ Leave that running, and in another terminal:
 curl --cacert lab-root-ca.crt https://app.lab.localhost:8443/
 ```
 
-Once the CA is in your keychain you can even drop `--cacert` — your system trust does the job, which is the whole point of Part I.
+Once the CA is in your keychain you can even drop `--cacert`: your system trust does the job, which is the whole point of Part I.
 
 Or just browse to https://app.lab.localhost:8443. Look at the certificate and you'll see it was issued by "Lab Root CA". Chrome and Safari should be happy with it, and Firefox will be once it knows about the CA. Your local cluster is now serving HTTPS.
 
@@ -431,7 +427,7 @@ Copy the issuer, rename it `letsencrypt-prod`, and change the server to `https:/
 kubectl delete secret shop-tls
 ```
 
-Check again with `kubectl get certificate`, then load the site in a browser. A padlock with no warnings means you're done. Renewal is automatic: cert-manager renews well before expiry and swaps the secret, and Envoy picks up the new certificate without a restart. Certificate lifetimes are trending shorter across the industry — the CA/Browser Forum's current plan shrinks maximum TLS lifetimes to 47 days by 2029 — so automation like this stops being a convenience and becomes the only sane way to run TLS.
+Check again with `kubectl get certificate`, then load the site in a browser. A padlock with no warnings means you're done. Renewal is automatic: cert-manager renews well before expiry and swaps the secret, and Envoy picks up the new certificate without a restart. Certificate lifetimes are trending shorter across the industry: the CA/Browser Forum's current plan shrinks maximum TLS lifetimes to 47 days by 2029, so automation like this stops being a convenience and becomes the only sane way to run TLS.
 
 ## Don't Forget the Redirect
 
@@ -538,7 +534,7 @@ The usual suspects:
 
 And two laptop-cluster problems that aren't about certificates at all, both of which bit me during the verification run:
 
-- **Controllers crash-looping with `fsnotify watcher init: too many open files`.** The Docker VM has run out of inotify watcher instances — many controllers and watch agents exhaust the default 128. Bump it inside the VM: `docker run --rm --privileged busybox sysctl -w fs.inotify.max_user_instances=1024`, then delete the crash-looping pods so they restart clean. On Docker Desktop this setting lives on the Linux VM; on plain Docker the same sysctl applies to the host.
+- **Controllers crash-looping with `fsnotify watcher init: too many open files`.** The Docker VM has run out of inotify watcher instances: many controllers and watch agents exhaust the default 128. Bump it inside the VM: `docker run --rm --privileged busybox sysctl -w fs.inotify.max_user_instances=1024`, then delete the crash-looping pods so they restart clean. On Docker Desktop this setting lives on the Linux VM; on plain Docker the same sysctl applies to the host.
 - **The API server timing out (`etcdserver: request timed out`) or CRD applies failing.** On a laptop this is usually the Docker VM running out of headroom, often because a *second* kind cluster's control plane is quietly eating 2 GB while you're not using it. `docker stats` will tell you in one glance; stop what you don't need before blaming the tools.
 
 ## Where to Go From Here

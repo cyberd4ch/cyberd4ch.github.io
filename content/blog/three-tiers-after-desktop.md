@@ -5,9 +5,9 @@ category: technical
 ai-assist: 100
 tags: [docker, colima, compose]
 topics: [cloud-native]
-excerpt: "rescuing lab 01 from a decommissioned docker desktop install — dead plugin symlinks, a credential store pointing at a corpse — and the compose lab that went green at the end."
+excerpt: "rescuing lab 01 from a decommissioned docker desktop install (dead plugin symlinks, a credential store pointing at a corpse), and the compose lab that went green at the end."
 ---
-*part 1 of a series from my new `cloud_prep/` practice workspace — home lab, cloud
+*part 1 of a series from my new `cloud_prep/` practice workspace: home lab, cloud
 native, reverse engineering. this one is small on purpose: a three-tier compose
 lab, and what it cost to bring it up on a machine that had already divested from
 docker desktop.*
@@ -29,7 +29,7 @@ The whole definition of success was three endpoints:
 ```sh
 curl localhost:8080/health     # {"status":"ok"}
 curl localhost:8080/db-check   # {"db":"up","version":["PostgreSQL","16.15"]}
-curl localhost:8080/counter    # {"hits":1} then {"hits":2} — state survives
+curl localhost:8080/counter    # {"hits":1} then {"hits":2}: state survives
 ```
 
 ## choice 1: no desktop app, a daemon
@@ -56,7 +56,7 @@ uninstalled Docker Desktop**, not colima's fault.
 
 The brew CLI happily loaded plugins whenever its _plugins lookup_ found them,
 and months ago Docker Desktop had installed **16 symlinked CLI plugins** into
-`~/.docker/cli-plugins` — every single one pointing into
+`~/.docker/cli-plugins`: every single one pointing into
 `/Applications/Docker.app/...`, which no longer exists. The `docker-compose`
 plugin symlink was dead, so the `docker compose` subcommand stopped existing.
 Walking `ls -la ~/.docker/cli-plugins` was all the debugging this needed; the
@@ -99,7 +99,7 @@ That helper binary used to ship *inside* Docker.app. My
 
 Backup the file, delete the `credsStore` line, pulls work again. The only
 reason this stung less than it could have: it's the same class of mistake as
-ghost 1 — **the config outlived the software**. Any uninstall script that
+ghost 1: **the config outlived the software**. Any uninstall script that
 leaves your dotfiles claiming a component still exists is a time bomb for the
 next person who uses the machine. Future lab note for the `.zshrc`-style
 audits: after removing any desktop app, grep `~/.docker`, `~/Library`, and
@@ -109,7 +109,7 @@ anything in `PATH` for its name.
 
 With both fixed, the first build sat at a leisurely ~1.2 MB/s (from the pip
 log inside the build, no tools required to measure it) through the head base
-images — python 3.13-alpine alone took ~35 s of layer download. Slow mirror,
+images; python 3.13-alpine alone took ~35 s of layer download. Slow mirror,
 not a broken thing. The lesson I keep re-learning: distinguise *slow* from
 *stuck* before touching anything. 88 MB in the image store means moving.
 
@@ -126,13 +126,13 @@ Full build in about five minutes, then green across the board:
 And `docker compose ps` shows the design payoff: **only nginx** has a
 published port (`0.0.0.0:8080->80`). postgres and the api expose `5432/tcp`
 and `8000/tcp` to the compose network and to the compose network alone.
-Within the network, service *names* are DNS — `PGHOST=postgres` needs no IP,
+Within the network, service *names* are DNS: `PGHOST=postgres` needs no IP,
 nothing. Compose is quietly practicing for the k8s Services lesson.
 
 ## what I'd steal from the compose file
 
-* **`depends_on: condition: service_healthy`** plus a `pg_isready` healthcheck
-  — the api never starts against a database that isn't accepting connections.
+* **`depends_on: condition: service_healthy`** plus a `pg_isready` healthcheck:
+  the api never starts against a database that isn't accepting connections.
 * **one published port, the other two dark.** Edges are routable, everything
   behind them stays internal. (Exercise 3 in the lab README: `psql -h
   localhost` should *fail*.) That embarrassment is the learning.
@@ -142,7 +142,7 @@ nothing. Compose is quietly practicing for the k8s Services lesson.
 ## next in the series
 
 Lab 02 is the same three tiers, deployed onto a kind cluster: Deployment,
-PVC, Secret, Service — and the nginx tier becomes a NodePort so the mental
+PVC, Secret, Service, and the nginx tier becomes a NodePort so the mental
 model is unchanged. The point won't be "docker done"; it'll be noticing
-precisely which lab-01 reflexes port over and which one is wrong — the
+precisely which lab-01 reflexes port over and which one is wrong: the
 volumes, it turns out, are the fun part.

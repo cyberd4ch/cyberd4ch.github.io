@@ -5,7 +5,7 @@ category: technical
 ai-assist: 100
 tags: [docker, kubernetes, terraform, forgejo, tls, ci]
 topics: [cloud-native, infrastructure-as-code]
-excerpt: "the whole workspace arc in one post: three tiers in a compose file, the same tiers on kind, observability bolted on, terraform state moved to s3 — and a self-hosted forge in kubernetes publishing images from its own CI behind a TLS chain that actually verifies."
+excerpt: "the whole workspace arc in one post: three tiers in a compose file, the same tiers on kind, observability bolted on, terraform state moved to s3, and a self-hosted forge in kubernetes publishing images from its own CI behind a TLS chain that actually verifies."
 ---
 Learning cloud-native the only way that sticks: build the same thing four
 times, each time with one fewer excuse.
@@ -32,7 +32,7 @@ The second rule was **one artefact per idea**. Each lab re-implements the
 previous one with new vocabulary, so the only thing that changes is the concept
 under test.
 
-## Act 1 — Three tiers in one compose file
+## Act 1: Three tiers in one compose file
 
 Lab 01 is the classic: nginx in front, a Flask API behind it, Postgres under
 that.
@@ -41,13 +41,13 @@ that.
 browser :8080 → nginx (reverse proxy) → Flask API :8000 (app tier) → Postgres :5432 (data tier)
 ```
 
-Almost nothing here is cloud-native. That is the point — it is the baseline
+Almost nothing here is cloud-native. That is the point: it is the baseline
 every later lab gets compared against. What I learned was small and concrete:
 a compose network is a DNS zone (`api`, `postgres` are hostnames), a named
 volume is where data survives `down`, and `.env` is where secrets go when you
 have not yet admitted that secrets are a problem.
 
-## Act 2 — The same three tiers, with Kubernetes vocabulary
+## Act 2: The same three tiers, with Kubernetes vocabulary
 
 Lab 02 rewrites those three services as three Deployments on a `kind` cluster and
 maps the vocabulary one-to-one:
@@ -64,7 +64,7 @@ maps the vocabulary one-to-one:
 Two things did not map cleanly, and they are the two worth remembering.
 
 **Storage changed character.** A named volume is a thing Docker owns. A PVC is a
-*request* that something else fulfils — in kind, `local-path-provisioner`
+*request* that something else fulfils: in kind, `local-path-provisioner`
 creating a directory on the node. Delete the node and the data is a directory
 nobody remembers. That was the first time a Kubernetes abstraction felt less
 convenient than the thing it replaced, and understanding why is the whole lesson.
@@ -75,7 +75,7 @@ controller deciding what to do with the traffic. The port is no longer a propert
 of the app; it is a property of the cluster's creation, which will matter a lot
 later in this post.
 
-## Act 3 — Making it observable
+## Act 3: Making it observable
 
 Lab 03 bolts a second namespace (`observe`) onto the same cluster, and the app
 does not change at all. That is deliberate: observability is not a feature of
@@ -86,7 +86,7 @@ The curriculum here is about **where numbers come from**:
 - kube-state-metrics turns object state into metrics (how many pods *should*
   exist, how many restarts a container has had);
 - cAdvisor, exposed by the kubelet on `10250`, turns actual CPU and memory use
-  into metrics — scraped directly, no sidecar;
+  into metrics, scraped directly, no sidecar;
 - logs answer "what happened", time-series answer "what has been happening", and
   only the second one can alert you before a user notices.
 
@@ -95,7 +95,7 @@ programs. A namespace is a folder. An exporter is a Deployment that reads an API
 Alerts are files. Nothing is magic; it is a stack of small programs agreeing on
 conventions.
 
-## Act 4 — Declaring it instead of clicking it
+## Act 4: Declaring it instead of clicking it
 
 Lab 04 writes the same three tiers again, this time in HCL with the Terraform
 Docker provider.
@@ -104,18 +104,18 @@ The app is identical. What changes is **ownership**: plan before apply, state
 between runs, drift when someone deletes a container by hand, `import` when
 something exists that the config does not know about, one `destroy` that leaves
 nothing behind. I ran that cycle against the Docker provider because it exercises
-every mechanic a cloud provider does — a resource graph, a state file, variables
-and outputs, drift, import, destroy — without an expired AWS session standing
+every mechanic a cloud provider does (a resource graph, a state file, variables
+and outputs, drift, import, destroy) without an expired AWS session standing
 between me and the lesson.
 
 Later this moved to an S3 backend with a `use_lockfile` lock, which I proved by
 planting a `.tflock` file and watching `plan` refuse to run. That is the moment
 remote state stopped being a bullet point.
 
-## Act 5 — A forge in a container
+## Act 5: A forge in a container
 
 Somewhere around here I noticed the gap. Every lab had a README claiming CI, and
-none of them had CI. There was no pipeline anywhere — just me running commands
+none of them had CI. There was no pipeline anywhere: just me running commands
 and writing down the output.
 
 So: [Forgejo](https://forgejo.org/) plus its Actions runner on Docker Compose, on
@@ -125,7 +125,7 @@ that costs nothing and can see my code without a token going anywhere.
 Two details mattered:
 
 - the runner gets **the host Docker socket** (`docker_host: automount`), so job
-  containers are siblings, not children — the classic Docker-out-of-Docker trick;
+  containers are siblings, not children: the classic Docker-out-of-Docker trick;
 - Forgejo ships a **container registry** on the same host, so images have
   somewhere to live without a paid registry.
 
@@ -135,10 +135,10 @@ enough to build on every push and honest enough to fail in interesting ways.
 
 Its pipeline is deliberately boring: `make ci` (fmt, clippy, tests, release
 build) on every push, and on a `v*` tag: run `make ci` again, then build and push
-the image. Boring is the goal — a pipeline you cannot debug at 2 a.m. is a
+the image. Boring is the goal: a pipeline you cannot debug at 2 a.m. is a
 pipeline you will disable at 2 a.m.
 
-## Act 6 — Move the forge into the cluster
+## Act 6: Move the forge into the cluster
 
 The Compose forge worked, which meant it was time to break it. Re-implementing
 it as a Helm chart on `kind-lab02` is where most of the Kubernetes learning in
@@ -164,14 +164,14 @@ network per job* and then starts job containers on it, which means:
 
 Every one of those was a real failure with a misleading error message.
 
-## Act 7 — The certificate chain
+## Act 7: The certificate chain
 
 The forge was reachable, but only through `kubectl port-forward`, and anything
 served over plain HTTP with a hand-managed cert eventually teaches you the wrong
 lesson. So: **ingress-nginx** as the entry point (NodePorts 30080/30443),
 **cert-manager** as the signer.
 
-The obvious setup — a self-signed leaf — is the one that teaches nothing. Browser
+The obvious setup, a self-signed leaf, is the one that teaches nothing. Browser
 warnings get clicked through and you never actually verify anything. What worked
 was the three-layer pattern:
 
@@ -203,13 +203,13 @@ Two "hostnames" exist at once, and that is correct, not a bug: the browser uses
 jobs use `http://forgejo.forgejo.svc.cluster.local:3000`. Same forge. Different
 questions being asked of it.
 
-## Act 8 — A tag that lied about itself
+## Act 8: A tag that lied about itself
 
 The first release proved something embarrassing: `v0.1.1` shipped an image whose
 `--version` said `0.1.0`, because `Cargo.toml` had never been bumped. The tag was
 in the registry, the pipeline was green, and the binary disagreed with both.
 
-The fix is not clever — bump the version, re-tag, and then **prove it**:
+The fix is not clever: bump the version, re-tag, and then **prove it**:
 
 ```console
 $ docker run --rm forgejo-registry.forgejo.svc.cluster.local:5000/dev/truthguard:v0.2.0 --version
@@ -220,7 +220,7 @@ The lesson is the verification, not the bump. A green pipeline says the build
 succeeded; it says nothing about whether the artefact is the thing you think it
 is. Ask the artefact.
 
-## Act 9 — The night the DNS went away
+## Act 9: The night the DNS went away
 
 Then the interesting failure. Both pipelines failed within the same minute:
 
@@ -237,7 +237,7 @@ I re-ran both workflows at once, which was the next mistake. Two concurrent carg
 builds on a 2-vCPU kind node pushed it over: `kube-apiserver`, `ingress-nginx`,
 and `metrics-server` all went into `CrashLoopBackOff` on failed etcd keepalives.
 Inside the node, load average hit 93. Nothing was OOM-killed. The cluster had not
-crashed — it had been starved.
+crashed: it had been starved.
 
 Three lessons, in order of value:
 
@@ -260,7 +260,7 @@ curl --proto '=https' --tlsv1.2 -sSf \
 ```
 
 `--retry-all-errors` is the load-bearing flag: plain `--retry` covers HTTP errors
-and connection resets, but **not** "could not resolve host" — which was the exact
+and connection resets, but **not** "could not resolve host", which was the exact
 failure. Outside that, attempts back off 5s → 10s → 20s → 40s → 60s, which covers
 a couple of minutes of outage, and `RUSTUP_MAX_RETRIES` does the same for the
 toolchain download that happens afterwards. `RUSTUP_INIT_URL` exists so the
@@ -275,13 +275,13 @@ rustup install failed after 1 attempts; giving up
 # exit 1
 ```
 
-## Act 10 — A port that stays open
+## Act 10: A port that stays open
 
 The last rough edge was the one I had been living with: the TLS URL only worked
 while a `kubectl port-forward` process was alive. Every doc had to open with
 "start the forward first", which is not documentation, it is a ritual.
 
-The obvious fix — publish another kind port — does not exist. `extraPortMappings`
+The obvious fix, publish another kind port, does not exist. `extraPortMappings`
 is fixed when the cluster is created, and Docker cannot add a port mapping to a
 running container. Gaining one port would mean recreating the cluster, taking the
 forge's PVC, its certificates, and the runner registration with it.
@@ -295,7 +295,7 @@ own.
 The trap that cost an hour: **`tcp4:` matters**. The node's name resolves to both
 an IPv4 address and a kind-internal IPv6 address, and the kube-proxy NodePort
 binds IPv4 only. Left to pick, `socat` accepts the connection and closes it
-mid-handshake — which looks exactly like a broken certificate, not a routing
+mid-handshake, which looks exactly like a broken certificate, not a routing
 problem:
 
 ```
@@ -352,7 +352,7 @@ actually arrived:
 
 Honestly, almost nothing: the compute is a laptop, the forge is self-hosted, the
 registry is in the cluster, and the CA is a secret in `cert-manager`. The bill is
-time, and most of it went to three categories — networking paths (who can resolve
+time, and most of it went to three categories: networking paths (who can resolve
 whom), privilege (which socket, which user), and capacity (2 vCPUs is exactly one
 build).
 
@@ -360,12 +360,12 @@ build).
 
 Being precise about the gaps is part of the exercise:
 
-- the cluster is **kind, not k3s** — a deliberate shortcut, named as a deviation
+- the cluster is **kind, not k3s**: a deliberate shortcut, named as a deviation
   in the roadmap;
 - the registry is **unauthenticated**;
 - the Compose forge still runs as the rollback, so there are two forges and one
   of them is going to rot;
-- no Argo CD, so the chart is applied by hand — the cluster is not yet reconciled
+- no Argo CD, so the chart is applied by hand; the cluster is not yet reconciled
   from Git;
 - no image scanning or signing.
 
@@ -374,8 +374,8 @@ Being precise about the gaps is part of the exercise:
 Retire the Compose stack (the runbook exists), then Argo CD, then Trivy and
 cosign, then a nightly CronJob that runs TruthGuard against a benchmark set with
 Prometheus and Grafana watching it. After that the practice changes from building
-a platform to *breaking* one on purpose — killing nodes, restoring from backup,
-upgrading without downtime — because a platform you have never failed is a
+a platform to *breaking* one on purpose (killing nodes, restoring from backup,
+upgrading without downtime) because a platform you have never failed is a
 platform you do not understand.
 
 The through-line from `docker-compose.yml` to a verified certificate chain is

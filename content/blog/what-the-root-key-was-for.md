@@ -5,12 +5,12 @@ category: technical
 ai-assist: 100
 tags: [aws, terraform, iam, s3]
 topics: [cloud-native, infrastructure-as-code]
-excerpt: "scoping AWS credentials to a lab user, then using them to move Terraform state off a laptop — including the IAM action name that does not exist."
+excerpt: "scoping AWS credentials to a lab user, then using them to move Terraform state off a laptop, including the IAM action name that does not exist."
 ---
 The lab README had a line I did not like: exercise 6 (remote state) was skipped
 because "the AWS session is expired". The account was being driven by the root
 user, which is the cloud equivalent of debugging production as `sudo` on the
-host — it works, and it teaches you nothing about permissions.
+host. It works, and it teaches you nothing about permissions.
 
 Root also turned out to have **no access keys at all**. The default profile was a
 `login` session, a temporary credential derived from a console login. So the
@@ -39,7 +39,7 @@ allows S3 only on `arn:aws:s3:::ftc-labs-*` and `…/ftc-labs-*/*`:
 
 The interesting part is not the list, it is the prefix. A policy scoped to a
 naming convention means the credential cannot touch anything that was not
-created for the lab — not another bucket, not somebody's production data, not
+created for the lab: not another bucket, not somebody's production data, not
 even by accident with a mistyped name.
 
 Proving it beats believing it:
@@ -59,7 +59,7 @@ failure path proves the blast radius.
 Credentials live in `~/.aws/credentials` under a profile, mode 600, written by
 `aws configure set` so the secret never appears in a terminal buffer, a chat
 log, or a git diff. The default profile stays untouched, because it may be
-needed for console-only tasks — root is for account-level work, not for `aws s3`.
+needed for console-only tasks: root is for account-level work, not for `aws s3`.
 
 ## The action name that does not exist
 
@@ -73,12 +73,12 @@ An error occurred (AccessDenied) when calling the PutBucketEncryption operation:
 The call was `put-bucket-encryption`; the IAM action it checks is
 `s3:PutEncryptionConfiguration`, not `s3:PutBucketEncryption`. The same trap
 sits on lifecycle (`s3:PutLifecycleConfiguration`) and public-access-block
-(`s3:PutBucketPublicAccessBlock` — that one *does* carry the `Bucket`). The
+(`s3:PutBucketPublicAccessBlock`, that one *does* carry the `Bucket`). The
 error message is the documentation: read the action it names, not the name of
 the CLI call.
 
 There is also a satisfying detail in the failure: the lab user could not update
-its own policy (`iam:CreatePolicyVersion` denied — correct), so the fix had to be
+its own policy (`iam:CreatePolicyVersion` denied, correct), so the fix had to be
 made as root. The permission boundary held even against the person fixing it.
 
 ## Then exercise 6: move the truth
@@ -119,7 +119,7 @@ Verification, because "it seemed to work" is not a state backend:
 
 | Check | Result |
 | ----- | ------ |
-| `init -migrate-state` then `plan` | `No changes` (exit 0) — the 8 resources came along |
+| `init -migrate-state` then `plan` | `No changes` (exit 0): the 8 resources came along |
 | `aws s3 ls s3://…/lab04/` | `terraform.tfstate`, 19,950 bytes |
 | `head-object` | `VersionId: gnPSQ3ZW…`, `ServerSideEncryption: AES256` |
 | planted `.tflock` | `plan` refused: `Error acquiring the state lock` |
@@ -139,9 +139,9 @@ SSE and the sensitive variable that ends up in state plaintext is encrypted at
 rest.
 
 The trade-off is real: the lab now needs `AWS_PROFILE=ftc-labs` for every
-Terraform command, and teardown order changed — `destroy` first, bucket second.
+Terraform command, and teardown order changed: `destroy` first, bucket second.
 Deleting the bucket first is the same lesson as exercise 3 with a worse view.
 
 What is left in the lab: exercise 7 (rewrite the same graph with
-`hashicorp/aws` — the credentials finally exist for it) and the stretch refactor
+`hashicorp/aws`, the credentials finally exist for it) and the stretch refactor
 into `modules/three-tier/`.

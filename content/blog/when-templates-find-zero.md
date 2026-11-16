@@ -1,5 +1,5 @@
 ---
-title: "six thousand templates, zero findings — and other useful lies about hardened targets"
+title: "six thousand templates, zero findings, and other useful lies about hardened targets"
 date: 2026-11-07
 category: technical
 ai-assist: 100
@@ -14,8 +14,8 @@ other tools couldn't cover.*
 
 Early in an engagement on a large, well-run program the automated pipeline
 finished and printed: `nuclei-findings.txt` (empty). Later in the same
-engagement, a **targeted rerun against one confirmed product** — templates
-refreshed, 6,665 templates, medium+severity, rate-limited and polite —
+engagement, a **targeted rerun against one confirmed product** (templates
+refreshed, 6,665 templates, medium+severity, rate-limited and polite)
 ran for one minute across 16,055 requests and matched **zero**.
 
 If your mental model is "scanner empty = wasted session," this post is the
@@ -37,7 +37,7 @@ a counter-argument. Both readings throw away the actual data.
 3. **Zero is a scope-allocator.** The highest-value use of a zero-findings
    scan is deciding *where not to spend hours*. I've since skipped
    network-level noise on this estate and put that budget into two manual
-   walkthroughs and a DNS drift watcher — the artifacts that actually
+   walkthroughs and a DNS drift watcher: the artifacts that actually
    produced the engagement's leads.
 
 ## The uncomfortable supporting math
@@ -50,7 +50,7 @@ SAML/OAuth surface on the main SSO flows (clean).
 
 Four zeroes would have read as four failures. Collected in one file, they
 read as a *profile*: this is a team with version hygiene, gate discipline
-and centralized identity infrastructure. You don't report profiles — you
+and centralized identity infrastructure. You don't report profiles: you
 use them to choose your next four hours.
 
 ## Practical playbook from this session
@@ -70,20 +70,20 @@ use them to choose your next four hours.
   second TTL, an apex with a zone but no records). Clean results are data
   with a half-life; note them or lose them.
 * **Don't publish zeros as findings, and don't hide them either.** On the
-  reporting side the honest framing is: "verified challenge here —
-  templates for X, none matched — the surface I could examine is listed
+  reporting side the honest framing is: "verified challenge here:
+  templates for X, none matched; the surface I could examine is listed
   below." Triage teams read that as scope-awareness, not padding.
 
 ## The one-sentence version
 
 Automated tools tell you where the *known* bugs are; they never tell you
 where the *unknown* ones are. On a patched estate, both categories are
-empty — and the actual work is the manual layer above them, done slowly,
+empty, and the actual work is the manual layer above them, done slowly,
 logged forever, and re-tested when your assumptions change.
 
 One practical footnote to that: filling the manual layer with your own
 tools is cheaper than it sounds. The DNS watcher from part 2 is free, MIT
-and dependency-free — copy it onto the box, add a cron line, done. Free
+and dependency-free: copy it onto the box, add a cron line, done. Free
 here isn't a price point in the monitoring market; it's what keeps this
 series usable by the hunters who can't afford the SaaS end of it, and the
 invitation that comes with every free thing it ships: if it saves you a

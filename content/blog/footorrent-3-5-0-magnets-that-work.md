@@ -5,9 +5,9 @@ category: technical
 ai-assist: 100
 tags: [rust, bittorrent, debugging]
 topics: [development]
-excerpt: "footorrent 3.5.0 — metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix."
+excerpt: "footorrent 3.5.0: metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix."
 ---
-*footorrent 3.5.0 — metadata before disk, a bep 10 id read from the wrong mailbox,
+*footorrent 3.5.0: metadata before disk, a bep 10 id read from the wrong mailbox,
 peers discarded at the start line, and the 917 KB in the first minute that proved the fix.*
 
 A magnet link is four lines of text that promises a file you cannot see yet. For a long
@@ -44,7 +44,7 @@ BEP 10 extension bit so peers actually answer with theirs.
 ## the peers we found, thrown away
 
 The worst one lived on the boundary between resolving and downloading. Resolving a magnet
-discovered 211 peers — and then `/api/start` dropped them and re-announced to the magnet's
+discovered 211 peers, and then `/api/start` dropped them and re-announced to the magnet's
 own tracker list. When that list was dead, the job sat at zero peers and zero bytes
 forever. The peers from resolve now go straight into the session that starts the download.
 
@@ -54,7 +54,7 @@ Old magnets carry tracker lists that rot: one returns 403, one is a UDP host tha
 answers, one is an I2P name that will not resolve. Asking them in sequence let the first
 failure eat the whole budget, so later trackers never got a turn.
 
-- announces go out in parallel — 8 s each, 20 s overall
+- announces go out in parallel: 8 s each, 20 s overall
 - if the whole list yields nothing, well-known public trackers are tried before the DHT
 - the DHT gets a second hunt when its first answer is thin, and metadata exchanges run in
   parallel batches of eight in shuffled order
@@ -72,8 +72,8 @@ ftc gui                   # the macOS window, same binary
 
 ## what it measured
 
-A Sintel magnet carrying a deliberately dead announce list — 403, two silent UDP trackers,
-one unresolvable I2P host — resolved in 17–42 s and reported:
+A Sintel magnet carrying a deliberately dead announce list (403, two silent UDP trackers,
+one unresolvable I2P host) resolved in 17–42 s and reported:
 
 - 129,302,391 bytes
 - 987 pieces, 11 files
@@ -85,7 +85,7 @@ earlier build, on the same magnet and network, wrote nothing at all.
 ## what it does not fix
 
 A dead swarm is still dead. If every peer in the DHT and every tracker refuses the
-connection, the client cannot invent a source — it can only say so. That is the point of
+connection, the client cannot invent a source; it can only say so. That is the point of
 the new error: `tried 27 of 27 peer(s): connection refused` means the swarm is gone, not
 that the client is confused.
 

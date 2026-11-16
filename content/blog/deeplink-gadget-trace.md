@@ -5,10 +5,10 @@ category: technical
 ai-assist: 100
 tags: [xss, csp, deeplink, meli]
 topics: [bug-bounty]
-excerpt: "The deeplink gadget in Mercado Libre's home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce'd script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously — but a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution."
+excerpt: "The deeplink gadget in Mercado Libre's home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce'd script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously. But a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution."
 ---
 *Field notes from an authorized bug-bounty engagement. No user data was
-touched, no mass scanning was run, and nothing here is a submitted finding — it
+touched, no mass scanning was run, and nothing here is a submitted finding: it
 is a trace, with the parts that worked and the parts that hit a wall.*
 
 ## The pattern
@@ -27,7 +27,7 @@ D = ({ deeplink: e, redirectUrl: t = null }) => {
 
 Both `e` and `t` are interpolated **raw**, inside **single quotes**, inside a
 **nonce'd** inline `<script>`. That is the interesting part. A `'` in either
-value does not need to break the CSP — the script was already trusted and
+value does not need to break the CSP: the script was already trusted and
 already carries the page nonce. A quote only changes the JavaScript, not the
 browser's trust decision. If the value is server-controlled or attacker-seeded,
 that is a nonce-laundering XSS primitive: the CSP is intact and irrelevant at
@@ -55,7 +55,7 @@ to meet in a live, authenticated document.
 Of ten downloaded bundles, three of four desktop home pages contained the
 deeplink wiring. The sink is not a one-off; it is shipped.
 
-## Correction: it mounts without an account — and the inputs are sanitised
+## Correction: it mounts without an account, and the inputs are sanitised
 
 My first read was that the component needed a signed-in home payload. That was
 wrong, and re-fetching the bundle settled it. The gate is `shouldRedirect` in
@@ -87,11 +87,11 @@ otherwise; it builds `redirectUrl` from the query but nulls it on a quote, keeps
 A quick cross-host check on a mobile UA: `www.mercadolibre.com.ar` behaves the
 same as `.co` (benign query reflected, `'` nulls `redirectUrl`).
 `www.mercadopago.com.ar` is a different application that never mounts this
-component — its only `deeplink` string is a static `adjust_deeplink` affiliate
+component: its only `deeplink` string is a static `adjust_deeplink` affiliate
 link. So the guard is consistent wherever the component ships.
 
 So the honest status is: **pattern confirmed in code, source confirmed
-server-side, mount confirmed for mobile — and every reachable input sanitised.
+server-side, mount confirmed for mobile, and every reachable input sanitised.
 Negative result.**
 
 ## What is and isn't a finding here
@@ -105,7 +105,7 @@ vulnerability and triage will say so:
   and a header complaint by itself pays nothing anywhere.
 - ❌ "The bundle contains a string concatenation." Also not a finding on its own.
 - ✅ "A server-controlled value reaches that concatenation and a single quote
-  executes in the origin under the page nonce." That is the bug — and it needs
+  executes in the origin under the page nonce." That is the bug, and it needs
   the authenticated document to prove.
 
 The honest state is a lead with a confirmed sink and a confirmed source, and a
@@ -117,12 +117,12 @@ reproduction gap that is purely access, not technique.
    less-validated source than the query string.
 2. A second-order stored field that populates `openInApp` for a signed-in seller
    (this is where the dead test account actually mattered).
-3. An encoding trick that survives the `'` guard yet terminates a JS string —
-   none is known; `\u2028`/`\u2029` do not terminate string literals in modern JS.
+3. An encoding trick that survives the `'` guard yet terminates a JS string.
+   None is known; `\u2028`/`\u2029` do not terminate string literals in modern JS.
 
 Absent one of those, the right outcome is to write down the negative: the sink
 is real, the mount is real, the sanitiser is real, and there is no execution.
-That is a defensible result — and much better than filing a "suspicious
+That is a defensible result, and much better than filing a "suspicious
 template" report that triage closes as N/A.
 
 ## A second nonce-copy primitive (for completeness)
@@ -144,7 +144,7 @@ function w(e) {
 `window.viewability.setTag()` uses it: it parses a `pixel_tag` HTML string and
 clones its `<script>` children into the page **with the document nonce**, so an
 inline script in a `pixel_tag` would run. On paper that is the Basecamp-Turbo
-shape again — a trusted script handing its nonce to attacker-influenced markup.
+shape again: a trusted script handing its nonce to attacker-influenced markup.
 
 It does not lead anywhere from the outside, though:
 

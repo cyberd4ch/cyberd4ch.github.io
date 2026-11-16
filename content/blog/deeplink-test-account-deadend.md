@@ -14,7 +14,7 @@ longer exists.*
 
 > **Update (2026-11-10):** a later re-fetch showed the gadget mounts for an
 > anonymous **mobile** `User-Agent`, so the account was not the blocker for the
-> core trace after all — and the server turned out to sanitise both inputs
+> core trace after all, and the server turned out to sanitise both inputs
 > anyway (a negative result). The account blocker still applies to the seller /
 > second-order path. The lesson below stands; the scope of "what needed an
 > account" narrowed.
@@ -22,8 +22,8 @@ longer exists.*
 ## The wall
 
 The program hands out challenge accounts for its account-takeover target. The
-one I was working with — call it `CHALLENGE_ATO_USER_2`, user id `1252539217`,
-site `MCO` — had been the anchor for every planned step. Then it stopped
+one I was working with (call it `CHALLENGE_ATO_USER_2`, user id `1252539217`,
+site `MCO`) had been the anchor for every planned step. Then it stopped
 resolving:
 
 ```
@@ -32,13 +32,13 @@ GET /login/identification/not-found
 ```
 
 Not a lockout, not a 2FA prompt. The identification step itself no longer
-recognizes the user. Expired, removed, or re-provisioned — from the outside
+recognizes the user. Expired, removed, or re-provisioned: from the outside
 those are indistinguishable, and none of them is something a researcher can fix.
 
 For the deeplink trace this mattered, because the component is mounted from the
 `openInApp` render context, and the routes I had mapped at the time all led
 through a signed-in home payload. (The mobile `User-Agent` path was found later
-and mounts anonymously — it just turns out the inputs are sanitised.) At the
+and mounts anonymously; it just turns out the inputs are sanitised.) At the
 time, the reproduction gap read as "no working session," and moving past it by
 improvising an account would have been a policy violation.
 
@@ -81,7 +81,7 @@ the limit.
 ## What the dead end actually cost
 
 Almost nothing in technique, and everything in timing. The trace didn't get
-better or worse when the account died — it just stopped being provable. That is
+better or worse when the account died; it just stopped being provable. That is
 a useful thing to be able to say plainly:
 
 > The vulnerability class is confirmed in code and in the server payload. The

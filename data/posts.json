@@ -7,7 +7,7 @@
     "dateISO": "2026-11-15",
     "category": "technical",
     "url": "/blog/adventures-in-encryption-2026/",
-    "excerpt": "the 2021 'adventures in encryption' guide rebuilt on gateway api — every command in part i re-run end to end on kind before publishing: a CA minted in-cluster, keychain trust, port-forwarded HTTPS, and the two findings the docs leave out.",
+    "excerpt": "the 2021 'adventures in encryption' guide rebuilt on gateway api: every command in part i re-run end to end on kind before publishing, with a CA minted in-cluster, keychain trust, port-forwarded HTTPS, and the two findings the docs leave out.",
     "aiAssist": 100,
     "tags": [
       "kubernetes",
@@ -69,7 +69,7 @@
   {
     "id": "triage-without-a-reproduce-step",
     "slug": "triage-without-a-reproduce-step",
-    "title": "triage without a reproduce step — what's left for an outside contributor",
+    "title": "triage without a reproduce step: what's left for an outside contributor",
     "date": "Nov 13, 2026",
     "dateISO": "2026-11-13",
     "category": "technical",
@@ -94,7 +94,7 @@
     "dateISO": "2026-11-12",
     "category": "technical",
     "url": "/blog/from-compose-to-certificates/",
-    "excerpt": "the whole workspace arc in one post: three tiers in a compose file, the same tiers on kind, observability bolted on, terraform state moved to s3 — and a self-hosted forge in kubernetes publishing images from its own CI behind a TLS chain that actually verifies.",
+    "excerpt": "the whole workspace arc in one post: three tiers in a compose file, the same tiers on kind, observability bolted on, terraform state moved to s3, and a self-hosted forge in kubernetes publishing images from its own CI behind a TLS chain that actually verifies.",
     "aiAssist": 100,
     "tags": [
       "docker",
@@ -108,12 +108,12 @@
       "cloud-native",
       "infrastructure-as-code"
     ],
-    "readMinutes": 13
+    "readMinutes": 12
   },
   {
     "id": "bounty-program-landscape",
     "slug": "bounty-program-landscape",
-    "title": "where the deeplink work can make money — and the reporting trap that kills it",
+    "title": "where the deeplink work can make money, and the reporting trap that kills it",
     "date": "Nov 10, 2026",
     "dateISO": "2026-11-10",
     "category": "general",
@@ -138,7 +138,7 @@
     "dateISO": "2026-11-10",
     "category": "technical",
     "url": "/blog/deeplink-gadget-trace/",
-    "excerpt": "The deeplink gadget in Mercado Libre's home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce'd script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously — but a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution.",
+    "excerpt": "The deeplink gadget in Mercado Libre's home component D interpolates server-rendered deeplink and redirectUrl values into single-quoted JavaScript inside a nonce'd script. Verified against the saved bundle: a mobile User-Agent flips openInApp.shouldRedirect and mounts it anonymously. But a quote nulls redirectUrl, non-UUID d2id nulls deeplink, and </script> is edge-blocked. Sink confirmed, sanitiser confirmed, no execution.",
     "aiAssist": 100,
     "tags": [
       "xss",
@@ -179,7 +179,7 @@
     "dateISO": "2026-11-09",
     "category": "technical",
     "url": "/blog/footorrent-3-5-0-magnets-that-work/",
-    "excerpt": "footorrent 3.5.0 — metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix.",
+    "excerpt": "footorrent 3.5.0: metadata before disk, a bep 10 reply read from the wrong mailbox, peers discarded at the start line, and the measured numbers after the fix.",
     "aiAssist": 100,
     "tags": [
       "rust",
@@ -220,7 +220,7 @@
     "dateISO": "2026-11-08",
     "category": "technical",
     "url": "/blog/from-form-to-download-manager/",
-    "excerpt": "rebuilding the ftc page as a download manager — one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening.",
+    "excerpt": "rebuilding the ftc page as a download manager: one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening.",
     "aiAssist": 100,
     "tags": [
       "rust",
@@ -240,7 +240,7 @@
     "dateISO": "2026-11-08",
     "category": "technical",
     "url": "/blog/one-binary-two-interfaces/",
-    "excerpt": "a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window — and the favicon bug that explained why 204 is not an icon.",
+    "excerpt": "a hand-written http server, html compiled into the binary, cancel and pause moved into the engine, an 87 KB swift window, and the favicon bug that explained why 204 is not an icon.",
     "aiAssist": 100,
     "tags": [
       "rust",
@@ -260,7 +260,7 @@
     "dateISO": "2026-11-08",
     "category": "technical",
     "url": "/blog/three-tiers-become-a-module/",
-    "excerpt": "lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083 — including the readiness wait that caught a green apply serving nothing.",
+    "excerpt": "lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083, including the readiness wait that caught a green apply serving nothing.",
     "aiAssist": 100,
     "tags": [
       "terraform",
@@ -280,7 +280,7 @@
     "dateISO": "2026-11-08",
     "category": "technical",
     "url": "/blog/what-the-root-key-was-for/",
-    "excerpt": "scoping AWS credentials to a lab user, then using them to move Terraform state off a laptop — including the IAM action name that does not exist.",
+    "excerpt": "scoping AWS credentials to a lab user, then using them to move Terraform state off a laptop, including the IAM action name that does not exist.",
     "aiAssist": 100,
     "tags": [
       "aws",
@@ -297,7 +297,7 @@
   {
     "id": "announcing-dnswatch-v1-1-0",
     "slug": "announcing-dnswatch-v1-1-0",
-    "title": "announcing dns-watch v1.1.0: your attack surface's DNS, diffed — for free",
+    "title": "announcing dns-watch v1.1.0: diff your attack surface's DNS for free",
     "date": "Nov 7, 2026",
     "dateISO": "2026-11-07",
     "category": "technical",
@@ -343,7 +343,7 @@
     "dateISO": "2026-11-07",
     "category": "technical",
     "url": "/blog/one-curl-per-host/",
-    "excerpt": "nineteen hosts, one administrative suffix, one HTTPS request each — how redirect headers turned a \"nothing here\" estate into a map.",
+    "excerpt": "nineteen hosts, one administrative suffix, one HTTPS request each: how redirect headers turned a \"nothing here\" estate into a map.",
     "aiAssist": 100,
     "tags": [
       "recon",
@@ -363,7 +363,7 @@
     "dateISO": "2026-11-07",
     "category": "technical",
     "url": "/blog/three-tiers-after-desktop/",
-    "excerpt": "rescuing lab 01 from a decommissioned docker desktop install — dead plugin symlinks, a credential store pointing at a corpse — and the compose lab that went green at the end.",
+    "excerpt": "rescuing lab 01 from a decommissioned docker desktop install (dead plugin symlinks, a credential store pointing at a corpse), and the compose lab that went green at the end.",
     "aiAssist": 100,
     "tags": [
       "docker",
@@ -398,7 +398,7 @@
   {
     "id": "when-templates-find-zero",
     "slug": "when-templates-find-zero",
-    "title": "six thousand templates, zero findings — and other useful lies about hardened targets",
+    "title": "six thousand templates, zero findings, and other useful lies about hardened targets",
     "date": "Nov 7, 2026",
     "dateISO": "2026-11-07",
     "category": "technical",

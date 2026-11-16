@@ -12,7 +12,7 @@ excerpt: "a packaging release: reproducible tarball, sha256-pinned homebrew tap 
 
 **dns-watch** is one shellfile that diffs DNS for a bug-bounty scope: one cron
 line, one readable log, no dashboard, no API keys. v1.1.1 adds no new DNS
-behavior — the diff engine, the takeover tagging and the signature table are
+behavior: the diff engine, the takeover tagging and the signature table are
 byte-identical to v1.1.0. What changed is how the tool reaches you, which for a
 dependency-free script is the part that actually decides whether anyone runs
 it.
@@ -30,7 +30,7 @@ make release-artifact          # -> /tmp/dnswatch-1.1.1.tar.gz + sha256
 ```
 
 That check is scenario 8 of the offline suite, so it runs in the same `make
-test` as the DNS logic — packaging can't rot quietly between releases.
+test` as the DNS logic; packaging can't rot quietly between releases.
 
 **The tap bumps itself.** Tagging `vX.Y.Z` now triggers a workflow that builds
 the artifact, computes the pin, and commits the formula update to
@@ -59,22 +59,22 @@ in CI.
 A DNS watcher is only useful if it is running on the box you actually hunt
 from, on a cron line you wrote months ago and forgot about. Tools that need a
 build step, a virtualenv or a "just clone it and remember the path" incantation
-get abandoned — and a watcher that got abandoned is worse than no watcher,
+get abandoned; a watcher that got abandoned is worse than no watcher,
 because it is a false all-clear on the exact interval where a dangling CNAME
 matters.
 
 So the release criteria were about trust, not features:
 
-- **the pin is the point** — a Homebrew formula whose sha256 anyone can
+- **the pin is the point**: a Homebrew formula whose sha256 anyone can
   reproduce is a claim you can check, not a claim you have to believe;
-- **the signature table ships with the binary** — `-T` pointing at `share/`
+- **the signature table ships with the binary**: `-T` pointing at `share/`
   means the takeover drill works on a fresh laptop with no repo;
-- **no new code paths** — v1.1.1 changes nothing that reads DNS. Upgrading from
+- **no new code paths**: v1.1.1 changes nothing that reads DNS. Upgrading from
   v1.1.0 cannot change a verdict, only the install.
 
 ## The honest footnote
 
-Reproducibility here means *the recipe is deterministic* — same script, same
+Reproducibility here means *the recipe is deterministic*: same script, same
 input, same bytes, twice. It is not a hermetic build attestation: there is no
 compiler and no toolchain, so there is nothing to rebuild from source beyond
 `tar` itself. The check is cheap to run and it caught real drift while this

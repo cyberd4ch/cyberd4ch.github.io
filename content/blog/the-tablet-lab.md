@@ -8,13 +8,11 @@ topics: [bug-bounty]
 excerpt: "root first, then everything else: a double-read BROM backup script, the magisk cmdline flag k3s needs, a device-owner agent with documented denials, and what 2 GB of RAM decides."
 ---
 
-# The tablet lab: root first, then everything else
-
 A 2 GB MediaTek tablet is not a good computer. That is exactly why it is a good
 lab: every abstraction I rely on has to be paid for in RAM, in 32-bit binaries,
 or in a kernel config that Android switched off years ago.
 
-This is the platform half of the Android work in my lab workspace — the same
+This is the platform half of the Android work in my lab workspace: the same
 `MediaTek NoteBook10Pro` from the attack-simulation write-up, now with the
 bootloader in scope. It is my device, it stays on my desk, and the one rule is
 the one that matters: **back up before you write**.
@@ -41,7 +39,7 @@ current. Software cannot rewire an antenna.
 
 The MT6737M is vulnerable to the kamakiri BROM exploit, which `mtkclient`
 implements. Generic MTK builds usually ship with `fastboot oem unlock` disabled,
-so BROM is not a shortcut — it is the only door. The same door reads the entire
+so BROM is not a shortcut: it is the only door. The same door reads the entire
 eMMC before Android is involved.
 
 The trap is trusting a single read. A flaky cable produces a file of the right
@@ -57,7 +55,7 @@ $ ./brom-backup.sh ~/tablet-backup-$(date +%F)
 ```
 
 The tablet was not attached when I wrote the script, so I tested the logic with
-a fake `mtk` that emits deterministic partitions — once clean, once with one
+a fake `mtk` that emits deterministic partitions: once clean, once with one
 partition corrupted. The failure path is the one that matters:
 
 ```console
@@ -81,7 +79,7 @@ Two more rules from the runbook, both learned the hard way by other people:
 ## Root, and the one cmdline flag that matters
 
 The root path is fastboot if the vendor allows it, and BROM if not. Patch `boot.img`
-with Magisk, then — before flashing — repack it and append one argument:
+with Magisk, then, before flashing, repack it and append one argument:
 
 ```sh
 magiskboot unpack magisk_patched.img
@@ -93,7 +91,7 @@ Android 4.4 kernels boot with the memory cgroup disabled and let
 `lowmemorykiller` do the job. kubelet needs the cgroup. There is no userspace fix:
 if the kernel was built without `CONFIG_MEMCG`, the flag does nothing and the
 Kubernetes track is over before it starts. That is why the verification order is
-`su -c id`, `/proc/cgroups`, `mount | grep cgroup`, `getenforce` — in that order,
+`su -c id`, `/proc/cgroups`, `mount | grep cgroup`, `getenforce`: in that order,
 because each one can invalidate the next.
 
 Recovery is a table, not a hope: no BROM enumeration means the preloader is gone;
@@ -105,11 +103,11 @@ same stock image. `read1/` gets `chmod -R a-w` after verification.
 
 The plan compares three levels of control:
 
-1. **adb over TCP** — the honest baseline. With an authorized key, "C2" is just
+1. **adb over TCP**: the honest baseline. With an authorized key, "C2" is just
    adb: input events, screen capture, disabling packages for user 0. Wireless
    state, camera and the lock screen are out of reach.
-2. **Meterpreter** — root, noisiest, quickest way to build an action matrix.
-3. **Device Owner** — a supported Android management API, no root. This is the
+2. **Meterpreter**: root, noisiest, quickest way to build an action matrix.
+3. **Device Owner**: a supported Android management API, no root. This is the
    one worth measuring, because it is not an exploit and it still does the things
    people assume need root.
 
@@ -128,23 +126,23 @@ Verification, in the order it happened:
 - then the tablet showed up on USB, and the debuggable test build actually ran:
   `ping` → `pong`, `camera_off`/`camera_on` succeeded as an **active admin**, and
   `state` returned a live policy document. `screenshot_off`, `statusbar_off` and
-  the user restrictions came back `denied: does not own the profile` — which is
+  the user restrictions came back `denied: does not own the profile`, which is
   exactly the boundary this tier is supposed to demonstrate.
 - running it found a third bug that compiling could not: `isStatusBarDisabled()`
   is missing from the **API 27 framework** (it exists in the newer stub), so the
   first `state` threw `NoSuchMethodError` and killed the poll thread. `state` now
   calls it reflectively and reports `unknown (API < 28)`, and the command handler
   catches `Throwable` so no single command can kill the agent.
-- the APK was assembled without Gradle — `aapt2`, `javac`, `d8`, `zipalign`,
-  `apksigner` — and verified: `package: lab.c2`, minSdk 24, targetSdk 27,
+- the APK was assembled without Gradle (`aapt2`, `javac`, `d8`, `zipalign`,
+  `apksigner`) and verified: `package: lab.c2`, minSdk 24, targetSdk 27,
   signature valid. `build-apk.sh` reproduces it.
 - the server was exercised end to end: 401 on a bad token, empty `/poll` →
   `{"cmd":"none"}`, a queued `camera_off` returned on the next poll, a result
   logged to JSONL, `/status` reflecting state.
 
 What is **not** verified: the Device Owner step itself. `dpm set-device-owner`
-refused outright — `Not allowed to set the device owner because there are already
-some accounts on the device` — so every owner-only command (`screenshot_off`,
+refused outright (`Not allowed to set the device owner because there are already
+some accounts on the device`), so every owner-only command (`screenshot_off`,
 `keyguard_off`, restrictions, `kill`) is still untested, as are `lock` and
 `reboot`. The service is also `exported="false"`, so adb cannot start it; the
 hardware run needed a debuggable build and `run-as lab.c2 am
@@ -165,7 +163,7 @@ LMKD does not know kubelet's eviction thresholds, so it will kill k3s first and
 call it a low-memory event.
 
 Then the blockers, in order: the memory cgroup (see above), a 32-bit userspace
-(k3s publishes armhf; every image needs a `linux/arm/v7` manifest), and no CNI —
+(k3s publishes armhf; every image needs a `linux/arm/v7` manifest), and no CNI:
 netd owns iptables, so the working shape is `--flannel-backend=none` plus pods
 with `hostNetwork: true`. `--disable traefik --disable servicelb
 --disable metrics-server --disable local-storage` keeps the footprint down.
@@ -182,8 +180,8 @@ node; the control plane just lives where the RAM is.
 Collecting is easy; proving what changed is the lab. `labs/forensics` now has two
 scripts:
 
-- `acquire.sh` takes a logical, non-root snapshot over adb — props, packages,
-  accounts, Wi-Fi/BT, usage stats, logcat, `/sdcard`, bugreport — and hashes
+- `acquire.sh` takes a logical, non-root snapshot over adb (props, packages,
+  accounts, Wi-Fi/BT, usage stats, logcat, `/sdcard`, bugreport) and hashes
   **every** collected file, including the pulled storage tree, into `SHA256SUMS`.
 - `baseline-diff.sh` verifies both snapshots against their manifests before
   comparing anything, then reports added/removed/changed files and writes unified
@@ -209,7 +207,7 @@ the rooted `dd` from a booted, unlocked device; pair the two.
 
 ## The other half: reading the binaries
 
-The platform work kept producing stripped aarch64 binaries — so the
+The platform work kept producing stripped aarch64 binaries, so the
 reverse-engineering lab became the place to get good at reading them. Five
 reproducible notes, all `r2` 6.0.5, each built from source, each with the exact
 commands that produce the finding:
@@ -218,7 +216,7 @@ commands that produce the finding:
 | --- | --- |
 | stripped branch crackme | recovering `main` without symbols |
 | xor-string | the secret was built on the stack and XOR'd with `0x5a`; `strings` misses it |
-| switch-tree | GCC 16.2 emitted a compare tree, not a jump table — the hypothesis was wrong |
+| switch-tree | GCC 16.2 emitted a compare tree, not a jump table: the hypothesis was wrong |
 | ptrace-guard | `PTRACE_TRACEME` + `cmn x0, 1`; patching `b.ne` at `0x808` flips a traced run to "running clean" |
 | checksum-key | `ubfiz`/`add` ×33 inverted by brute force; 68 valid keys, `afh` one of them |
 

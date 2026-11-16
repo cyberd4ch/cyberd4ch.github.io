@@ -11,13 +11,13 @@ excerpt: "five rebuilds, three false walls, and the two design decisions that ma
 [one-curl-per-host methodology](/blog/one-curl-per-host/); part 3 is the
 [zero-findings math](/blog/when-templates-find-zero/).*
 
-Repo: https://github.com/cyberd4ch/dns-watch (v1.1.0 — `dnswatch.sh`, MIT,
+Repo: https://github.com/cyberd4ch/dns-watch (v1.1.0: `dnswatch.sh`, MIT,
 offline test suite, CI, pluggable takeover-signature table). The story
 below is the compressed debug trail that produced it.
 
 ## The problem
 
-Between bounty sessions — sometimes two weeks — the DNS posture of a target
+Between bounty sessions, sometimes two weeks, the DNS posture of a target
 estate is a live document nobody is reading:
 
 * a CNAME goes stale → subdomain-takeover candidates;
@@ -36,36 +36,36 @@ It was a five-version rebuild, and the failures were the interesting part.
 
 ## What broke
 
-### v1 — the system resolver inside the VM flapped
+### v1: the system resolver inside the VM flapped
 
 The Kali VM's NAT resolver (`10.0.2.3`, the DHCP default) intermittently
 **timed out** on two hosts mid-snapshot, writing them as empty. Two hours
 later a snapshot showed the same hosts at full length. First `CHANGES`
 block: **garbage**. The watcher had surfaced resolver noise, not drift.
 
-### v2 — no, it wasn't (just) timeouts
+### v2: no, it wasn't (just) timeouts
 
-Switched to public resolvers (`1.1.1.1`, then `8.8.8.8` on empty) — *still*
+Switched to public resolvers (`1.1.1.1`, then `8.8.8.8` on empty). It *still*
 generated a spurious `CHANGES`: same host, empty answer in one run, full
 answer in the next, with zero local changes. Root causes found:
 
-* multi-record answers arrive in **arbitrary order** per query — my snapshot
+* multi-record answers arrive in **arbitrary order** per query: my snapshot
   kept the raw order, so "IPs shuffled" outranked "nothing changed";
 * a `printf '%s\n' ""` idiom emitted a literal newline, so **empty answers
   tested non-empty** in the canary display.
 
 Fixes: sort every answer before storing (order is resolver noise), and treat
-a truly empty answer as empty — "none", not ";".
+a truly empty answer as empty: "none", not ";".
 
-### v3 — the over-engineered retry
+### v3: the over-engineered retry
 
 Added a third resolver (9.9.9.9) and three retry epochs per query. Result:
 runs took **five minutes and 40 seconds** because 9.9.9.9 was
-**black-holed by the NAT** — every NXDOMAIN-shaped query burned 12 dig
+**black-holed by the NAT**: every NXDOMAIN-shaped query burned 12 dig
 timeouts before falling through. Lesson: every "just add a fallback" needs
 a budget, or the fallback becomes the new failure mode.
 
-### v4 — the actual engine: TCP
+### v4: the actual engine is TCP
 
 The difference between "flaky" DNS and "reliable" DNS was transport. A
 single continuous TCP query (`dig +tcp`) returned the same answer on every
@@ -73,7 +73,7 @@ consecutive run for the full estate. That one flag removed *all* of the
 flapping. UDP through the NAT was dropping packets under burst load; I was
 chasing infrastructure that dig had already solved for me.
 
-### v5 — trust, but verify: the health control
+### v5: trust, but verify (the health control)
 
 Even with TCP, one failure mode remained: what if a resolver outage
 *coincided* with real drift, or produced all-empty output that looked like a
@@ -116,23 +116,23 @@ twice in my own first pass.
 ## Free, on purpose
 
 The tool is MIT and it stays that way. The reason is not anti-SaaS
-posturing — it's who the tool is actually for. Solo hunters and small
+posturing: it's who the tool is actually for. Solo hunters and small
 volunteer-run orgs watch five to fifty domains on a bounty budget, and the
 existing monitoring market is priced for security teams wearing a corporate
 card. That split (SaaS monitoring above, one-shot CLI utilities below) is
-exactly where dnswatch sits: log-first, precise, and **free forever** — no
+exactly where dnswatch sits: log-first, precise, and **free forever**. No
 freemium tiers, no premium gates, no feature locked behind a signup.
 
 Concretely, that means:
 
 * **The OSS script is the product.** One file, one cron line. If you want
-  drift monitoring and you can run cron, you're done — the repo is the
+  drift monitoring and you can run cron, you're done. The repo is the
   install, not a funnel into a dashboard.
 * **First-timer-friendly contributions are the sustainability plan.** The
   repo's [CONTRIBUTING.md](https://github.com/cyberd4ch/dns-watch/blob/main/CONTRIBUTING.md)
   reserves good first spots for exactly this audience: extending the
   pluggable takeover-fingerprint signature table (match CNAME drift against
-  known provider fingerprints — kept deliberately conservative, because a
+  known provider fingerprints, kept deliberately conservative, because a
   wrong "takeover candidate!" flag is worse than a quiet one), and
   packaging so the tool is one install away on any machine.
 * **Money is optional and flat.** If dnswatch caught a stale CNAME for you,
@@ -140,12 +140,12 @@ Concretely, that means:
   cadence tier, no seat, no card.
 * **If a hosted instance ever exists, it's a free community service, not an
   upsell.** Sign-up-by-request, hard domain caps, running this same engine
-  unmodified — and if abuse or cost ever forced it to change character, the
+  unmodified. And if abuse or cost ever forced it to change character, the
   answer would be to shut it down and keep the script, never to monetize
   the cron. The script is the product; that boundary is the point of the
   whole free stance.
 
 The one sentence version, and I'd rather be judged against it later than
-quietly walk away from it: *git-diff for your attack surface's DNS — free
+quietly walk away from it: *git-diff for your attack surface's DNS, free
 forever, because the people who need it most are the ones who can least
 afford a SaaS subscription.*

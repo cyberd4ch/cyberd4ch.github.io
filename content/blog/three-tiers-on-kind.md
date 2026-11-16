@@ -9,7 +9,7 @@ excerpt: "re-homing the lab 01 stack onto kind: a KeyError crashloop, the secret
 ---
 *part 2 of the `cloud_prep/` lab log. part 1, [three tiers via colima and the
 docker desktop ghosts](/blog/three-tiers-after-desktop/), ended with a
-compose file going green. this one hands the same application to Kubernetes —
+compose file going green. this one hands the same application to Kubernetes,
 and learns that a crash loop is honest work, a secret is a bag of keys, and a
 same-tag rebuild is a performance by a very small liar.*
 
@@ -48,10 +48,10 @@ KeyError: 'PGUSER'
 ```
 
 The API password Secret keys were `POSTGRES_USER`, `POSTGRES_PASSWORD`,
-`POSTGRES_DB` (the postgres image's vocabulary — its entrypoint script makes
+`POSTGRES_DB` (the postgres image's vocabulary: its entrypoint script makes
 that contract) while the application itself reads libpq spellings:
 `PGUSER`, `PGPASSWORD`, `PGDATABASE`. In the compose lab, the API patched
-`PGUSER` out of the same .env — nobody noticed that the *two* naming systems
+`PGUSER` out of the same .env; nobody noticed that the *two* naming systems
 already coexisted. Kubernetes noticed, precisely, and gave us a crash loop.
 
 The fix is the k8s idiom worth stealing: one Secret, consumer-specific
@@ -74,12 +74,12 @@ env:
 
 A Secret is a bag of keys, not a magic env block. `envFrom` ignores the
 spelling your app reads. The lesson generalizes past k8s: whenever two
-components share a credential, check who names it what — the source of most
+components share a credential, check who names it what: the source of most
 "works in compose, fails in prod" stories.
 
 ## crashloop math, written large
 
-The pods did not stay red. Kubernetes *does* self-heal — restart on repeat,
+The pods did not stay red. Kubernetes *does* self-heal: restart on repeat,
 backoff widening until 5 minutes. Except: the rollout deadline I ran (180 s)
 expires earlier than the backoff schedule. So the orchestrator reports
 "deployment 'api' exceeded its progress deadline" about two hours before pods
@@ -90,7 +90,7 @@ up patience sooner than remediation.
 
 `init_schema()` used to exit the container whenever Postgres wasn't
 listening yet (fresh cluster runs provision the PVC and take a minute). The
-pod would exit, restart, exit again — a self-healing crash loop with the
+pod would exit, restart, exit again: a self-healing crash loop with the
 orchestration equivalent of a shrug. Made it patient instead:
 
 ```python
@@ -110,7 +110,7 @@ Now a fresh-cluster run waits politely rather than flexing restarts.
 ## the small roast: same tag, same template
 
 `kind load docker-image` applies the new image bytes, but the deployment
-never rolls it. Reason: a same-tag image needs no new pod template — for
+never rolls it. Reason: a same-tag image needs no new pod template; for
 k8s it is the *same* application by hash, so nothing to do regardless of the
 fact your code changed. The fix is a one-liner in the deploy script:
 
@@ -121,7 +121,7 @@ kubectl -n three-tiers rollout restart deploy/api
 ## the numbers finally said it
 
 After the shift everything answered the same three questions that compose
-answered — same answers:
+answered, same answers:
 
 ```
 {"status":"ok"}
@@ -131,8 +131,8 @@ answered — same answers:
 ```
 
 Exercise 3: `kubectl -n three-tiers scale deploy/api --replicas=4` watched by
-`kubectl -n three-tiers get endpoints api -w` — endpoint pairs tumbling into
-place (`0.13/.14` → `.16` → `.15 + 1 more`). Exercise 2 — delete the *pg
+`kubectl -n three-tiers get endpoints api -w`: endpoint pairs tumbling into
+place (`0.13/.14` → `.16` → `.15 + 1 more`). Exercise 2: delete the *pg
 pod*, not the cluster: `pod "pg-648795b-q4tt5" deleted`; counter still
 answers from its archival memory because the PVC out lives the reroots.
 
@@ -144,12 +144,12 @@ answers from its archival memory because the PVC out lives the reroots.
 * **PVC & pod independence**, this time in contradiction of compose: k8s's
   most useful property got explained the hard way (see exercise 2).
 * **Multiple name translations instead of one.** compose's one port map
-  traded for: host→node port→service→pod IP and ports, all three — each
+  traded for: host→node port→service→pod IP and ports, all three: each
   tunable, each fragile in its own way, each debuggable with `get endpoints`.
 
 ## next in the series
 
-The Rust rewrite of the client (`free-torrent-cli`) gains BEP 5 — DHT peer
-discovery — next session, so a *trackerless* magnet works end to end. After
+The Rust rewrite of the client (`free-torrent-cli`) gains BEP 5 (DHT peer
+discovery) next session, so a *trackerless* magnet works end to end. After
 that, lab 03 covers observability on this same cluster (the container log
 named the bug; the next lab will name it faster).

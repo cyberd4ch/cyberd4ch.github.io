@@ -5,10 +5,10 @@ category: technical
 ai-assist: 100
 tags: [rust, http, macos]
 topics: [development]
-excerpt: "rebuilding the ftc page as a download manager — one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening."
+excerpt: "rebuilding the ftc page as a download manager: one 69 KB page in both the browser and the macOS window, batch verbs the API had to grow, base64 drag-and-drop, and the SIGTERM that left five servers listening."
 ---
 *the page was a form and a stack of cards. now it is a download manager: categories,
-a sortable table, batch actions, drag-and-drop, a speed graph — still one binary, still
+a sortable table, batch actions, drag-and-drop, a speed graph; still one binary, still
 no framework, still no build step.*
 
 The first version of the ftc web UI proved a point: a Rust binary can serve a page, and
@@ -19,14 +19,14 @@ row, then a vertical stack of cards, one Cancel button each. That is a demo.
 A download manager is a different artifact. Free Download Manager, and every tool in
 that family, converges on the same shape: categories down the left, a dense sortable
 table in the middle, a toolbar that acts on a selection, a details pane, a status bar.
-That shape is not decoration — it is what makes twenty downloads legible at once.
+That shape is not decoration: it is what makes twenty downloads legible at once.
 
 So the page got rebuilt around it.
 
 ## the same page, in both places
 
 There is one `ui.html`, embedded with `include_str!`. The browser tab and the macOS
-`WKWebView` window load the same bytes. No framework, no bundler, no `node_modules` —
+`WKWebView` window load the same bytes. No framework, no bundler, no `node_modules`,
 because the alternative is a build step between "fix a bug" and "ship the fix", and
 this project's whole claim is that a user installs one file.
 
@@ -40,12 +40,12 @@ column of grids, and the whole thing stays under 70 KB uncompressed.
 The page keeps one `app` object: jobs, totals, settings, filter, search, sort, the
 selected ids, the job shown in the details pane. Every second it polls `/api/state`,
 recomputes the visible view (filter → search → sort), and re-renders. No virtual DOM,
-no diffing — just `replaceChildren` on the rows container, which is fast enough for the
+no diffing: just `replaceChildren` on the rows container, which is fast enough for the
 dozens of jobs a desktop client actually holds.
 
 The interesting decision is what a toolbar button acts on. If anything is selected, the
 action applies to the selection. If nothing is selected, it applies to every job in the
-current view that the action can affect — Pause is disabled when nothing in view is
+current view that the action can affect: Pause is disabled when nothing in view is
 downloading, Retry only counts failed or stopped jobs, Remove only sees finished ones.
 That is the behaviour a file manager trains people to expect, and it means "stop
 everything I am looking at" needs no extra button.
@@ -62,7 +62,7 @@ one.
 
 `/api/state` grew `version`, `settings`, `totals`, and per job `path`, `percent`,
 `added`, `finished` and verified/total pieces. Every one of those exists because the
-table or the details pane needed it — not because a schema looked tidy.
+table or the details pane needed it, not because a schema looked tidy.
 
 ## drag-and-drop is an encoding problem
 
@@ -72,7 +72,7 @@ argument limit on `String.fromCharCode`, and posted to `/api/add-torrent`. The s
 decodes it with sixty lines of base64 (no new dependency), rejects anything that is not
 base64 or is larger than 8 MB, writes it into the temp folder under a sanitized name,
 and queues it like any other torrent. Once the worker has parsed the file, the copy is
-deleted — a dropped torrent does not need to survive the parse.
+deleted; a dropped torrent does not need to survive the parse.
 
 Dropping a magnet link or a `.torrent` path works too: the drop handler reads
 `text/plain` when there are no files, splits it, and posts each target.
@@ -81,7 +81,7 @@ Dropping a magnet link or a `.torrent` path works too: the drop handler reads
 
 The macOS app starts `ftc serve` as a child and terminates it on quit. Testing the
 release bundle with `kill` showed the child still listening afterwards. Five of them had
-accumulated over a day of runs — each holding a loopback port and a job queue nobody
+accumulated over a day of runs, each holding a loopback port and a job queue nobody
 could see.
 
 The cause is AppKit, not the Rust: `applicationWillTerminate` runs for the framework's
@@ -91,7 +91,7 @@ own quit path (Cmd-Q, closing the last window) and not for `SIGTERM`. Logout sen
 The fix is a `DispatchSourceSignal` for `SIGTERM`, `SIGINT` and `SIGHUP` that runs the
 same `stopServer()` as Quit: terminate, wait up to a second, escalate to `SIGKILL` if
 the child is still alive. Verified by starting the app three times and sending one
-signal each — page `200` before, no listener and no child after.
+signal each: page `200` before, no listener and no child after.
 
 ## what is verified, and what is not
 
@@ -102,8 +102,8 @@ uploaded torrent queueing with the right name and size. The page script is check
 `node --check`, and every endpoint was exercised against a live server.
 
 What I cannot show you is a screenshot. macOS screen capture and window enumeration are
-both blocked by TCC in this environment, so the visual side is asserted structurally —
-the markup, the CSS custom property, the rendered script — not by looking at pixels.
+both blocked by TCC in this environment, so the visual side is asserted structurally
+(the markup, the CSS custom property, the rendered script), not by looking at pixels.
 
 ## the cross-platform part
 

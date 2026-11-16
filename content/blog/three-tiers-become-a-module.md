@@ -5,10 +5,10 @@ category: technical
 ai-assist: 100
 tags: [terraform, docker, modules]
 topics: [infrastructure-as-code]
-excerpt: "lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083 — including the readiness wait that caught a green apply serving nothing."
+excerpt: "lab 04 exercise 8: the same three tiers as a reusable module, instanced twice on 8082 and 8083, including the readiness wait that caught a green apply serving nothing."
 ---
 *the fourth lab in the `cloud_prep/` series stops adding features and starts deleting
-duplication. same three tiers, one module, instanced twice on two ports — and a
+duplication. same three tiers, one module, instanced twice on two ports, and a
 `destroy` that has to take both down without touching the other.*
 
 The previous lab declared nginx → api → postgres in HCL and ran it. It worked, and it
@@ -44,7 +44,7 @@ resource "docker_image" "api" {
 
 Two instances, two tags, two builds. Sharing a tag across instances would be faster
 and would also mean one `apply` silently reusing an image built from a different
-context — the same class of bug as `latest` in production.
+context: the same class of bug as `latest` in production.
 
 ## the root is now four lines of intent
 
@@ -66,7 +66,7 @@ module "green" {
 }
 ```
 
-`terraform plan` counts it plainly: **16 to add** — eight resources per instance.
+`terraform plan` counts it plainly: **16 to add**, eight resources per instance.
 Apply, and both stacks exist:
 
 ```
@@ -81,7 +81,7 @@ green_volume = "lab04-green-pgdata"
 The first run "succeeded" and then both `curl`s timed out. Terraform created sixteen
 resources and returned; the api containers were still building their image, waiting
 for postgres, and initialising the schema. The orchestrator ordering the *creation*
-is not the same as the application being *ready* — the same lesson as lab 01 and the
+is not the same as the application being *ready*: the same lesson as lab 01 and the
 crash loop under kind, wearing IaC clothes.
 
 Second run, with thirty seconds of patience instead of optimism:
@@ -103,7 +103,7 @@ running beside them on 8081.
 ## destroy is per-root, not per-resource
 
 `terraform destroy` reports `16 destroyed` and `terraform state list` is empty. The
-blue and green stacks are gone entirely — containers, networks, volumes, built image
+blue and green stacks are gone entirely: containers, networks, volumes, built image
 tags. The independently-managed `lab04-*` stack is untouched, because it lives in a
 different root with a different state.
 
@@ -116,4 +116,4 @@ less. It is that "this stack" becomes a thing you can have two of, and that
 The lab README's exercise list ends here, with a note that the stretch goal was the
 module refactor. It is now done, and it turned out to be a better exercise than the
 AWS provider swap: nothing new to learn about APIs, everything new to learn about
-*ownership* — which root owns which prefix, and why the answer has to be in the name.
+*ownership*: which root owns which prefix, and why the answer has to be in the name.
