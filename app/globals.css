@@ -411,6 +411,36 @@ input:focus, textarea:focus {
 .like-btn-verb {
   text-transform: uppercase;
 }
+/* share cluster — same hairline-pill vocabulary as the like button; the
+   network targets are plain share-intent links, "copy" flashes copied */
+.share-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+  background: 0 0;
+  border-radius: 99px;
+  padding: 3px 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  transition: color 0.15s, border-color 0.15s;
+}
+.share-btn:hover {
+  color: var(--navy);
+  border-color: var(--navy);
+}
+.share-copied {
+  text-transform: uppercase;
+}
 /* the view counter rides the same meta row as the like button — a passive
    pill (no border), eye + count, so interactive and read-only stay distinct */
 .view-count {
@@ -627,6 +657,18 @@ input:focus, textarea:focus {
   margin-top: 1.8em;
 }
 .post p { color: var(--fg); }
+/* figures: every diagram/screenshot scales to the column, so the drawn
+   figures read as one consistent set instead of overflowing on narrow
+   screens */
+.post img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.6em auto 0.2em;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
 .post a {
   text-decoration: underline;
   text-underline-offset: 3px;

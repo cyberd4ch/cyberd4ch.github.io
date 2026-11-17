@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm'
 import PageCol from '@/components/PageCol'
 import AIRing from '@/components/blog/AIRing'
 import LikeButton from '@/components/blog/LikeButton'
+import ShareButtons from '@/components/blog/ShareButtons'
 import ViewCounter from '@/components/blog/ViewCounter'
 import { posts } from '@/lib/posts'
 
@@ -66,6 +67,7 @@ export default async function BlogPostPage({ params }: Props) {
             {found.post.aiAssist != null && <AIRing pct={found.post.aiAssist} size={15} label />}
             <ViewCounter slug={found.post.slug} />
             <LikeButton slug={found.post.slug} />
+            <ShareButtons slug={found.post.slug} title={found.post.title} />
             {found.post.topics.length > 0 && (
               <span className="text-[10px] uppercase tracking-widest text-[var(--muted)]">
                 topics:

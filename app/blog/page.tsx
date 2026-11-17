@@ -4,7 +4,21 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import PageCol from '@/components/PageCol'
 import AIRing from '@/components/blog/AIRing'
-import { posts, allTags, allTopics, BlogCategory, Post } from '@/lib/posts'
+import { posts as allPosts, BlogCategory, Post } from '@/lib/posts'
+
+/**
+ * The listing is curated to one post for now (the 2026 encryption update):
+ * the archive below and the "latest" staging area both read from this
+ * filtered set. The other posts stay published at their URLs; widen the
+ * listing by removing the filter.
+ */
+const ONLY_SLUG = 'adventures-in-encryption-2026'
+const posts = allPosts.filter(p => p.slug === ONLY_SLUG)
+
+/** tag + topic vocabulary of exactly what's listed, so the chips can't
+    offer filters the visible set can't answer */
+const allTags = Array.from(new Set(posts.flatMap(p => p.tags)))
+const allTopics = Array.from(new Set(posts.flatMap(p => p.topics)))
 
 type Filter = 'all' | BlogCategory
 
@@ -49,6 +63,9 @@ export default function BlogPage() {
   }, [filtered])
 
   const groups = useMemo(() => {
+    // curated to a single post: one section, no topic grouping (the post
+    // would otherwise repeat under every collection it qualifies for)
+    if (posts.length === 1) return [[posts[0].category, filtered] as const]
     if (topic !== 'all') return [[topic, filtered] as const]
     return chapters.map(([t]) => [t, filtered.filter(p => p.topics.includes(t))] as const)
   }, [chapters, filtered, topic])
@@ -127,8 +144,9 @@ export default function BlogPage() {
         )}
       </div>
 
-      {/* the staging area: latest releases (only while nothing is filtered) */}
-      {unfiltered && latest.length > 0 && (
+      {/* the staging area: latest releases (only while nothing is filtered
+          and the listing carries more than the one curated post) */}
+      {unfiltered && posts.length > 1 && latest.length > 0 && (
         <section className="mb-10 stagger-2">
           <div className="chapter-head">
             <h2 className="sec-label">

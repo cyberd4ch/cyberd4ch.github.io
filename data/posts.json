@@ -2,15 +2,16 @@
   {
     "id": "adventures-in-encryption-2026",
     "slug": "adventures-in-encryption-2026",
-    "title": "adventures in encryption: securing your laptop kubernetes cluster (2026 update)",
+    "title": "A modern approach to securing kubernetes cluster",
     "date": "Nov 15, 2026",
     "dateISO": "2026-11-15",
     "category": "technical",
     "url": "/blog/adventures-in-encryption-2026/",
-    "excerpt": "the 2021 'adventures in encryption' guide rebuilt on gateway api: every command in part i re-run end to end on kind before publishing, with a CA minted in-cluster, keychain trust, port-forwarded HTTPS, and the two findings the docs leave out.",
-    "aiAssist": 100,
+    "excerpt": "This is an update of Rob Thorne's 2021 Medium article, *Adventures in Encryption: Securing Your Laptop Kubernetes Cluster*, with credit to Rob for the original approach. Part I covers a local cluster, and Part II takes the same ideas to a public cluster with free Let's Encrypt certificates.",
+    "aiAssist": 94,
     "tags": [
       "kubernetes",
+      "kubernetes-security",
       "tls",
       "cert-manager",
       "gateway-api",
@@ -20,7 +21,7 @@
       "cloud-native",
       "development"
     ],
-    "readMinutes": 16
+    "readMinutes": 15
   },
   {
     "id": "the-tablet-lab",
