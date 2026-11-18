@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-18T04:04:14.560Z",
+  "generatedAt": "2026-11-18T04:32:57.893Z",
   "user": {
     "login": "cyberd4ch",
     "name": "DKA447~000",
@@ -178,21 +178,21 @@
     },
     {
       "type": "IssueCommentEvent",
+      "repo": "BaaRai/ARTEX",
+      "repoUrl": "https://github.com/BaaRai/ARTEX",
+      "at": "2026-11-18T02:55:18Z",
+      "title": "commented on #317 in BaaRai/ARTEX",
+      "detail": "ingest_bbot: scope_distance is trusted from output.json, but the allow-list is the only scope gate",
+      "url": "https://github.com/BaaRai/ARTEX/issues/317#issuecomment-6967609873"
+    },
+    {
+      "type": "IssueCommentEvent",
       "repo": "coredns/coredns",
       "repoUrl": "https://github.com/coredns/coredns",
       "at": "2026-11-18T02:20:08Z",
       "title": "commented on #7756 in coredns/coredns",
       "detail": "DNSSEC resolve error on not present record types",
       "url": "https://github.com/coredns/coredns/issues/7756#issuecomment-6967047212"
-    },
-    {
-      "type": "IssueCommentEvent",
-      "repo": "BaaRai/ARTEX",
-      "repoUrl": "https://github.com/BaaRai/ARTEX",
-      "at": "2026-11-18T02:05:46Z",
-      "title": "commented on #124 in BaaRai/ARTEX",
-      "detail": "Adversarial audit: map the 2026 agentic attack classes (memory poisoning, plan hijacking, tool abuse) onto ARTEX itself",
-      "url": "https://github.com/BaaRai/ARTEX/issues/124#issuecomment-6966813851"
     },
     {
       "type": "IssuesEvent",

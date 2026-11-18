@@ -15,6 +15,10 @@ const OUT = path.join(process.cwd(), 'data', 'github.json')
 
 // The profile-README repo and this site itself are not portfolio projects.
 const EXCLUDE = new Set([USER, `${USER}.github.io`])
+// ...and commits to this site are how the snapshot ships, not work worth a
+// line in the feed: a snapshot push would otherwise be the newest item every
+// hourly refresh.
+const SITE_REPO = `${USER}/${USER}.github.io`
 
 // Stars/forks/watches are noise in a "what is he building" feed.
 const NOISE = new Set(['WatchEvent', 'ForkEvent', 'PublicEvent'])
@@ -125,10 +129,7 @@ async function fetchPinned() {
  * items, deduped against the event items below.
  */
 async function fetchCommitPushes(repos) {
-  const poll = [
-    { name: `${USER}.github.io`, url: `https://github.com/${USER}/${USER}.github.io` },
-    ...repos.slice(0, 4),
-  ]
+  const poll = repos.slice(0, 5)
   const results = []
   for (const repo of poll) {
     try {
@@ -203,6 +204,7 @@ async function main() {
     ...rawEvents.filter(e => !NOISE.has(e.type)).map(describe).filter(Boolean),
     ...commitPushes,
   ]
+    .filter(e => e.repo !== SITE_REPO)
     .filter(e => {
       // exact duplicate (same target url)…
       const key = `${e.type}:${e.url ?? ''}`

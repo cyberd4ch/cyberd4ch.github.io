@@ -18,11 +18,11 @@ Some of the bugs such as cookies marked `Secure` but behave differently were eas
 
 While looking for a good guide, I found Rob Thorne's 2021 Medium article, [*Adventures in Encryption: Securing Your Laptop Kubernetes Cluster*](https://robthorne-26852.medium.com/adventures-in-encryption-securing-your-laptop-kubernetes-cluster-9e032bf77f3e). The idea hasn't aged a day: make your own certificate authority, trust it and let cert-manager issue certificates for you. The tools around it have aged though. This post is my update of that article for 2026 with credit to Rob for the original approach. Part I covers a local cluster, and Part II takes the same ideas to a public cluster with free Let's Encrypt certificates.
 
-So what really changed? The `extensions/v1beta1` Ingress in the original was removed in Kubernetes 1.22, so those manifests won't apply on a current cluster. Additionally, the [Ingress NGINX controller](https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/) it relied on was retired earlier in March this year (the final release was v1.15.1 and the repository is archived). This version uses the [Gateway API](https://gateway-api.sigs.k8s.io/), the modern replacement for Ingress, plus a few newer tools that make the certificate side easier.
+So what really changed? The [`extensions/v1beta1` Ingress](https://kubernetes.io/docs/reference/using-api/deprecation-guide) that the original applied was [removed in Kubernetes 1.22](https://kubernetes.io/blog/2021/07/14/upcoming-changes-in-kubernetes-1-22), so those manifests won't apply on a current cluster. Additionally, the Ingress NGINX controller it relied on was [retired in March this year](https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/) (the final release was v1.15.1 and the repository is archived). This version uses the [Gateway API](https://gateway-api.sigs.k8s.io/), the modern replacement for Ingress, plus a few newer tools that make the certificate side easier.
 
 ## Before We Begin
 
-A little heads up: I'm still learning myself, so I'm assuming you've at least have some fair knowledge with certificates, Kubernetes and Helm.
+A little heads up: I'm still learning myself, so I'm assuming you've at least have some fair knowledge with [certificates](https://www.cloudflare.com/learning/ssl/what-is-an-ssl-certificate/), [Kubernetes](https://kubernetes.io/docs/tutorials/kubernetes-basics/) and [Helm](https://helm.sh/docs/intro/quickstart/).
 
 Other prerequisites are:
 
@@ -32,7 +32,7 @@ Other prerequisites are:
 
 *The CA key is the master key to the building. Don't leave it under the doormat.*
 
-For Part I we'll setup our own certificate authority (CA) and let cert-manager use it to issue server certificates automatically. Browsers and tools only trust certificates signed by an authority they know, and no public authority will sign a certificate for a product still in early development that only exists on your laptop. That is why we are configuring our CA to bypass the browser errors and also simulate the secure-first deployment approach embedded in Kubernetes.
+For Part I we'll setup our own certificate authority (CA) and let cert-manager use it to issue server certificates automatically. Browsers and tools only trust certificates signed by [an authority they know](https://en.wikipedia.org/wiki/Certificate_authority), and no public authority will sign a certificate for a product still in early development that only exists on your laptop. That is why we are configuring our CA to bypass the browser errors and also simulate the secure-first deployment approach embedded in Kubernetes.
 
 ## My HomeLab Setup and What You'll Need
 
@@ -45,8 +45,8 @@ Everything here works on Linux, Windows or macOS. For reference, I'm on a Mac wi
 - **cert-manager**, the part that does the heavy lifting. Once we describe what we want, it creates and renews the certificates for us.
 - **trust-manager**, optional (see the bonus section). A cert-manager sub-project that hands your CA to the pods in your cluster.
 
-If you haven't set up a local cluster yet, [this guide](https://kind.sigs.k8s.io/docs/user/quick-start/) walks you through creating one. 
-NOTE: Envoy Gateway and cert-manager are extra controllers on top of Kubernetes itself, so on a small machine give Docker a bit more memory than you think you need. And if you keep other clusters' containers around, stop the ones you aren't using (see When Things Go Wrong for the timeout story).
+If you don't have not setup a local cluster yet, you can follow [the kind quick start](https://kind.sigs.k8s.io/docs/user/quick-start/) to create one. 
+NOTE: Envoy Gateway and cert-manager are extra controllers on top of Kubernetes itself, so on a small machine give Docker a bit more memory than you think you need. And if you keep other clusters' containers around, stop the ones you aren't using (see *When Things Go Wrong* near the end of this post for the timeout story).
 
 ```sh
 kind create cluster --name lab
@@ -83,7 +83,7 @@ It is also worth noting that order matters a little here. Installing Envoy Gatew
 
 ## Creating the CA
 
-The old way to make a CA was a long `openssl` config file which contains a passphrase that decrypts the key into a temporary file and uploads it to the cluster. This setup works under the assumption that you would remember to delete the temp file after usage. It works, but there are plenty of ways to slip up.
+The old way to make a CA was a long [`openssl` config file](https://jamielinux.com/docs/openssl-certificate-authority/appendix/root-configuration-file.html) which contains a passphrase that decrypts the key into a temporary file and uploads it to the cluster. This setup works under the assumption that you would remember to delete the temp file after usage. It works, but there are plenty of ways to slip up.
 
 A much preferred approach is to configure the cert-manager to bootstrap the CA itself. The private key is generated inside the cluster and never touches your disk. There are three links in the chain:
 
@@ -136,10 +136,10 @@ kubectl get certificate -n cert-manager lab-root-ca
 
 When `READY` says `True`, you have a CA. In my run it took two seconds. A few notes on the choices:
 
-- I picked an ECDSA P-256 key. It's smaller and faster than the 4096-bit RSA key the original used and every current browser accepts it.
+- I picked an [ECDSA P-256 key](https://www.rfc-editor.org/rfc/rfc5480). It's smaller and faster than the 4096-bit RSA key the original used and every current browser accepts it.
 - It's a `ClusterIssuer`, not a namespaced `Issuer` so any namespace can use it.
-- The root lasts two years, which is fine for a lab. A real internal CA would use a short-lived intermediate and keep the root offline.
-- Anyone with this CA key can impersonate any site to any machine that trusts the CA. Protect the cluster's secrets, and only trust this root on machines you control.
+- The root lasts two years, which is fine for a lab. A real internal CA would use a short-lived intermediate and keep the root [offline](https://jamielinux.com/docs/openssl-certificate-authority/create-the-root-pair.html).
+- Anyone with this CA key can impersonate any site to any machine that trusts the CA, which is why [root key compromise is treated as disastrous](https://jamielinux.com/docs/openssl-certificate-authority/create-the-root-pair.html). Protect the cluster's secrets, and only trust this root on machines you control.
 
 ## Trusting the CA
 
@@ -166,7 +166,7 @@ sudo update-ca-certificates
 certutil -addstore -f ROOT lab-root-ca.crt
 ```
 
-The login-keychain variant does the same job without needing admin rights: same trust decision, smaller blast radius and easy to undo from Keychain Access. Chrome, Edge and Safari use the system store. Firefox keeps its own, so either import the certificate in its settings or turn on `security.enterprise_roots.enabled` in `about:config` so it reads the system store.
+The login-keychain variant does the same job without needing admin rights: same trust decision, smaller blast radius and easy to undo from Keychain Access. Safari and Edge read the system store, and Chrome trusts roots installed there alongside its own root programme. Firefox ships its own root store, so either import the certificate in its settings or turn on `security.enterprise_roots.enabled` in `about:config` so it also [reads the system store](https://support.mozilla.org/en-US/kb/setting-certificate-authorities-firefox).
 
 A shortcut worth knowing about is **[mkcert](https://github.com/FiloSottile/mkcert)**, a tool that creates a local CA and installs it in your system and browser trust stores with one command. If all you need is HTTPS for a dev server on your laptop, it's the quickest route and you can even load its root into the cluster as a TLS secret and point the CA issuer at it. I'm doing the in-cluster version here because it teaches you how cert-manager thinks and it's the same machinery you'll use in Part II.
 
@@ -542,4 +542,4 @@ Next on my own list: keeping the manifests and issuers in Git with Argo CD, encr
 
 Until then, keep your keys private and your certificates renewing. If something in here breaks on your setup, let me know. Breaking things is how I learn.
 
-*This post is an update of ["Adventures in Encryption: Securing Your Laptop Kubernetes Cluster"](https://robthorne-26852.medium.com/adventures-in-encryption-securing-your-laptop-kubernetes-cluster-9e032bf77f3e) by Rob Thorne (Medium, 2021).*
+*This post is an update of "Adventures in Encryption: Securing Your Laptop Kubernetes Cluster" by Rob Thorne (Medium, 2021).*

@@ -7,13 +7,12 @@ import AIRing from '@/components/blog/AIRing'
 import { posts as allPosts, BlogCategory, Post } from '@/lib/posts'
 
 /**
- * The listing is curated to one post for now (the 2026 encryption update):
- * the archive below and the "latest" staging area both read from this
- * filtered set. The other posts stay published at their URLs; widen the
- * listing by removing the filter.
+ * The listing is curated: the archive below and the "latest" staging area
+ * both read from this filtered set. Add a slug here to list a post; the
+ * others stay published at their URLs either way.
  */
-const ONLY_SLUG = 'adventures-in-encryption-2026'
-const posts = allPosts.filter(p => p.slug === ONLY_SLUG)
+const LISTED_SLUGS = new Set(['adventures-in-encryption-2026', 'agentlens-first-try-accuracy'])
+const posts = allPosts.filter(p => p.slug != null && LISTED_SLUGS.has(p.slug))
 
 /** tag + topic vocabulary of exactly what's listed, so the chips can't
     offer filters the visible set can't answer */

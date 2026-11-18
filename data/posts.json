@@ -1,5 +1,26 @@
 [
   {
+    "id": "agentlens-first-try-accuracy",
+    "slug": "agentlens-first-try-accuracy",
+    "title": "agentlens: score a coding model on its first attempt, not its final one",
+    "date": "Nov 18, 2026",
+    "dateISO": "2026-11-18",
+    "category": "technical",
+    "url": "/blog/agentlens-first-try-accuracy/",
+    "excerpt": "A harness that snapshots the workspace at every done claim, so a model's first attempt gets scored before it has a chance to correct itself.",
+    "aiAssist": 100,
+    "tags": [
+      "python",
+      "testing",
+      "evaluation",
+      "sqlite"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 6
+  },
+  {
     "id": "adventures-in-encryption-2026",
     "slug": "adventures-in-encryption-2026",
     "title": "A modern approach to securing kubernetes cluster",
@@ -21,7 +42,7 @@
       "cloud-native",
       "development"
     ],
-    "readMinutes": 15
+    "readMinutes": 16
   },
   {
     "id": "the-tablet-lab",
