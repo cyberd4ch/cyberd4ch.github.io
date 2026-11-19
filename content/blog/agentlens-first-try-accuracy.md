@@ -129,6 +129,20 @@ The third seed did verify, with `python3 -c "from greet import greet; print(gree
 
 That is the part worth trusting about rule based labels: they are cheap, deterministic and auditable, and they are still wrong until something uses them on real data.
 
+## A second model, and a floor under the leaderboard
+
+The obvious next question is whether any of this changes with a different model. The machine had a second Ollama model on disk, `qwen2.5:3b`, so the same task ran three more seeds through the same driver:
+
+```text
+task       model             seeds  per-seed  first try  false done  status
+demo-greet ollama-qwen2.5-3b 3      1,1,1     3/3        0/3         ranked
+demo-greet ollama-qwen2.5-7b 3      1,1,1     3/3        0/3         ranked
+```
+
+Six live runs, six first-try passes, zero false dones. That is still not a benchmark: the task is one file with one function, both models are from the same family, and a perfect score has no variance to explain. What it does establish is the spec's minimum evidence bar — two models, three seeds each — and that the tool can now say so itself. `compare` groups by task and model and marks a group `ranked` only with three *distinct* recorded seeds; a repeated seed is one seed of evidence, and an unseeded run never counts. A new `variance` command prints the per-seed rows behind the mean.
+
+The more useful signal is in `findings`, not the leaderboard: all three 3b runs wrote the file, printed the marker, and never ran it. That is the same `skipped_verification` finding as two of the three 7b runs. The hidden checks passed all six. First-try accuracy says the work was right; the process rule says the model had no evidence it was right when it claimed so. Both are true, and they answer different questions.
+
 ## When things go wrong
 
 **Every checkpoint held the same files.** The first version snapshotted the workspace after the run finished. By then the workspace was final, so checkpoint 1, 2 and 3 were byte-identical and first-attempt accuracy was fiction. A test comparing two checkpoints caught it, and the fix was to snapshot inside the loop, at the claim.
