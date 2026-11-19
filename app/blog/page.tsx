@@ -11,7 +11,12 @@ import { posts as allPosts, BlogCategory, Post } from '@/lib/posts'
  * both read from this filtered set. Add a slug here to list a post; the
  * others stay published at their URLs either way.
  */
-const LISTED_SLUGS = new Set(['adventures-in-encryption-2026', 'agentlens-first-try-accuracy'])
+const LISTED_SLUGS = new Set([
+  'adventures-in-encryption-2026',
+  'agentlens-first-try-accuracy',
+  'the-truncation-guard-stops-at-chat',
+  'auditing-an-agents-memory',
+])
 const posts = allPosts.filter(p => p.slug != null && LISTED_SLUGS.has(p.slug))
 
 /** tag + topic vocabulary of exactly what's listed, so the chips can't
