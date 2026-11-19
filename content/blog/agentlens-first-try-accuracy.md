@@ -74,6 +74,8 @@ demo-greet-script-s1 script 2       FAIL       PASS   YES        -
 
 That row is the whole thesis in one line. The final state is correct, so a transcript-only view scores this a success. The first attempt was wrong, and the model said it was done.
 
+![Two done claims, two snapshots, and only the first one answers the question](/images/agentlens-first-try-accuracy/checkpoints.png)
+
 ## The leaderboard
 
 `compare` aggregates every evaluated run per model: how many runs, first-try pass rate (the sort key), false-done rate, recovery count, and cost. On the demo data it looks like this:
@@ -103,6 +105,30 @@ Three rules and two gates so far. `false_done` is high severity on the first che
 
 Unevaluated checkpoints produce nothing. Recomputation replaces rows instead of appending duplicates. A rule that guesses is worse than no rule at all.
 
+## The first live run
+
+Everything up to here ran on scripted commands standing in for a model. A harness that has only ever seen its own scripts is not yet evidence about anything, so the next step was a real model end to end.
+
+Neither CLI I wanted was usable on this machine. `claude` is not installed, and the Gemini CLI is there with a stored credential that returns 401 UNAUTHENTICATED on every request, which is a five minute fix only the account owner can make. Ollama was already installed with `qwen2.5:7b-instruct` on disk, so the live driver became a small script instead: model command, spec on stdin, a shell tool, the model's own loop, and the whole trace re-emitted as the same stream-json the existing adapter already parses. About two hundred lines, and now any local model can be measured without an API key.
+
+Three independent seeds on the demo task, then `report`:
+
+```text
+run                                model             checks  first try  final  recovered  cost
+demo-greet-ollama-qwen2.5-7b-s1-r4 ollama-qwen2.5-7b 1       PASS       PASS   -          $0.0000
+demo-greet-ollama-qwen2.5-7b-s2-r3 ollama-qwen2.5-7b 1       PASS       PASS   -          $0.0000
+demo-greet-ollama-qwen2.5-7b-s3-r3 ollama-qwen2.5-7b 1       PASS       PASS   -          $0.0000
+demo-greet-script-s1               script            2       FAIL       PASS   YES        -
+```
+
+A 7B model passing a two-check task three times out of three is not a benchmark result, and the honest reading is narrow: the plumbing works with a real model, and a small model can satisfy an unambiguous spec. The task asks for one file with one function, which is about the smallest thing that can still be scored.
+
+The more interesting column is not first-try accuracy. `findings` flagged two of those three runs as `skipped_verification`: the model wrote the file, decided that was enough, and printed the marker without ever running the code. The checks passed anyway, both times. A model that claims done without evidence is not caught by a hidden check that happens to agree with it, and that gap is exactly why the process rules exist next to the pass rates.
+
+The third seed did verify, with `python3 -c "from greet import greet; print(greet())"`, printed `hello`, and got flagged anyway. That was a false positive in my own allowlist: it knew `pytest` and `cargo test` and `npm test`, and had no notion that running the code and reading its output is verification. The allowlist now has an interpreter one-liner pattern, with a test named after the run that found it, and recomputing the stored events moves the count to two of three, both of them true.
+
+That is the part worth trusting about rule based labels: they are cheap, deterministic and auditable, and they are still wrong until something uses them on real data.
+
 ## When things go wrong
 
 **Every checkpoint held the same files.** The first version snapshotted the workspace after the run finished. By then the workspace was final, so checkpoint 1, 2 and 3 were byte-identical and first-attempt accuracy was fiction. A test comparing two checkpoints caught it, and the fix was to snapshot inside the loop, at the claim.
@@ -117,10 +143,12 @@ Unevaluated checkpoints produce nothing. Recomputation replaces rows instead of 
 
 ## What it does not do yet
 
-The real driver is written and tested against recorded stream-json output, but I have not run it against a live agent session yet, so every number in this post comes from scripted runs. That is deliberate: the harness should be boring and correct before it is pointed at a model with a bill attached.
+One trivial task and one local 7B model is a smoke test, not a leaderboard. To compare models honestly I need three or four tasks that are hard enough to fail, the same seeds across every model, and a frontier model in the mix, which means a working `claude` or Gemini login and a budget decision rather than a better harness.
+
+The other honest limit is the batch itself. The first three seeds came out byte-identical, 2,232 tokens each, because my driver pinned the sampler seed: three runs, one sample, reported as three. The seed is now left to the model unless asked for, and the same three runs give 1,095, 2,129 and 1,517 tokens with 7, 11 and 9 events. A harness that cannot notice three identical seeds is not measuring variance; it is measuring itself.
 
 Phase 2, inferring done claims from unmarked sessions, and LLM-assisted labeling are both future work, and neither is allowed to override a hidden check. The cheap objective signal wins every argument.
 
 ## Where to go from here
 
-The next useful measurements are variance across seeds for one model, and a real run of the same task across two models with the cost column filled in. If you want the shape of the thing rather than the numbers, the 39 tests are the honest documentation: the checkpoint detector has the heaviest coverage, because every metric downstream of it is only as trustworthy as the moment it decides a claim was made.
+The next useful measurements are variance across seeds on a task that can fail, and the same task across two models with the cost column filled in. If you want the shape of the thing rather than the numbers, the 40 tests are the honest documentation: the checkpoint detector has the heaviest coverage, because every metric downstream of it is only as trustworthy as the moment it decides a claim was made.

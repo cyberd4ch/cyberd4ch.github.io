@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="600" viewBox="0 0 1100 600" font-family="-apple-system, 'Helvetica Neue', Arial, sans-serif">
+  <defs>
+    <marker id="arrowA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f3e81"/>
+    </marker>
+  </defs>
+  <style>
+    .ink { fill: #1a1a1e; }
+    .dim { fill: #6b6a70; }
+    .mono { font-family: 'SF Mono', Menlo, Consolas, monospace; }
+    .box { fill: #ffffff; stroke: #242326; stroke-width: 1.5; }
+    .first { stroke: #2f3e81; stroke-width: 2; }
+    .flow { stroke: #2f3e81; stroke-width: 2; fill: none; marker-end: url(#arrowA); }
+    .dash { stroke: #b9b8c0; stroke-width: 2; fill: none; stroke-dasharray: 5 5; }
+  </style>
+  <rect x="0" y="0" width="1100" height="600" rx="16" fill="#fafafa" stroke="#d9d8dc"/>
+  <text x="40" y="52" font-size="24" font-weight="700" class="ink">Only the first snapshot answers the question</text>
+  <text x="40" y="78" font-size="15" class="dim">Each done claim is copied at the moment it happens. The first copy is what "first try" means; the rest are recovery.</text>
+
+  <!-- timeline -->
+  <rect x="40" y="112" width="186" height="112" rx="10" class="box"/>
+  <text x="58" y="140" font-size="13" class="dim">turns 2-3</text>
+  <text x="58" y="166" font-size="17" font-weight="700" class="ink mono">tool calls</text>
+  <text x="58" y="192" font-size="13.5" class="dim">writes greet.py</text>
+  <text x="58" y="211" font-size="13.5" class="dim">no verification</text>
+
+  <rect x="262" y="112" width="186" height="112" rx="10" class="box first"/>
+  <text x="280" y="140" font-size="13" class="dim">claim 1</text>
+  <text x="280" y="166" font-size="15" font-weight="700" class="ink mono">AGENTLENS_DONE</text>
+  <text x="280" y="192" font-size="13.5" class="dim">snapshot taken here</text>
+  <text x="280" y="211" font-size="13.5" class="dim">before any fix</text>
+
+  <rect x="484" y="112" width="186" height="112" rx="10" class="box"/>
+  <text x="502" y="140" font-size="13" class="dim">turns 4-6</text>
+  <text x="502" y="166" font-size="17" font-weight="700" class="ink mono">more work</text>
+  <text x="502" y="192" font-size="13.5" class="dim">renames, retries,</text>
+  <text x="502" y="211" font-size="13.5" class="dim">re-checks</text>
+
+  <rect x="706" y="112" width="186" height="112" rx="10" class="box"/>
+  <text x="724" y="140" font-size="13" class="dim">claim 2</text>
+  <text x="724" y="166" font-size="15" font-weight="700" class="ink mono">AGENTLENS_DONE</text>
+  <text x="724" y="192" font-size="13.5" class="dim">snapshot taken here</text>
+  <text x="724" y="211" font-size="13.5" class="dim">after the fix</text>
+
+  <rect x="928" y="112" width="132" height="112" rx="10" class="box"/>
+  <text x="946" y="140" font-size="13" class="dim">end of run</text>
+  <text x="946" y="166" font-size="15" font-weight="700" class="ink mono">workspace</text>
+  <text x="946" y="192" font-size="13.5" class="dim">one final state,</text>
+  <text x="946" y="211" font-size="13.5" class="dim">no history</text>
+
+  <path class="flow" d="M 226 168 L 258 168"/>
+  <path class="flow" d="M 448 168 L 480 168"/>
+  <path class="flow" d="M 670 168 L 702 168"/>
+  <path class="flow" d="M 892 168 L 924 168"/>
+
+  <!-- snapshot lines down to verdicts -->
+  <path class="dash" d="M 355 224 L 355 268"/>
+  <path class="dash" d="M 799 224 L 799 268"/>
+
+  <!-- verdict cards -->
+  <rect x="242" y="268" width="432" height="104" rx="10" class="box first" fill="#f4f6fc"/>
+  <text x="262" y="296" font-size="13" class="dim">checkpoint 1 · scored by hidden checks</text>
+  <text x="262" y="324" font-size="19" font-weight="700" class="ink">first-try accuracy</text>
+  <text x="262" y="350" font-size="13.5" class="dim">This is the number the whole harness exists to produce.</text>
+
+  <rect x="694" y="268" width="366" height="104" rx="10" class="box"/>
+  <text x="714" y="296" font-size="13" class="dim">checkpoint 2 · scored the same way</text>
+  <text x="714" y="324" font-size="19" font-weight="700" class="ink">recovery only</text>
+  <text x="714" y="350" font-size="13.5" class="dim">A pass here says the model fixed itself, not that it knew.</text>
+
+  <!-- live band -->
+  <rect x="40" y="400" width="1020" height="164" rx="10" class="box"/>
+  <text x="60" y="430" font-size="13" class="dim">live run · demo-greet task · 3 independent seeds</text>
+  <text x="60" y="458" font-size="17" font-weight="700" class="ink mono">qwen2.5:7b-instruct</text>
+
+  <text x="60" y="492" font-size="14" class="dim">first try</text>
+  <text x="60" y="520" font-size="28" font-weight="700" class="ink">3/3</text>
+  <text x="60" y="544" font-size="12.5" class="dim">passed both checks</text>
+
+  <text x="290" y="492" font-size="14" class="dim">false done</text>
+  <text x="290" y="520" font-size="28" font-weight="700" class="ink">0/3</text>
+  <text x="290" y="544" font-size="12.5" class="dim">no wrong claim passed</text>
+
+  <text x="500" y="492" font-size="14" class="dim">claimed done unverified</text>
+  <text x="500" y="520" font-size="28" font-weight="700" class="ink">2/3</text>
+  <text x="500" y="544" font-size="12.5" class="dim">no check run before the claim</text>
+
+  <text x="770" y="492" font-size="14" class="dim">tokens per run</text>
+  <text x="770" y="520" font-size="20" font-weight="700" class="ink mono">1,095 / 2,129 / 1,517</text>
+  <text x="770" y="544" font-size="12.5" class="dim">local model, no API spend</text>
+</svg>
