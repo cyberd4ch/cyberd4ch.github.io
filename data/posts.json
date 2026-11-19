@@ -21,6 +21,48 @@
     "readMinutes": 6
   },
   {
+    "id": "auditing-an-agents-memory",
+    "slug": "auditing-an-agents-memory",
+    "title": "auditing an agent's memory: enforced provenance, self-declared labels",
+    "date": "Nov 17, 2026",
+    "dateISO": "2026-11-17",
+    "category": "technical",
+    "url": "/blog/auditing-an-agents-memory/",
+    "excerpt": "ARTEX's maintainer invited an adversarial audit of the platform's own agents, and the memory poisoning row holds up better than expected: fact provenance is enforced down to a prove_goal refusal, but the label deciding which gate applies is written by the model the target is talking to.",
+    "aiAssist": 100,
+    "tags": [
+      "llm-agents",
+      "security",
+      "go",
+      "open-source"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 5
+  },
+  {
+    "id": "the-truncation-guard-stops-at-chat",
+    "slug": "the-truncation-guard-stops-at-chat",
+    "title": "the truncation guard stops at chat: proving the blind spot with a real vault",
+    "date": "Nov 17, 2026",
+    "dateISO": "2026-11-17",
+    "category": "technical",
+    "url": "/blog/the-truncation-guard-stops-at-chat/",
+    "excerpt": "A review of DeepTutor's truncation guard found the same cut-off tool calls reaching five dispatch sites outside the chat path, so I filed the issue with a runtime repro: a scripted truncated round, the real dispatch code, and a real Obsidian vault that gets mutated while history records a fabricated success.",
+    "aiAssist": 100,
+    "tags": [
+      "llm-agents",
+      "python",
+      "debugging",
+      "open-source"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 5
+  },
+  {
     "id": "adventures-in-encryption-2026",
     "slug": "adventures-in-encryption-2026",
     "title": "A modern approach to securing kubernetes cluster",
