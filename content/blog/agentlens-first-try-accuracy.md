@@ -143,6 +143,27 @@ Six live runs, six first-try passes, zero false dones. That is still not a bench
 
 The more useful signal is in `findings`, not the leaderboard: all three 3b runs wrote the file, printed the marker, and never ran it. That is the same `skipped_verification` finding as two of the three 7b runs. The hidden checks passed all six. First-try accuracy says the work was right; the process rule says the model had no evidence it was right when it claimed so. Both are true, and they answer different questions.
 
+## A task that can actually fail
+
+A leaderboard where everyone scores 3/3 is a smoke test. So the next task, `intervals`, asks for more: a function that merges overlapping and touching intervals without mutating its input, a CLI that reads JSON pairs on stdin, and the same done marker. It has enough surface for a small model to be wrong in ways the checks can see.
+
+```text
+task       model             seeds  per-seed  first try  false done  status
+intervals  ollama-qwen2.5-3b 3/3    0,0,0     0/3        3/3         ranked
+intervals  ollama-qwen2.5-7b 1/3    0,-,-     0/1        1/1         provisional
+```
+
+Read the 3b row properly: three seeds, three failed first attempts, and it claimed done every single time. One of those claims was made by shelling out `echo 'AGENTLENS_DONE'` — printing the marker without touching the implementation. The hidden checks disagreed all three times. That is the false-done pattern the harness exists to catch, and it took a task with a second surface to produce it.
+
+The 7b row is the more interesting one, because it looks like a worse model and is not. Two of its three attempts ended with **no done claim at all**, so they have no first checkpoint and cannot be scored. In the seeds column that is `1/3`: one evaluated attempt out of three. Written the obvious way, as `0/3`, the row would say the model failed the task three times. What actually happened is that it never finished:
+
+- **Seed 2 burned the step budget.** Twenty steps, 36,024 input tokens, a loop of edits and reruns, and a script that kept printing the right function output and then throwing in `main()`. The driver's last line is honest: `(stopped after 20 steps without a done claim)`.
+- **Seed 3 was not a run at all.** Its transcript holds one event, the task spec, and nothing else, because the process died before the first assistant turn.
+
+That second case was a bug in my accounting, not a fact about the model. A run that crashes is saved with any checkpoints it made before the failure — which is what `test_claim_made_before_a_crash_keeps_its_checkpoint` pins — but the failure path never stamped an end time, so the row was byte-identical to a run still in flight, and the leaderboard counted a process that died as an attempt. The fix is two lines in the failure handlers and an assertion that a failed run still has an `ended_at`. A crashed run is finished, badly; it is not still running.
+
+Which leaves a distinction the first version of the tool did not have: **an attempt is not a data point**. A seed that claims done is evaluated and counts toward the first-try rate and the ranking floor. A seed that never claims, or is killed, is still visible as an attempt and never becomes a wrong answer. `seeds` prints `evaluated/attempted`, `per-seed` prints `-` for an unscored run, and the ranking floor counts distinct *evaluated* seeds. Otherwise three crashed runs would outrank three honest failures, and the number that decides which model I trust would be measuring my own uptime.
+
 ## When things go wrong
 
 **Every checkpoint held the same files.** The first version snapshotted the workspace after the run finished. By then the workspace was final, so checkpoint 1, 2 and 3 were byte-identical and first-attempt accuracy was fiction. A test comparing two checkpoints caught it, and the fix was to snapshot inside the loop, at the claim.
@@ -157,7 +178,7 @@ The more useful signal is in `findings`, not the leaderboard: all three 3b runs 
 
 ## What it does not do yet
 
-One trivial task and one local 7B model is a smoke test, not a leaderboard. To compare models honestly I need three or four tasks that are hard enough to fail, the same seeds across every model, and a frontier model in the mix, which means a working `claude` or Gemini login and a budget decision rather than a better harness.
+Two small tasks and two local models is a smoke test, not a leaderboard — `intervals` fails reliably now, but it is still a task I wrote in an afternoon. To compare models honestly I need three or four tasks that are hard enough to fail, the same seeds across every model, and a frontier model in the mix, which means a working `claude` or Gemini login and a budget decision rather than a better harness.
 
 The other honest limit is the batch itself. The first three seeds came out byte-identical, 2,232 tokens each, because my driver pinned the sampler seed: three runs, one sample, reported as three. The seed is now left to the model unless asked for, and the same three runs give 1,095, 2,129 and 1,517 tokens with 7, 11 and 9 events. A harness that cannot notice three identical seeds is not measuring variance; it is measuring itself.
 
@@ -165,4 +186,4 @@ Phase 2, inferring done claims from unmarked sessions, and LLM-assisted labeling
 
 ## Where to go from here
 
-The next useful measurements are variance across seeds on a task that can fail, and the same task across two models with the cost column filled in. If you want the shape of the thing rather than the numbers, the 40 tests are the honest documentation: the checkpoint detector has the heaviest coverage, because every metric downstream of it is only as trustworthy as the moment it decides a claim was made.
+The next useful measurements are variance across seeds on a task that can fail, and the same task across two models with the cost column filled in. If you want the shape of the thing rather than the numbers, the 58 tests are the honest documentation: the checkpoint detector has the heaviest coverage, because every metric downstream of it is only as trustworthy as the moment it decides a claim was made.
