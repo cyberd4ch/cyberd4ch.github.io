@@ -165,6 +165,26 @@ That second case was a bug in my accounting, not a fact about the model. A run t
 
 When a model fails like that, the first question is whether the task was fair. This one was: it never asked for a shebang. The spec says `python3 intervals.py`, and the CLI check runs `[sys.executable, "intervals.py"]`. A twelve-line reference implementation passes all six hidden checks at mode 644, no executable bit anywhere. The 7b invented a launcher the task never described and could not read its own error message well enough to back out. That is a failure mode check tuning cannot fix, and the `0/3` row would have hidden it behind a number.
 
+## The task has to be passable before a failure means anything
+
+Every number above is a claim about a model only if the task can be done. I had been arguing that by hand — a reference implementation, run once, pasted into a note. That is a check I can skip by forgetting, so it is now part of `task validate`: a task ships a `solution/` directory beside `checks/`, and validation copies `repo/`, overlays `solution/`, and requires **every** hidden check to pass. A task whose checks nothing satisfies is rejected before a run, because otherwise a model failing an impossible check looks exactly like a model failing the work. The scaffold creates the directory, and the tests run the shipped references instead of a second inline copy, so the gate is exercised on every `pytest`.
+
+One direction only, on purpose: validation does not require the checks to *fail* on the untouched repo. The scaffold's smoke check passes against the empty starting point by design, and a rule that forbade that would reject the template it exists to protect.
+
+## The third task
+
+`csvcol` is the task I should have written first. It asks for a function that returns one column from CSV text — header row, quoted fields with escaped quotes, ragged rows as errors, missing column as an error — and a CLI over stdin with the same semantics. Five hidden checks, two surfaces, and nothing in it that a lucky guess satisfies.
+
+```text
+task    model             seeds  per-seed    first try  false done  status
+csvcol  ollama-qwen2.5-3b 2/6    0,-,-,0,-,-  0/2        2/2         provisional
+csvcol  ollama-qwen2.5-7b 1/3    0,-,-       0/1        1/1         provisional
+```
+
+Neither row is ranked, and the 3b's is the more damning. Six attempts, two done claims, and **zero checks passed at either claim**. One of those claims came with no `csvcol.py` on disk at all: four events, a shell command that echoed the marker, and nothing else. The other wrote a file and still failed all five checks. The remaining four seeds never claimed at all: two stopped at the twelve-step cap, one at twenty, and one crashed before its first turn. Raising the cap was the check on whether the budget was the whole story; it was not, and the 3b mostly cannot keep the tool protocol going long enough to finish, which is why it gives so few data points on a task harder than the ones it passed.
+
+The 7b managed one point out of five at its single claim, then lost a seed to a request timeout and another to a crash before its first turn. Provisional is the honest label for one evaluated seed, and the harness says so instead of averaging it into a rate.
+
 Which leaves a distinction the first version of the tool did not have: **an attempt is not a data point**. A seed that claims done is evaluated and counts toward the first-try rate and the ranking floor. A seed that never claims, or is killed, is still visible as an attempt and never becomes a wrong answer. `seeds` prints `evaluated/attempted`, `per-seed` prints `-` for an unscored run, and the ranking floor counts distinct *evaluated* seeds. Otherwise three crashed runs would outrank three honest failures, and the number that decides which model I trust would be measuring my own uptime.
 
 ## When things go wrong
@@ -181,7 +201,7 @@ Which leaves a distinction the first version of the tool did not have: **an atte
 
 ## What it does not do yet
 
-Two small tasks and two local models is a smoke test, not a leaderboard — `intervals` fails reliably now, but it is still a task I wrote in an afternoon. To compare models honestly I need three or four tasks that are hard enough to fail, the same seeds across every model, and a frontier model in the mix, which means a working `claude` or Gemini login and a budget decision rather than a better harness.
+Three small tasks and two local models is a smoke test, not a leaderboard — `csvcol` fails reliably now, but it is still a task I wrote in an afternoon. To compare models honestly I need three or four tasks that are hard enough to fail, the same seeds across every model, and a frontier model in the mix, which means a working `claude` or Gemini login and a budget decision rather than a better harness.
 
 The other honest limit is the batch itself. The first three seeds came out byte-identical, 2,232 tokens each, because my driver pinned the sampler seed: three runs, one sample, reported as three. The seed is now left to the model unless asked for, and the same three runs give 1,095, 2,129 and 1,517 tokens with 7, 11 and 9 events. A harness that cannot notice three identical seeds is not measuring variance; it is measuring itself.
 
@@ -189,4 +209,4 @@ Phase 2, inferring done claims from unmarked sessions, and LLM-assisted labeling
 
 ## Where to go from here
 
-The next useful measurements are variance across seeds on a task that can fail, and the same task across two models with the cost column filled in. If you want the shape of the thing rather than the numbers, the 59 tests are the honest documentation: the checkpoint detector has the heaviest coverage, because every metric downstream of it is only as trustworthy as the moment it decides a claim was made.
+The next useful measurements are variance across seeds on a task that can fail, and the same task across two models with the cost column filled in. If you want the shape of the thing rather than the numbers, the 64 tests are the honest documentation: the checkpoint detector has the heaviest coverage, because every metric downstream of it is only as trustworthy as the moment it decides a claim was made.
