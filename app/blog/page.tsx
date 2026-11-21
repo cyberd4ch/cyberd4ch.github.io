@@ -16,6 +16,7 @@ const LISTED_SLUGS = new Set([
   'agentlens-first-try-accuracy',
   'the-truncation-guard-stops-at-chat',
   'auditing-an-agents-memory',
+  'tying-a-fact-to-the-work-that-produced-it',
 ])
 const posts = allPosts.filter(p => p.slug != null && LISTED_SLUGS.has(p.slug))
 

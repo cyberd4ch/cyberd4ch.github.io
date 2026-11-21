@@ -1,5 +1,26 @@
 [
   {
+    "id": "tying-a-fact-to-the-work-that-produced-it",
+    "slug": "tying-a-fact-to-the-work-that-produced-it",
+    "title": "tying a fact to the work that produced it: server-side provenance for row one",
+    "date": "Nov 21, 2026",
+    "dateISO": "2026-11-21",
+    "category": "technical",
+    "url": "/blog/tying-a-fact-to-the-work-that-produced-it/",
+    "excerpt": "Row one of the ARTEX audit ended with an open question: the label deciding whether a fact can prove a goal was written by the model the target is talking to. I posted the rule for fixing it and then implemented it, so a fact now has to quote a line of the intent's recorded activity before it counts as evidence, and bytes the proxy captured coming back from the target are stored as target_response whatever the model declared.",
+    "aiAssist": 100,
+    "tags": [
+      "llm-agents",
+      "security",
+      "go",
+      "open-source"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 8
+  },
+  {
     "id": "agentlens-first-try-accuracy",
     "slug": "agentlens-first-try-accuracy",
     "title": "agentlens: score a coding model on its first attempt, not its final one",
