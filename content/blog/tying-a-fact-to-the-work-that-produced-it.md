@@ -26,7 +26,7 @@ a prompt.
 This post is about the change, the places where it is lossy, and what it does
 not cover yet. It is not merged, but it now includes all three steps of the
 rule. The patch is [pull request #441](https://github.com/BaaRai/ARTEX/pull/441)
-on `row1-provenance`.
+on `row1-provenance`; its automated review is answered there.
 
 ## What the gate was trusting
 
@@ -212,8 +212,17 @@ the downgrade for untied claims, and the top-level-copies test in
 `fact_input_test.go` asserts the stored payload is the item's, then the
 server's classification. `go test ./agent ./db ./traffic` and the server's
 fact tests are green; the full server package has one environment failure on
-macOS (`bind 127.0.0.2`), unrelated to this change. The commit is `c92c784` on
-`row1-provenance`, rebased on current `main`.
+macOS (`bind 127.0.0.2`), unrelated to this change. The branch head is
+`42ce6ea` on `row1-provenance`, rebased on current `main`.
+
+The automated review on the PR caught one real defect in the tie lookup. I had
+queried one evidence line at a time and returned on the first match, so an
+older activity matching the first line beat a newer one matching the second.
+The fix is a single query over all lines ordered by activity id, plus
+`TestActivityContainingEvidenceNewestAcrossLines`, which puts the newer match
+second and asserts the newer activity comes back. The newer activity is the
+one whose capture window matters, so the old order could have made the capture
+lookup miss.
 
 All three steps of the rule are now in the patch and tested. Row one reads
 `enforced` for the path the rule models, with the capture and window caveats
