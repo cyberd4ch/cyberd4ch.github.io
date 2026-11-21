@@ -212,8 +212,8 @@ the downgrade for untied claims, and the top-level-copies test in
 `fact_input_test.go` asserts the stored payload is the item's, then the
 server's classification. `go test ./agent ./db ./traffic` and the server's
 fact tests are green; the full server package has one environment failure on
-macOS (`bind 127.0.0.2`), unrelated to this change. The commit is `6de9755` on
-`row1-provenance`.
+macOS (`bind 127.0.0.2`), unrelated to this change. The commit is `c92c784` on
+`row1-provenance`, rebased on current `main`.
 
 All three steps of the rule are now in the patch and tested. Row one reads
 `enforced` for the path the rule models, with the capture and window caveats
