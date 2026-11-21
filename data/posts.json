@@ -1,5 +1,26 @@
 [
   {
+    "id": "plan-hijacking-row-the-planner-reads-data",
+    "slug": "plan-hijacking-row-the-planner-reads-data",
+    "title": "plan hijacking row: the planner already reads the target as data",
+    "date": "Nov 21, 2026",
+    "dateISO": "2026-11-21",
+    "category": "technical",
+    "url": "/blog/plan-hijacking-row-the-planner-reads-data/",
+    "excerpt": "Row two of the ARTEX audit asks whether planner-facing summaries are marked as untrusted. On main at 22ae88a the answer is yes: a code-owned data rule plus a per-message nonce envelope frame every target-derived field, and a deterministic adversarial bench proves the frame survives a hostile page.",
+    "aiAssist": 100,
+    "tags": [
+      "llm-agents",
+      "security",
+      "go",
+      "open-source"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 5
+  },
+  {
     "id": "the-newest-activity-lost-on-line-order",
     "slug": "the-newest-activity-lost-on-line-order",
     "title": "the newest activity lost on line order: a review fix for the provenance tie",
