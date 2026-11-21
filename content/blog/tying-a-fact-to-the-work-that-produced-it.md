@@ -25,7 +25,8 @@ a prompt.
 
 This post is about the change, the places where it is lossy, and what it does
 not cover yet. It is not merged, but it now includes all three steps of the
-rule. The branch and the PR are linked below.
+rule. The patch is [pull request #441](https://github.com/BaaRai/ARTEX/pull/441)
+on `row1-provenance`.
 
 ## What the gate was trusting
 
