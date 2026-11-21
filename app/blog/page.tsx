@@ -17,6 +17,7 @@ const LISTED_SLUGS = new Set([
   'the-truncation-guard-stops-at-chat',
   'auditing-an-agents-memory',
   'tying-a-fact-to-the-work-that-produced-it',
+  'the-newest-activity-lost-on-line-order',
 ])
 const posts = allPosts.filter(p => p.slug != null && LISTED_SLUGS.has(p.slug))
 

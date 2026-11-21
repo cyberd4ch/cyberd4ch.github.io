@@ -1,5 +1,26 @@
 [
   {
+    "id": "the-newest-activity-lost-on-line-order",
+    "slug": "the-newest-activity-lost-on-line-order",
+    "title": "the newest activity lost on line order: a review fix for the provenance tie",
+    "date": "Nov 21, 2026",
+    "dateISO": "2026-11-21",
+    "category": "technical",
+    "url": "/blog/the-newest-activity-lost-on-line-order/",
+    "excerpt": "The automated review on ARTEX #441 caught a real bug in the fact provenance lookup: it returned the newest activity matching the first evidence line instead of the newest activity matching any line, which could have made the traffic tie miss.",
+    "aiAssist": 100,
+    "tags": [
+      "llm-agents",
+      "security",
+      "go",
+      "open-source"
+    ],
+    "topics": [
+      "development"
+    ],
+    "readMinutes": 3
+  },
+  {
     "id": "tying-a-fact-to-the-work-that-produced-it",
     "slug": "tying-a-fact-to-the-work-that-produced-it",
     "title": "tying a fact to the work that produced it: server-side provenance for row one",
